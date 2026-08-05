@@ -24,7 +24,18 @@ skill não escreve YAML de modelo: ela produz `$MEM/project-context.yaml`.
 descoberta gravada na modelagem errada sobrescreve o propósito de outra
 realidade, em silêncio.
 
-Leia `cfour.yaml`:
+**Se a ordem de resolução do núcleo já respondeu, ela vence e não se pergunta.**
+O arquiteto disse o id nesta conversa, ou `C4_MODELAGEM` está definida: nos dois
+casos a resposta existe, e repetir a pergunta é ignorar o que ele já disse.
+**Anuncie em voz alta** — *"trabalhando em `<id>`, que veio de `C4_MODELAGEM`"* —
+e siga. O anúncio é o que dá a ele a chance de corrigir sem que você decida por
+ele.
+
+O resto desta seção vale quando nada foi dito nesta conversa e a variável não
+está definida. **O `active:` do `cfour.yaml` não conta aqui**, e esta é a única
+skill em que ele não conta: ele é o default de quem vai *ler*, e uma descoberta
+*escreve* o propósito. Herdar o `active:` em silêncio é exatamente como um
+propósito novo sobrescreve o de outra realidade. Leia `cfour.yaml`:
 
 - **Nenhuma modelagem registrada** → esta descoberta é a primeira. Siga, e crie a
   modelagem via `cfour:modelagens` quando o `id` ficar claro — o nome nasce do

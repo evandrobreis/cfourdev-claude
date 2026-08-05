@@ -68,6 +68,11 @@ Ordem, e ela não é negociável:
 Se o id não resolver, ou se houver mais de um candidato plausível, **pergunte**.
 Escolher em silêncio é como memória vai parar na realidade errada.
 
+Quando 1 ou 2 responderem, a resposta está dada: **não pergunte, anuncie** — o
+anúncio é o que dá ao arquiteto a chance de corrigir sem que você decida por ele.
+A única exceção é `cfour:descoberta`, que não herda o `active:` do passo 3: ela
+*escreve* o propósito, e o passo 3 é o default de quem vai *ler*.
+
 Sem `cfour.yaml` em lugar nenhum, ou sem o `cfour` instalado, o repositório ainda
 não está pronto: → `cfour:setup`, antes de qualquer outra coisa.
 
@@ -121,6 +126,7 @@ Sete regras que valem em toda skill `cfour:*`. Nenhuma é negociável.
 | a situação é… | use |
 |---|---|
 | não há `cfour.yaml`, ou o `cfour` não está instalado | `cfour:setup` |
+| **mais de uma frente na mesma conversa** | `references/modelagem-ou-projeto.md`, **antes de escolher qualquer skill** |
 | começar uma modelagem, ou não saber ainda o que ela precisa apoiar | `cfour:descoberta` |
 | listar, criar, trocar ou registrar uma modelagem | `cfour:modelagens` |
 | ter o propósito e precisar decidir organização, projetos, taxonomia e visões | `cfour:estrategia` |

@@ -57,6 +57,9 @@ coisa que você achou que tinha escrito.
 `kind: element | relation | diagram | flow | note | project` no topo, ou as chaves
 de lista `elements:`, `relations:`, `diagrams:`, `flows:`, `notes:`.
 
+**Para nota, use a chave de lista.** No topo do documento o `kind` já é o do
+documento, e a nota fica sem onde declarar o dela — ver §8.
+
 | documento | é |
 |---|---|
 | **elemento** | uma caixa |
@@ -113,6 +116,11 @@ desenho: não muda nível nem comportamento. Desconhecido → caixa cinza + avis
 `kind` prontos: `sync`, `async`, `event`, `batch`, `dep`, `peer`. Convenção de
 leitura: **ponta cheia é síncrono, ponta vazada é assíncrono**.
 
+**Relação não tem `technology`.** O campo existe em elemento (§4), a seis linhas
+daqui, e escrevê-lo numa seta não falha: nenhum campo desconhecido de relação é
+reclamado pelo `cfour check`. Ele simplesmente não faz nada. O protocolo ou a
+tecnologia da integração vai no `label` ou na `description`.
+
 **Escreva cada integração uma vez só, no nível mais fino que você realmente
 conhece.** O viewer sobe cada ponta até a caixa visível naquele desenho. Não
 redesenhe a mesma seta em três níveis. Não sabe qual componente faz a chamada?
@@ -154,6 +162,7 @@ dono dela.
 | `exclude`, `where`, `groups`, `groupBy`, `subject` | — |
 | `neighbors` | `0` |
 | `relations` | `auto` (`none` = visão puramente estrutural) |
+| `notes` | `[]` — aninhadas, com o `scope` implícito (§8) |
 | `order` | `500` |
 
 - `scope` faz quatro coisas: escolhe membros, desenha a moldura, é o destino do
@@ -187,16 +196,28 @@ deveria ser uma seta que já foi declarada. Quando não é, o viewer avisa e des
 | `id` | nome do arquivo — **não pode colidir com id de diagrama do projeto** |
 | `title` | o `id` |
 | `scope` | nenhum — dá a trilha; **não escolhe os participantes** |
-| `level` | o nível mais fino que os passos citam |
+| `level` | o nível mais fino que os passos citam. Escrito, só vale `context`, `container`, `component` ou `code` — **em inglês** |
 | `main` | `{ name: Principal, outcome: success }` |
 | `participants` | ordem de primeira aparição |
 | `steps` | **obrigatório** |
 | `paths` | `[]` |
 
+`level` é o campo em que a conversa em português vira defeito silencioso:
+`componente` **não** é `component`. Um valor fora dos quatro sai como **aviso**,
+com `ok: true` e código de saída 0 — quem confia no "sem erros" publica um fluxo
+cuja projeção por nível não funciona.
+
 **Passo:** `to` é o único obrigatório; `from` omitido herda o `to` do anterior
 (obrigatório no primeiro); `kind` herda o da seta declarada; `label` idem;
 `reply` é uma resposta curta tracejada na linha seguinte; `id` só é preciso se
 algum caminho desviar dali.
+
+**`from` e `to` de passo resolvem pela regra do §1, e não pelo passo anterior.**
+Um id nu é procurado no projeto que declara o **fluxo** e depois em `shared` —
+nunca no projeto do elemento citado no passo de cima. Num fluxo que atravessa
+projetos, qualifique: `estoque/estoque-api`. Errar aqui é **erro**, não aviso: o
+fluxo inteiro deixa de carregar, e o sintoma é `0 fluxo(s)` no check, sem nada
+apontando o passo culpado.
 
 **Caminho:** `id` e `steps` obrigatórios; `from` é o id do passo de desvio,
 **inclusive ele** (o que muda quase sempre é a resposta àquele passo); `outcome`
@@ -232,6 +253,11 @@ quebrado conta a coisa errada". Por isso, depois de mexer em fluxo, rodar
 | `kind` | `info` — prontos: `risk`, `blocker`, `warning`, `question`, `info`, `tip` |
 | `target` | nenhum → post-it solto (exige `scope`) |
 | `scope` | nenhum → acompanha a caixa em todo diagrama |
+
+**Nota se escreve pela chave de lista `notes:`, ou aninhada** — na caixa (§4) ou
+no diagrama (§6). **Não** como documento com `kind: note` no topo: ali o `kind`
+já é o do documento, e não sobra onde escrever `risk`, `question` ou `info`. As
+duas chaves são a mesma, e uma sobrescreve a outra.
 
 Sem `target` **e** sem `scope` → descartada com aviso. Notas viram filtro
 ("mostre só o que tem risco em aberto"). É onde risco, dúvida e decisão pendente

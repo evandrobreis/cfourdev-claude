@@ -91,6 +91,8 @@ Se o arquiteto não mencionou nenhum, pergunte antes de escrever.
 
 Escreva a visão com `cfour:editor` e rode `cfour check`.
 
-Registre a proposta que a originou: a `question` e a `audience` viram uma nota
-`info` presa ao diagrama, ou uma linha na decisão de modelagem correspondente.
-Uma visão cuja pergunta ninguém mais lembra é a primeira a apodrecer.
+**Registre a proposta que a originou — isto não é opcional.** A `question` e a
+`audience` viram uma nota `info` presa ao diagrama, ou uma linha na decisão de
+modelagem correspondente. Escolha um dos dois e diga qual; um `viewProposal` que
+ficou só na conversa some com ela, e uma visão cuja pergunta ninguém mais lembra
+é a primeira a apodrecer.
