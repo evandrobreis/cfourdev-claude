@@ -1,6 +1,6 @@
 ---
 name: reconciliar
-description: Reconcilia a memória do harness com o modelo do cfourdev — encontra convenções não seguidas, decisões desatualizadas, hipóteses já resolvidas, termos e metadados equivalentes, e referências a elementos removidos ou renomeados. Use quando memória e modelo parecerem divergir, depois de alguém editar YAML fora do harness, antes de uma revisão importante, ou quando pedirem /cfour:reconciliar.
+description: Reconcilia a memória do plugin com o modelo do cfourdev — encontra convenções não seguidas, decisões desatualizadas, hipóteses já resolvidas, termos e metadados equivalentes, e referências a elementos removidos ou renomeados. Use quando memória e modelo parecerem divergir, depois de alguém editar YAML fora do plugin, antes de uma revisão importante, ou quando pedirem /cfour:reconciliar.
 ---
 
 # Reconciliar memória e modelo
@@ -91,7 +91,7 @@ Depois da decisão dele:
 ## Sinal de alarme
 
 Se a maior parte das divergências for do tipo 7 (`fingerprint` diferente), o
-modelo vem sendo editado fora do harness. Isso é legítimo — o YAML é do
-arquiteto, não do harness. Diga em voz alta o que isso implica: a memória descreve
+modelo vem sendo editado fora do plugin. Isso é legítimo — o YAML é do
+arquiteto, não do plugin. Diga em voz alta o que isso implica: a memória descreve
 uma modelagem que já não é a atual, e vale reconciliar antes de continuar a
 escrever por cima.

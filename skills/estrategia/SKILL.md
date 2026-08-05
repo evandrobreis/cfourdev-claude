@@ -78,7 +78,7 @@ depois de saber em qual modelagem se está.
 O `cfourdev` aceita as duas: vários projetos convivem no mesmo `model/`, e setas
 atravessam projetos normalmente (`estoque/estoque-api`). Times que precisam de
 ciclos de revisão independentes ficam em **modelagens** separadas, registradas no
-`cfour.yaml` — inclusive em outro repositório (`docs/10`). O que essa
+`cfour.yaml` — inclusive em outro repositório (`doc:modelagens`). O que essa
 separação cobra é a seta: entre modelagens não existe nenhuma.
 
 ## Taxonomia emergente
@@ -101,7 +101,7 @@ vira filtro sozinha — o custo de escrever é baixo, o de manter uma taxonomia 
 ninguém usa é alto.
 
 Nomes como `migrationWave`, `legacy`, `tenant`, `domain` ou `criticality` **não
-são padrão do harness**: só existem se o projeto responder "sim" à pergunta 1.
+são padrão do plugin**: só existem se o projeto responder "sim" à pergunta 1.
 
 ## Visões
 
@@ -142,11 +142,43 @@ Do tom errado:
 > Como este é um projeto de plataforma, crie uma pasta para a plataforma, uma para
 > cada legado e uma para migração.
 
+## Peça o sim antes de gravar
+
+O formato `RECOMENDO / PORQUE / CONSIDEREI / REVISE SE` **parece** fechar a
+conversa: a alternativa foi honrada, o critério está escrito, e é fácil seguir
+como se a escolha tivesse sido feita. Ela não foi. Apresentar duas organizações
+com trade-off honesto e fechar sozinho cumpre o guarda-corpo 4 na forma e o
+descumpre no ato — a escolha é do arquiteto.
+
+Então, ao fim de cada recomendação estrutural, **pergunte, e espere**:
+
+> Fico com a (1) ou com a (2)? Ou quer pensar e voltar nisto?
+
+E as três respostas vão para lugares diferentes:
+
+| ele disse | a decisão nasce |
+|---|---|
+| escolheu uma | `status: accepted`, com a data |
+| ainda não sabe | `status: proposed` — e um `Q-NNN` em `project-context.yaml` dizendo o que não anda enquanto isso |
+| não quer decidir agora, e nada depende disso | nem decisão nem pergunta; só uma linha no `session.yaml` |
+
+**Nunca escreva `accepted` sem ter obtido o sim nesta conversa.** Uma decisão
+`accepted` é lida pelas sessões seguintes como escolha do arquiteto, e é a
+terceira fonte de autoridade da escada — gravá-la sem o aceite é pôr a sua
+inferência três degraus acima de onde ela vive.
+
 ## Portão de saída
 
 - Cada escolha estrutural **aceita** vira uma decisão em
   `$MEM/decisions/MD-NNN-*.md` (template no núcleo), com opções
-  consideradas e critério de revisão.
+  consideradas e critério de revisão. `accepted` só depois do sim, pela seção
+  acima; sem ele, `proposed`.
+- **Cada `viewProposal` preenchido foi para algum lugar** — nota `info` presa ao
+  diagrama, ou uma linha na decisão de modelagem correspondente
+  (`${CLAUDE_PLUGIN_ROOT}/skills/modelagem/references/view-or-flow.md`, passo 5).
+  Uma proposta que ficou só na conversa
+  evapora, e a visão nasce sem a pergunta que a justificava. Diga, no fecho, onde
+  cada uma parou; se nenhuma visão foi recomendada, diga isso também.
 - As convenções que passam a valer entram em `$M/model/MODELING-CONVENTIONS.md`.
 - O que ficou em aberto vira `Q-NNN` ou `H-NNN` em `project-context.yaml`.
 - `session.yaml` recebe `focus` e `next_step` (normalmente

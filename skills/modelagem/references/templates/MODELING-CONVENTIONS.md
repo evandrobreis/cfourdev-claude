@@ -1,7 +1,7 @@
 # Convenções desta modelagem
 
 O que vale para quem escrever ou revisar YAML aqui. Este arquivo mora em
-`model/` porque acompanha o modelo, não o harness.
+`model/` porque acompanha o modelo, não o plugin.
 
 Regra de ouro: **uma convenção só entra aqui depois que uma decisão a criou**
 (`$MEM/decisions/`). Convenção sem decisão vira preferência disfarçada de

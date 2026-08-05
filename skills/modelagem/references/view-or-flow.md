@@ -34,7 +34,7 @@ Duas perguntas de corte, antes de continuar:
 
 ## Passo 2 — mapa ou história
 
-O modelo tem duas espécies de visão, com papéis declarados (`docs/01`):
+O modelo tem duas espécies de visão, com papéis declarados (`doc:conceitos`):
 
 ```
 DIAGRAMA   o mapa:      o que existe e quem conversa com quem
@@ -55,7 +55,7 @@ ele narra em ordem ("aí o serviço chama…", "quando o pagamento volta…"), u
 tempo verbal de sequência, ou pergunta o que acontece **quando falha**.
 
 Jornada ponta a ponta, atravessando sistemas e times, é fluxo — não uma pilha de
-diagramas (`docs/09`).
+diagramas (`doc:perguntas-frequentes`).
 
 ## Passo 3 — traduza para os recursos que existem
 
@@ -91,6 +91,8 @@ Se o arquiteto não mencionou nenhum, pergunte antes de escrever.
 
 Escreva a visão com `cfour:editor` e rode `cfour check`.
 
-Registre a proposta que a originou: a `question` e a `audience` viram uma nota
-`info` presa ao diagrama, ou uma linha na decisão de modelagem correspondente.
-Uma visão cuja pergunta ninguém mais lembra é a primeira a apodrecer.
+**Registre a proposta que a originou — isto não é opcional.** A `question` e a
+`audience` viram uma nota `info` presa ao diagrama, ou uma linha na decisão de
+modelagem correspondente. Escolha um dos dois e diga qual; um `viewProposal` que
+ficou só na conversa some com ela, e uma visão cuja pergunta ninguém mais lembra
+é a primeira a apodrecer.

@@ -1,11 +1,12 @@
-# Memória do harness
+# A memória do plugin
 
 A memória é **explícita, versionada e legível por humanos**. Nada do que importa
 depende do histórico da conversa: uma sessão nova precisa conseguir retomar o
 trabalho lendo arquivos.
 
 A memória é **de uma modelagem** — mas não mora dentro dela. `$M` é a pasta do
-modelo e `$MEM` a da memória (`SKILL.md`, "A modelagem ativa").
+modelo e `$MEM` a da memória (`${CLAUDE_PLUGIN_ROOT}/skills/modelagem/SKILL.md`,
+"A modelagem ativa").
 
 ```
 $M/                               = o `path:` do registro  O MODELO
@@ -44,13 +45,13 @@ existir, uma decisão sobre o registry em si — nunca sobre uma modelagem.
 
 ## Onde cada coisa mora
 
-Esta divisão é a regra anti-duplicação do harness. Escrever a mesma informação em
+Esta divisão é a regra anti-duplicação do plugin. Escrever a mesma informação em
 dois lugares garante que um deles vai mentir.
 
 | a informação é… | mora em |
 |---|---|
 | um fato arquitetural (existe, chama, contém) | **o YAML do modelo** |
-| um risco, dúvida ou decisão pendente **ligada a uma caixa ou visão** | **`notes:`** com `target`/`scope` (`docs/09`) |
+| um risco, dúvida ou decisão pendente **ligada a uma caixa ou visão** | **`notes:`** com `target`/`scope` (`doc:perguntas-frequentes`) |
 | uma decisão sobre **como o modelo é organizado** | `$MEM/decisions/MD-NNN-*.md` |
 | uma convenção a seguir daqui para frente | `$M/model/MODELING-CONVENTIONS.md` |
 | propósito, audiência, escopo, hipótese, pergunta sem alvo no modelo | `$MEM/project-context.yaml` |
@@ -67,11 +68,12 @@ Duas consequências práticas:
   legado como projeto separado" é decisão de modelagem, e vira `MD-NNN`.
 
 Usar `noteKinds: { decision: … }` exige declarar em `$M/model/workspace.yaml`
-antes (`docs/07`). Proponha; não assuma.
+antes (`doc:configuracao`). Proponha; não assuma.
 
 ## Precedência
 
-1. a documentação do cfourdev e o contrato em `viewer-contract.md`
+1. a documentação do cfourdev (`https://cfourdev.com.br/docs/`) e o contrato em
+   `viewer-contract.md`, que a resume
 2. o YAML atual do modelo (`$M/model/`)
 3. decisões aceitas (`$MEM/decisions/`)
 4. convenções (`$M/model/MODELING-CONVENTIONS.md`)
@@ -118,7 +120,7 @@ O `model_fingerprint` são as contagens de
 `cfour check --modelagem <id> --inventory --json` (projetos, caixas, setas,
 diagramas, fluxos, notas, erros, avisos) no momento em que a sessão fechou — **da
 modelagem desta memória, não da árvore inteira**. Se ao retomar elas não
-baterem, alguém editou o modelo fora do harness, o que `/cfour:retomar` precisa dizer
+baterem, alguém editou o modelo fora do plugin, o que `/cfour:retomar` precisa dizer
 em voz alta.
 
 ### `modelagem.yaml`

@@ -30,7 +30,7 @@
 
 ## Critérios específicos
 
-1. O parceiro entra como `external`, e o harness recusa detalhar o interior dele.
+1. O parceiro entra como `external`, e o plugin recusa detalhar o interior dele.
 2. Reconhece duas audiências com perguntas diferentes e propõe visões separadas.
 3. Trata a titularidade do dado (CPF, renda, score) como perspectiva de dados que
    atravessa níveis, não como um nível C4.

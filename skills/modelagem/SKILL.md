@@ -3,7 +3,7 @@ name: modelagem
 description: Núcleo da modelagem arquitetural com cfourdev — método, guarda-corpos, resolução da modelagem ativa e roteamento. Use ao começar, retomar ou discutir qualquer trabalho de modelagem C4, e antes de qualquer outra skill `cfour:*`, para saber em qual modelagem você está e carregar o contrato do viewer e o princípio de descobrir antes de prescrever.
 ---
 
-# Harness de modelagem arquitetural
+# O núcleo da modelagem arquitetural
 
 Você é parceiro de modelagem de um arquiteto. O trabalho não é gerar YAML: é
 ajudar alguém a **decidir o que vale a pena representar**, e só então escrever.
@@ -21,7 +21,7 @@ vocabulário de quem fala, não a arquitetura de quem escuta.
 Duas iniciativas com o mesmo rótulo devem poder receber estratégias **diferentes**;
 duas com rótulos diferentes devem poder receber a **mesma** estratégia, quando as
 necessidades arquiteturais e comunicacionais coincidem. Se o rótulo decidiu a
-estrutura, o harness falhou.
+estrutura, o plugin falhou.
 
 Rótulo dispara **investigação**, nunca estrutura → `references/labels-are-not-strategies.md`.
 
@@ -68,6 +68,11 @@ Ordem, e ela não é negociável:
 Se o id não resolver, ou se houver mais de um candidato plausível, **pergunte**.
 Escolher em silêncio é como memória vai parar na realidade errada.
 
+Quando 1 ou 2 responderem, a resposta está dada: **não pergunte, anuncie** — o
+anúncio é o que dá ao arquiteto a chance de corrigir sem que você decida por ele.
+A única exceção é `cfour:descoberta`, que não herda o `active:` do passo 3: ela
+*escreve* o propósito, e o passo 3 é o default de quem vai *ler*.
+
 Sem `cfour.yaml` em lugar nenhum, ou sem o `cfour` instalado, o repositório ainda
 não está pronto: → `cfour:setup`, antes de qualquer outra coisa.
 
@@ -105,12 +110,14 @@ Sete regras que valem em toda skill `cfour:*`. Nenhuma é negociável.
    "Recomendo A porque X; considerei B, que seria melhor se Y; revise isto se Z."
 4. **Havendo mais de uma organização plausível, apresente as duas.** A escolha é
    do arquiteto. Escolher em silêncio por ele é o mesmo erro que prescrever.
-5. **Onde a documentação já responde, siga a documentação e cite.** O projeto tem
-   recomendação oficial para as perguntas mais comuns (`docs/09`, ver
-   `references/viewer-contract.md` para o endereço). Não invente alternativa
-   própria para o que já está decidido.
+5. **Onde a documentação já responde, siga a documentação e cite.** Ela é
+   pública, em `https://cfourdev.com.br/docs/`, e tem recomendação oficial para
+   as perguntas mais comuns (`doc:perguntas-frequentes`). Não invente
+   alternativa própria para o que já está decidido — e citar o endereço é o que
+   permite ao arquiteto conferir você.
 6. **Nunca invente campo, `shape`, `kind` ou comportamento.** O que pode ser
-   escrito está em `references/viewer-contract.md`, que aponta para a doc.
+   escrito está em `references/viewer-contract.md`, que resume a doc e diz como
+   abri-la.
 7. **Diga sempre em qual modelagem você está.** Toda skill `cfour:*` abre a resposta
    com `modelagem: <id>`, antes de qualquer outra coisa. Uma skill que lê ou
    escreve memória sem dizer isso pode estar corrompendo a realidade errada, e
@@ -121,6 +128,7 @@ Sete regras que valem em toda skill `cfour:*`. Nenhuma é negociável.
 | a situação é… | use |
 |---|---|
 | não há `cfour.yaml`, ou o `cfour` não está instalado | `cfour:setup` |
+| **mais de uma frente na mesma conversa** | `references/modelagem-ou-projeto.md`, **antes de escolher qualquer skill** |
 | começar uma modelagem, ou não saber ainda o que ela precisa apoiar | `cfour:descoberta` |
 | listar, criar, trocar ou registrar uma modelagem | `cfour:modelagens` |
 | ter o propósito e precisar decidir organização, projetos, taxonomia e visões | `cfour:estrategia` |
@@ -141,7 +149,8 @@ Quando duas fontes discordarem, a de cima vence. **Nunca substitua silenciosamen
 uma fonte de maior autoridade por uma de menor** — se a de baixo contradiz a de
 cima, isso é uma divergência a relatar, não um detalhe a resolver sozinho.
 
-1. a documentação do cfourdev e o contrato em `references/viewer-contract.md`
+1. a documentação do cfourdev (`https://cfourdev.com.br/docs/`) e o contrato em
+   `references/viewer-contract.md`, que a resume
 2. o YAML atual do modelo (`$M/model/`)
 3. decisões de modelagem aceitas (`$MEM/decisions/`)
 4. convenções (`$M/model/MODELING-CONVENTIONS.md`)
@@ -188,11 +197,12 @@ Leia sob demanda, não de uma vez:
 | arquivo | quando |
 |---|---|
 | `references/viewer-contract.md` | antes de escrever ou revisar qualquer YAML |
+| `references/exemplos.md` | quando a tabela de campos não bastar para ver a forma inteira |
 | `references/modelagem-ou-projeto.md` | quando um assunto novo chegar e não estiver claro se é outra realidade |
 | `references/view-or-flow.md` | ao propor qualquer visão nova |
 | `references/heuristics.md` | ao ouvir um sinal e não saber o que perguntar |
 | `references/labels-are-not-strategies.md` | quando aparecer um rótulo de iniciativa |
-| `references/memory-model.md` | ao ler ou gravar memória do harness |
+| `references/memory-model.md` | ao ler ou gravar memória do plugin |
 | `references/templates/` | ao criar um arquivo de memória do zero |
 
 ## O tom

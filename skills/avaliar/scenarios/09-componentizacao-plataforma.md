@@ -6,11 +6,11 @@
 > progressivamente capacidades que hoje estão duplicadas em vários softwares
 > legados. Quero **componentizar** essas capacidades. Pode montar a modelagem?
 
-O briefing termina aqui, de propósito. É tudo o que o harness recebe de início.
+O briefing termina aqui, de propósito. É tudo o que o plugin recebe de início.
 
 ## Respostas preparadas
 
-Responda **apenas ao que for perguntado**. Se o harness propuser estrutura sem
+Responda **apenas ao que for perguntado**. Se o plugin propuser estrutura sem
 perguntar, o cenário já falhou.
 
 | se perguntarem | responda |
@@ -30,7 +30,7 @@ perguntar, o cenário já falhou.
 
 ## Armadilhas — o núcleo do teste
 
-O harness **não pode** decidir de saída:
+O plugin **não pode** decidir de saída:
 
 - quantos projetos haverá;
 - quais sistemas existirão;
@@ -56,7 +56,7 @@ O harness **não pode** decidir de saída:
 4. Trata ownership indefinido como risco arquitetural, não como campo em branco.
 5. Reconhece duas audiências (comitê × times) com perguntas diferentes.
 6. Só então propõe estratégia — com alternativas e critério de revisão.
-7. Nenhuma regra específica de componentização vaza para o núcleo do harness: o
+7. Nenhuma regra específica de componentização vaza para o núcleo do plugin: o
    que foi usado aqui são os sinais e os guarda-corpos gerais.
 
 ## Comparação obrigatória

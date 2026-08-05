@@ -76,12 +76,16 @@ test('toda skill tem frontmatter, e o name e o nome do diretorio', () => {
   assert.deepEqual(problemas, [])
 })
 
+/** Nomenclatura, e nao arquivo: `decisions/MD-NNN-slug.md`, `scenarios/NN-*.md`. */
+const EH_PADRAO = (alvo) => /NN|YYYY|AAAA|<[a-z]|\bslug\b|\bid\b|\bprojeto\b/.test(alvo)
+
 test('todo ${CLAUDE_PLUGIN_ROOT} citado aponta para um arquivo que existe', () => {
   const quebrados = []
   for (const f of textos()) {
     const texto = fs.readFileSync(f, 'utf8')
     for (const [, alvo] of texto.matchAll(/\$\{CLAUDE_PLUGIN_ROOT\}\/([\w./-]+)/g)) {
       const limpo = alvo.replace(/[.,;)]+$/, '')
+      if (EH_PADRAO(limpo)) continue
       // Um diretorio citado com barra no fim e referencia a pasta, nao a arquivo.
       if (!fs.existsSync(path.join(RAIZ, limpo))) quebrados.push(`${rel(f)}: ${limpo}`)
     }
@@ -90,36 +94,111 @@ test('todo ${CLAUDE_PLUGIN_ROOT} citado aponta para um arquivo que existe', () =
 })
 
 /**
- * Prefixos que resolvem FORA do plugin, e por isso nao sao conferiveis aqui.
+ * O unico prefixo que resolve FORA do plugin.
  *
  * `model/…` e caminho dentro de uma modelagem, relativo ao `model/` dela: quem
  * resolve e o repositorio de quem esta modelando, que so existe em tempo de
- * conversa. `docs/…` e a documentacao do cfourdev, que mora no outro
- * repositorio — o endereco completo esta no topo de `viewer-contract.md`, e a
- * tag fixada ali e o que impede a referencia de apodrecer.
+ * conversa.
  *
- * A alternativa era escreve-los sempre por URL inteira. Sao ~40 ocorrencias, e
- * o texto ficaria ilegivel para ganhar uma verificacao que a rede faria melhor.
+ * `docs/…` estava aqui e saiu: a documentacao do cfourdev virou publica, e as
+ * marcas viraram `doc:<slug>` — conferiveis pelo teste dos slugs, abaixo.
  */
-const FORA_DO_PLUGIN = [/^model\//, /^docs\//]
+const FORA_DO_PLUGIN = [/^model\//]
 
-test('todo caminho relativo citado entre crases existe', () => {
-  // O mesmo mecanismo de `tests/contracts/documentacao.test.ts` do cfourdev:
-  // entre crases, com barra, e com extensao conhecida — especifico o bastante
-  // para nao varrer prosa por engano. Resolve contra a raiz e contra o proprio
-  // diretorio, que e como as referencias do nucleo sao escritas.
+/**
+ * Nomes que sao arquivos DO USUARIO, e nao deste repositorio.
+ *
+ * O registro, a identidade, a configuracao e os quatro arquivos de memoria
+ * nascem no repositorio de quem esta modelando; `view.yaml` vem dentro do
+ * `cfour`. Citar qualquer um deles pelo nome nu e o certo — e eles sao a razao
+ * de a checagem de nome nu precisar de uma lista, em vez de proibir a forma.
+ */
+const DO_USUARIO = new Set([
+  'cfour.yaml',
+  'modelagem.yaml',
+  'workspace.yaml',
+  'folder.yaml',
+  'view.yaml',
+  'project-context.yaml',
+  'session.yaml',
+  'MODELING-CONVENTIONS.md',
+])
+
+test('todo caminho de arquivo citado entre crases existe', () => {
+  // Dois formatos, e o segundo foi acrescentado depois de uma skill citar cinco
+  // arquivos pelo nome nu — arquivos que nem moravam no diretorio dela. A versao
+  // antiga exigia uma barra, entao `view-or-flow.md` passava batido.
+  //
+  // Resolve contra a raiz e contra o proprio diretorio, que e como as
+  // referencias do nucleo sao escritas.
+  const COM_BARRA = /`([\w./-]+\/[\w.-]+\.(?:md|yaml|yml|json|mjs))`/g
+  const NOME_NU = /`([\w-]+\.(?:md|yaml|yml|mjs))`/g
+
   const quebrados = []
   for (const f of textos()) {
     const texto = fs.readFileSync(f, 'utf8')
-    for (const [, alvo] of texto.matchAll(/`([\w./-]+\/[\w.-]+\.(?:md|yaml|yml|json|mjs))`/g)) {
-      // Padrao de nomenclatura, e nao arquivo: `decisions/MD-NNN-slug.md`.
-      if (/NNN|YYYY|AAAA|<[a-z]|\bslug\b|\bid\b|\bprojeto\b/.test(alvo)) continue
-      if (FORA_DO_PLUGIN.some((re) => re.test(alvo))) continue
-      const candidatos = [path.resolve(RAIZ, alvo), path.resolve(path.dirname(f), alvo)]
-      if (!candidatos.some((c) => fs.existsSync(c))) quebrados.push(`${rel(f)}: ${alvo}`)
+    for (const re of [COM_BARRA, NOME_NU]) {
+      for (const [, alvo] of texto.matchAll(re)) {
+        if (EH_PADRAO(alvo)) continue
+        if (DO_USUARIO.has(alvo)) continue
+        if (FORA_DO_PLUGIN.some((r) => r.test(alvo))) continue
+        const candidatos = [path.resolve(RAIZ, alvo), path.resolve(path.dirname(f), alvo)]
+        if (!candidatos.some((c) => fs.existsSync(c))) quebrados.push(`${rel(f)}: ${alvo}`)
+      }
     }
   }
   assert.deepEqual(quebrados, [])
+})
+
+/**
+ * Os slugs da documentacao publica.
+ *
+ * A MESMA lista esta congelada em `tests/contracts/documentacao-publica.test.ts`
+ * do cfourdev. Duas copias em dois repositorios e exatamente o desenho: nenhum
+ * dos dois pode importar o outro, e um acordo assim ou e afirmado dos dois lados
+ * ou nao e afirmado em lugar nenhum.
+ *
+ * Conferir por HTTP seria mais forte e nao vale: poria rede num teste que roda
+ * em todo push, para pegar um erro que so acontece quando alguem renomeia um
+ * documento — e quem renomeia ve o dourado do outro lado falhar primeiro.
+ */
+const SLUGS = [
+  'conceitos',
+  'primeiros-passos',
+  'modelagem',
+  'diagramas',
+  'fluxos',
+  'usando-o-viewer',
+  'configuracao',
+  'referencia',
+  'perguntas-frequentes',
+  'modelagens',
+  'publicando',
+  'exemplos',
+]
+
+test('toda marca doc: aponta para um documento que existe', () => {
+  const invalidas = []
+  for (const f of textos()) {
+    const linhas = fs.readFileSync(f, 'utf8').split('\n')
+    linhas.forEach((linha, i) => {
+      for (const [, slug] of linha.matchAll(/\bdoc:([a-z][a-z-]*)/g)) {
+        if (!SLUGS.includes(slug)) invalidas.push(`${rel(f)}:${i + 1}: doc:${slug}`)
+      }
+    })
+  }
+  assert.deepEqual(invalidas, [])
+})
+
+test('a tabela de slugs do contrato lista todos, e so eles', () => {
+  // O contrato traz a lista para o leitor, e ela e o que ensina a resolver
+  // `doc:<slug>`. Uma lista incompleta manda o modelo adivinhar o endereco.
+  const contrato = fs.readFileSync(
+    path.join(SKILLS, 'modelagem', 'references', 'viewer-contract.md'),
+    'utf8',
+  )
+  const ausentes = SLUGS.filter((s) => !contrato.includes(`| \`${s}\` |`))
+  assert.deepEqual(ausentes, [], 'slugs que a tabela do contrato nao lista')
 })
 
 test('toda skill citada como cfour:<nome> existe', () => {
@@ -148,19 +227,31 @@ test('nao sobrou nada do monorepo', () => {
     [/npm run dev/, 'no repositorio do usuario o comando e `cfour serve`'],
     [/\bc4-(model|modeling|resume|close|reconcile|modelagens|architecture)/, 'nome de skill antigo'],
     [/(?<!\/)\bexamples\/<(?:id|slug)>/, '`examples/` era pasta do monorepo; o modelo vem do `path:` do registro'],
+    // `docs/NN` apontava para a documentacao dentro do repositorio PRIVADO do
+    // cfourdev. Ela e publica agora, e a marca e `doc:<slug>` — que o teste dos
+    // slugs confere. Escrever `docs/08` de novo seria voltar a citar um endereco
+    // que o leitor deste plugin nao pode abrir.
+    [/\bdocs\/\d\d\b/, 'a marca agora e `doc:<slug>`, e resolve em cfourdev.com.br/docs'],
+    // Enquanto as skills moravam num diretorio do monorepo, "harness" era o nome
+    // certo. Hoje isto e um plugin, e o README ja diz isso em toda parte.
+    [/\bharness\b/i, 'isto e um plugin, e nao um harness'],
+    // A modelagem de exemplo do cfourdev nao esta no repositorio de ninguem.
+    [/\bexemplos-c4\b/, 'os exemplos moram em `references/exemplos.md` e em doc:exemplos'],
   ]
-  // `cfour:setup` e a UNICA skill que pode falar do endereco antigo: o trabalho
-  // dela e achar a memoria que ficou la e oferecer a migracao. Proibir a string
-  // nela seria proibir a migracao — e quem tem a pasta antiga e exatamente quem
-  // nao percebe que a perdeu.
+  // `cfour:setup` e a UNICA skill que pode falar do endereco antigo e da palavra
+  // antiga: o trabalho dela e achar a memoria que ficou la e oferecer a
+  // migracao, e explicar POR QUE o nome mudou. Proibir as strings nela seria
+  // proibir a migracao — e quem tem a pasta antiga e exatamente quem nao percebe
+  // que a perdeu.
   const MIGRACAO = path.join(SKILLS, 'setup', 'SKILL.md')
+  const SO_NA_MIGRACAO = /c4-harness|\\bharness\\b/
 
   const sobras = []
   for (const f of textos()) {
     const linhas = fs.readFileSync(f, 'utf8').split('\n')
     linhas.forEach((linha, i) => {
       for (const [re, porque] of PROIBIDO) {
-        if (f === MIGRACAO && /c4-harness/.test(String(re))) continue
+        if (f === MIGRACAO && SO_NA_MIGRACAO.test(String(re))) continue
         if (re.test(linha)) sobras.push(`${rel(f)}:${i + 1}: ${porque} — ${linha.trim().slice(0, 70)}`)
       }
     })

@@ -8,15 +8,16 @@ description: Executa a suíte de cenários que valida as próprias skills cfour 
 Esta skill é ferramenta de quem **desenvolve** o `cfour`. Se você chegou aqui
 querendo modelar alguma coisa, o caminho é `cfour:modelagem`.
 
-Os cenários são **testes, não regras**. Nada do que está em `scenarios/` pode
+Os cenários são **testes, não regras**. Nada do que está em `${CLAUDE_PLUGIN_ROOT}/skills/avaliar/scenarios/` pode
 virar comportamento do núcleo: se um cenário só passa com uma regra específica
 dele, o problema é a regra, não o cenário.
 
 ## O que existe
 
-- `rubric.md` — os treze critérios comuns e os três testes transversais.
-- `scenarios/01..11-*.md` — briefing, respostas preparadas, armadilhas e critérios
-  específicos de cada caso.
+- `${CLAUDE_PLUGIN_ROOT}/skills/avaliar/rubric.md` — os treze critérios comuns e os três
+  testes transversais.
+- `${CLAUDE_PLUGIN_ROOT}/skills/avaliar/scenarios/NN-*.md` — briefing, respostas
+  preparadas, armadilhas e critérios específicos de cada caso.
 
 ## Como rodar
 
@@ -54,17 +55,21 @@ Para cada cenário selecionado, um subagente, com este contrato:
 
 > Você vai interpretar **dois papéis, separadamente**.
 >
-> **Papel 1 — o arquiteto.** Você recebe `scenarios/NN-*.md`. Abra a conversa com
+> **Papel 1 — o arquiteto.** Você recebe o caminho absoluto de
+> `${CLAUDE_PLUGIN_ROOT}/skills/avaliar/scenarios/NN-*.md`. O caminho tem de ser
+> absoluto: o seu `cwd` é o diretório descartável do cenário, e um caminho
+> relativo não resolve de lá. Abra a conversa com
 > o briefing, literalmente. Depois responda **apenas ao que for perguntado**,
 > usando a tabela de respostas preparadas. Pergunta fora da tabela: responda de
 > forma plausível e mantenha coerência. **Nunca ofereça informação que não foi
 > pedida** e nunca sugira estrutura.
 >
-> **Papel 2 — o avaliador.** Ao final, pontue a conversa pela `rubric.md` e pelos
+> **Papel 2 — o avaliador.** Ao final, pontue a conversa pela
+> `${CLAUDE_PLUGIN_ROOT}/skills/avaliar/rubric.md` e pelos
 > critérios específicos do cenário. Cada critério: `PASSA` / `FALHA` / `PARCIAL`,
-> **sempre com a citação** da fala do harness que comprova.
+> **sempre com a citação** da fala do plugin que comprova.
 >
-> O harness sob teste é o conjunto de skills `cfour:*` do plugin instalado.
+> O que está sob teste é o conjunto de skills `cfour:*` do plugin instalado.
 > Siga-as como o Claude as seguiria. Trabalhe no diretório que lhe foi dado, e
 > em nenhum outro.
 
@@ -83,11 +88,11 @@ Nenhum cenário sozinho detecta isto:
   parecidas. As estratégias **convergiram** para ownership explícito e fluxo sobre
   estrutura existente?
 - **Corte de realidade (04 × 11)** — nos dois há duas organizações. A separação em
-  modelagens saiu do que precisa aparecer junto, ou saiu do CNPJ? Um harness que
+  modelagens saiu do que precisa aparecer junto, ou saiu do CNPJ? Um plugin que
   responde "empresas diferentes → modelagens diferentes" acerta o 11 por acaso e
   erra o 04.
 
-Se a estratégia acompanhou o rótulo em vez das necessidades, o harness falhou —
+Se a estratégia acompanhou o rótulo em vez das necessidades, o plugin falhou —
 mesmo com todos os treze critérios passando em cada cenário isolado.
 
 ### O placar
@@ -112,16 +117,16 @@ Falha aponta para **uma skill**, não para um cenário:
 
 | falhou | olhe |
 |---|---|
-| 1, 2 (propósito, não assumir) | `cfour:descoberta`, `labels-are-not-strategies.md` |
+| 1, 2 (propósito, não assumir) | `cfour:descoberta`, `${CLAUDE_PLUGIN_ROOT}/skills/modelagem/references/labels-are-not-strategies.md` |
 | 3, 6 (perguntas, estados) | `cfour:entrevista` |
-| 4, 5, 8 (alternativa, justificativa, visões) | `cfour:estrategia`, `view-or-flow.md` |
-| 7, 12 (mapa/história, finais tristes) | `view-or-flow.md` |
-| 9, 10 (YAML, contrato) | `cfour:editor`, `viewer-contract.md` |
-| 11 (memória) | `cfour:encerrar`, `memory-model.md` |
-| 13 (modelagem ou projeto) | `modelagem-ou-projeto.md`, `cfour:modelagens`, passo 0 de `cfour:descoberta` |
+| 4, 5, 8 (alternativa, justificativa, visões) | `cfour:estrategia`, `${CLAUDE_PLUGIN_ROOT}/skills/modelagem/references/view-or-flow.md` |
+| 7, 12 (mapa/história, finais tristes) | `${CLAUDE_PLUGIN_ROOT}/skills/modelagem/references/view-or-flow.md` |
+| 9, 10 (YAML, contrato) | `cfour:editor`, `${CLAUDE_PLUGIN_ROOT}/skills/modelagem/references/viewer-contract.md` |
+| 11 (memória) | `cfour:encerrar`, `${CLAUDE_PLUGIN_ROOT}/skills/modelagem/references/memory-model.md` |
+| 13 (modelagem ou projeto) | `${CLAUDE_PLUGIN_ROOT}/skills/modelagem/references/modelagem-ou-projeto.md`, `cfour:modelagens`, passo 0 de `cfour:descoberta` |
 
 Corrija a skill e rode **de novo o cenário que falhou**, mais os dois
 transversais — uma correção que resolve um caso costuma quebrar outro.
 
 **Nunca corrija adicionando ao núcleo uma regra sobre o cenário.** "Quando for
-componentização, faça X" é exatamente o que o harness existe para não fazer.
+componentização, faça X" é exatamente o que o plugin existe para não fazer.

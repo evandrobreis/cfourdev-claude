@@ -37,7 +37,7 @@
   existe glossário compartilhado a desempatar.
 - **O corte não é "empresas diferentes".** Se uma seta precisasse atravessar, a
   resposta seria dois projetos numa modelagem só, apesar de empresas diferentes.
-  O harness precisa **perguntar o que atravessa**, não deduzir do CNPJ.
+  O plugin precisa **perguntar o que atravessa**, não deduzir do CNPJ.
 - **Nada de descoberta única.** Cada modelagem tem seu `project-context.yaml`, sua
   série `MD-001` e sua sessão. Uma descoberta que responde as catorze perguntas
   "pelas duas ao mesmo tempo" já errou.

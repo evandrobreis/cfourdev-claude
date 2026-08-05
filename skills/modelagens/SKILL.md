@@ -1,6 +1,6 @@
 ---
 name: modelagens
-description: Lista, cria, troca e registra modelagens no cfourdev — as realidades independentes que um arquiteto mantém em paralelo, cada uma com propósito, vocabulário, convenções e memória próprios. Use ao começar a modelar algo que talvez não pertença à modelagem aberta, ao voltar sem saber em qual realidade estava, ao apontar o harness para uma modelagem que mora em outro repositório, ou quando pedirem /cfour:modelagens.
+description: Lista, cria, troca e registra modelagens no cfourdev — as realidades independentes que um arquiteto mantém em paralelo, cada uma com propósito, vocabulário, convenções e memória próprios. Use ao começar a modelar algo que talvez não pertença à modelagem aberta, ao voltar sem saber em qual realidade estava, ao apontar o plugin para uma modelagem que mora em outro repositório, ou quando pedirem /cfour:modelagens.
 ---
 
 # Modelagens
@@ -58,11 +58,11 @@ Para cada modelagem registrada, leia também `focus` e `next_step` de
 
 ```
 MODELAGENS
-  ● componentizacao-nstech   Componentização nstech
+  ● arquitetura              Arquitetura do produto
       onde parou: <focus>
       próximo:    <next_step>
       modelo:     N caixa(s), N diagrama(s), N fluxo(s)
-    exemplos-c4              Exemplos do cfourdev
+    cliente-acme             Arquitetura da Acme
       ...
 ```
 

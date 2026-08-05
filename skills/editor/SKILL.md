@@ -91,7 +91,7 @@ curada. Registre a pergunta que a visão responde (nota `info` no diagrama).
 
 ### Fluxo
 
-Cinco regras específicas, todas de `docs/05`:
+Cinco regras específicas, todas de `doc:fluxos`:
 
 1. **Um fluxo não cria caixa nenhuma.** Se a história precisa de algo que não
    existe, primeiro decida o elemento — depois escreva o passo.
