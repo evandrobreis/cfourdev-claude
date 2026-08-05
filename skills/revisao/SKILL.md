@@ -47,7 +47,7 @@ O que o check não vê, porque é semântica:
 - **Contexto sem detalhe interno** — nenhuma tecnologia, nenhum banco, nenhuma
   fila na visão de topo.
 - **Decomposição consistente** — um sistema com 12 componentes ao lado de outro
-  que é caixa fechada precisa de motivo (`heuristics.md`, sinal 10).
+  que é caixa fechada precisa de motivo (`${CLAUDE_PLUGIN_ROOT}/skills/modelagem/references/heuristics.md`, sinal 10).
 - **Nível declarado à mão** discordando da hierarquia: é aviso do check, mas a
   causa é de modelagem.
 - **Fluxo no nível certo** — os passos citam as caixas mais finas que o modelo
@@ -71,7 +71,7 @@ Julga a **visão**, não o modelo:
 
 ## 4. Qualidade arquitetural
 
-O que o modelo **revela** — e o que ele esconde. Use `heuristics.md` e produza
+O que o modelo **revela** — e o que ele esconde. Use `${CLAUDE_PLUGIN_ROOT}/skills/modelagem/references/heuristics.md` e produza
 **perguntas e notas**, nunca refatoração automática:
 
 responsabilidades · dependências · riscos · ownership · acoplamento · resiliência

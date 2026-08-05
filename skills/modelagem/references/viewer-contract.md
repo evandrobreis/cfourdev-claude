@@ -1,26 +1,47 @@
 # Contrato do cfourdev — índice normativo
 
-**Duas regras antes de tudo:**
+**Uma regra antes de tudo: não invente campo, `shape`, `kind`, `outcome` ou
+comportamento.** O que não está aqui nem na documentação não existe.
 
-1. **Não invente campo, `shape`, `kind`, `outcome` ou comportamento.** Em dúvida,
-   abra `docs/08`. O que não está lá não existe.
-2. **Os números dos documentos já mudaram uma vez.** Se um documento citado aqui
-   não existir, consulte o índice antes de citar.
+## `doc:<slug>` — as marcas, e como abri-las
 
-## `docs/NN` — o que essas marcas são, e o que não são
+Ao longo deste arquivo, `doc:<slug>` marca **de onde cada regra veio**, e é um
+endereço que você pode abrir:
 
-Ao longo deste arquivo, `docs/NN` marca **de onde cada regra veio**: o documento
-do cfourdev que a decidiu. É proveniência, não um link para você abrir.
+```
+doc:<slug>   →   https://cfourdev.com.br/docs/<slug>/
+```
 
-**Você não tem essa documentação em mãos, e não precisa dela para escrever.**
-Este arquivo carrega a regra; o `docs/NN` ao lado existe para que, quando alguém
-questionar uma regra, se saiba onde ela foi decidida. A documentação vem
-instalada com o cfourdev — `docs/` no repositório de quem tem acesso a ele, e
-[cfourdev.com.br](https://cfourdev.com.br) para o produto.
+A documentação é **pública e não pede login**. Os slugs, que são a lista inteira:
 
-**Quando a regra aqui não bastar, a resposta não é procurar a doc: é rodar
-`cfour check`.** Ele carrega com o mesmo loader do viewer e diz o que aceita.
-Correção técnica é o que ele responder — nunca o que você deduziu lendo.
+| slug | é |
+|---|---|
+| `conceitos` | o C4 em quatro níveis, e como este viewer os representa |
+| `primeiros-passos` | do `cfour init` ao primeiro diagrama na tela |
+| `modelagem` | caixas, setas e anotações: o que se escreve, e onde |
+| `diagramas` | a visão estrutural: escopo, recorte, agrupamento |
+| `fluxos` | o que acontece, e em que ordem |
+| `usando-o-viewer` | a interface, por tarefa |
+| `configuracao` | formatos, cores, tipos de seta e de anotação |
+| `referencia` | **todo campo**, com o que acontece quando falta, e os limites do formato |
+| `perguntas-frequentes` | as respostas oficiais para o que se pergunta sempre |
+| `modelagens` | uma modelagem é uma realidade; quando criar a segunda |
+| `publicando` | conta, chave, `cfour push`, e a leitura hospedada |
+| `exemplos` | as duas modelagens de exemplo, inteiras, arquivo por arquivo |
+
+**A URL não carrega o número do documento**, e isso é deliberado: a numeração já
+mudou uma vez, e estas marcas seriam as primeiras a apodrecer. Cada `##` da
+página é uma âncora, então `https://cfourdev.com.br/docs/referencia/#fluxo`
+aponta para a seção, e não para o documento inteiro.
+
+**Este arquivo é o resumo normativo; a documentação é a fonte.** Para escrever, o
+resumo basta — ele existe para você não precisar de rede a cada campo. Vá à doc
+quando a regra aqui não bastar, quando alguém questionar uma regra, ou quando
+precisar citar onde ela foi decidida.
+
+**Mas correção técnica não sai de leitura nenhuma: sai do `cfour check`.** Ele
+carrega com o mesmo loader do viewer e diz o que aceita. Quando o check e a sua
+leitura discordarem, o check está certo.
 
 E se nem o check resolver, **pergunte ao arquiteto em vez de inventar**. Um
 campo inventado não falha: ele é ignorado em silêncio, e o desenho fica sem a
@@ -28,7 +49,7 @@ coisa que você achou que tinha escrito.
 
 ---
 
-## 1. Onde os arquivos ficam (`docs/02`, `docs/08`, `docs/10`)
+## 1. Onde os arquivos ficam (`doc:primeiros-passos`, `doc:referencia`, `doc:modelagens`)
 
 - O motor lê **uma raiz de modelagem por vez**: o `model/` de uma modelagem. Qual
   delas é assunto do núcleo ("A modelagem ativa"); daqui para baixo, `model/`
@@ -52,7 +73,7 @@ coisa que você achou que tinha escrito.
 | `shared/gateway-pagamento` | exatamente ali — barra é caminho completo |
 | `estoque/estoque-api` | em outro projeto |
 
-## 2. Os cinco documentos (`docs/01`, `docs/02`)
+## 2. Os cinco documentos (`doc:conceitos`, `doc:primeiros-passos`)
 
 `kind: element | relation | diagram | flow | note | project` no topo, ou as chaves
 de lista `elements:`, `relations:`, `diagrams:`, `flows:`, `notes:`.
@@ -68,7 +89,7 @@ documento, e a nota fica sem onde declarar o dela — ver §8.
 | **fluxo** | um caso de uso como sequência — *a história* |
 | **nota** | uma anotação: risco, dúvida, bloqueio, decisão |
 
-## 3. O nível vem do `parent` — sempre (`docs/01`, `docs/03`)
+## 3. O nível vem do `parent` — sempre (`doc:conceitos`, `doc:modelagem`)
 
 ```
 sem parent          -> contexto (sistema)
@@ -82,9 +103,9 @@ filho de componente -> código
 - Caixa no nível errado = `parent` errado, nunca diagrama errado.
 - A mesma hierarquia decide quatro coisas: nível, moldura, descer/subir e lifting.
 - Teste container × componente: *"se eu derrubar isto sozinho, o resto continua de
-  pé?"* Sim → container. Não → componente. (`docs/01`, `docs/09`)
+  pé?"* Sim → container. Não → componente. (`doc:conceitos`, `doc:perguntas-frequentes`)
 
-## 4. Elemento (`docs/03`, `docs/08`)
+## 4. Elemento (`doc:modelagem`, `doc:referencia`)
 
 | campo | se omitido |
 |---|---|
@@ -102,7 +123,7 @@ filho de componente -> código
 `database`, `queue`, `topic`, `container`, `component`, `class`. Shape é só
 desenho: não muda nível nem comportamento. Desconhecido → caixa cinza + aviso.
 
-## 5. Relação (`docs/03`, `docs/04`)
+## 5. Relação (`doc:modelagem`, `doc:diagramas`)
 
 | campo | se omitido |
 |---|---|
@@ -125,21 +146,21 @@ tecnologia da integração vai no `label` ou na `description`.
 conhece.** O viewer sobe cada ponta até a caixa visível naquele desenho. Não
 redesenhe a mesma seta em três níveis. Não sabe qual componente faz a chamada?
 Escreva no container e mova depois — os níveis de cima continuam certos
-(`docs/03`, `docs/09`).
+(`doc:modelagem`, `doc:perguntas-frequentes`).
 
-**Abstração funde, detalhe separa** (`docs/04`): no diagrama em que a seta liga as
+**Abstração funde, detalhe separa** (`doc:diagramas`): no diagrama em que a seta liga as
 caixas que ela mesma cita, cada uma mantém sua linha; num nível acima, tudo que
 sobe para o mesmo par vira uma linha só, com o número de integrações e o hover
 listando as originais. Uma seta cujas duas pontas viram a mesma caixa não é
 desenhada.
 
-**Seta que nomeia o `scope` do diagrama** (`docs/04`): é desenhada **na moldura**,
+**Seta que nomeia o `scope` do diagrama** (`doc:diagramas`): é desenhada **na moldura**,
 e separada das setas dos membros — ela nunca falou de um componente, então não
 funde com nenhum. É o que garante que descer de nível não perde integração. Já
 uma caixa tirada por `exclude`/`where` leva as setas dela junto: isso é curadoria,
 e sai em `invisibleRelations` no `--inventory`.
 
-**Atravessar modelagens** (`docs/03`, `docs/10`): `to:` NUNCA cita elemento de
+**Atravessar modelagens** (`doc:modelagem`, `doc:modelagens`): `to:` NUNCA cita elemento de
 outra modelagem — cada uma compila sozinha e aquele id vira erro. Use um
 **espelho**: caixa `external` local com `bind: { modelagem, ref }`, e a seta
 aponta para o id local. Lida sozinha é uma caixa comum; lidas juntas o espelho se
@@ -151,7 +172,7 @@ só com dois projetos.
 dois casos: a origem mora em `shared/`, ou a seta liga dois projetos e nenhum é
 dono dela.
 
-## 6. Diagrama — o mapa (`docs/04`, `docs/08`)
+## 6. Diagrama — o mapa (`doc:diagramas`, `doc:referencia`)
 
 | campo | se omitido |
 |---|---|
@@ -173,7 +194,7 @@ dono dela.
   `project`. Dentro de uma chave vale **OU**, entre chaves **E**. **Não há negação.**
 - Ordem de montagem: include → where → exclude → neighbors → setas → bandas →
   subject → notas. Bandas nunca trazem alguém novo.
-- **O anel não conversa consigo mesmo** (`docs/04`): seta entre dois vizinhos do
+- **O anel não conversa consigo mesmo** (`doc:diagramas`): seta entre dois vizinhos do
   MESMO salto não é desenhada — é contexto do escopo conversando entre si, e o
   leitor não a distingue de uma seta dos membros. Saltos diferentes sobrevivem,
   senão o segundo anel de `neighbors: 2` ficaria mudo. A moldura nunca conta como
@@ -185,7 +206,7 @@ dono dela.
 - **O viewer nunca inventa visão.** Caixa com filhos e sem diagrama com
   `scope:` apontando para ela → conteúdo inalcançável, avisado na carga.
 
-## 7. Fluxo — a história (`docs/05`, `docs/08`)
+## 7. Fluxo — a história (`doc:fluxos`, `doc:referencia`)
 
 **Um fluxo não cria caixa nenhuma.** Ele percorre as que já existem, e cada passo
 deveria ser uma seta que já foi declarada. Quando não é, o viewer avisa e desenha
@@ -241,11 +262,11 @@ iguais e seguidas se fundem (`×2`); coluna que passou a responder por outras mo
 **Fluxo não tem arquivo de layout** — toda coordenada sai da ordem do elenco e das
 mensagens. A ordem das colunas se muda em `participants`, no arquivo.
 
-**Um fluxo com erro não carrega inteiro** (`docs/08`): "uma história com um passo
+**Um fluxo com erro não carrega inteiro** (`doc:referencia`): "uma história com um passo
 quebrado conta a coisa errada". Por isso, depois de mexer em fluxo, rodar
 `cfour check` não é opcional.
 
-## 8. Nota (`docs/03`, `docs/08`)
+## 8. Nota (`doc:modelagem`, `doc:referencia`)
 
 | campo | se omitido |
 |---|---|
@@ -261,9 +282,9 @@ duas chaves são a mesma, e uma sobrescreve a outra.
 
 Sem `target` **e** sem `scope` → descartada com aviso. Notas viram filtro
 ("mostre só o que tem risco em aberto"). É onde risco, dúvida e decisão pendente
-devem morar (`docs/09`).
+devem morar (`doc:perguntas-frequentes`).
 
-## 9. `tags` e `meta` — o vocabulário da empresa (`docs/03`)
+## 9. `tags` e `meta` — o vocabulário da empresa (`doc:modelagem`)
 
 - `tags`: sinalizador acumulável, a caixa tem ou não tem (`pci`, `legado`, `core`).
 - `meta`: classificação com valor (`domain: vendas`, `owner: squad-checkout`).
@@ -272,9 +293,9 @@ devem morar (`docs/09`).
 - Valor de `meta` que é `http(s)://` vira link na caixa e **não** vira filtro. Não
   existe campo `links:`.
 - Legado ou descontinuado: `tags: [legado]` + `exclude` na visão que ele polui
-  (`docs/09`).
+  (`doc:perguntas-frequentes`).
 
-## 10. Configuração (`docs/07`)
+## 10. Configuração (`doc:configuracao`)
 
 O `view.yaml` que vem dentro do `cfour` é do motor; `$M/model/workspace.yaml` é
 da modelagem e é somado **item por item** sobre ele. Registros abertos — acrescentar uma entrada basta,
@@ -285,7 +306,7 @@ sem código: `shapes` (combinando `primitive`/`stereotype`/`palette`/`outline`/`
 **Usar um `kind`, `shape` ou `outcome` novo exige declará-lo antes.** Sem isso ele
 funciona degradado e com aviso — nunca some, mas não é o que você quis dizer.
 
-## 11. O que é erro e o que é aviso (`docs/08`)
+## 11. O que é erro e o que é aviso (`doc:referencia`)
 
 Nada é fatal: o modelo carrega degradado e os problemas sobem para o topo da tela.
 Não reproduza a lista aqui — rode `cfour check`. O que importa saber:
@@ -298,7 +319,7 @@ Não reproduza a lista aqui — rode `cfour check`. O que importa saber:
 - o modelo YAML **nunca é reescrito** pelo viewer; a única coisa gravada é
   `model/<projeto>/.layout/<diagrama>.json`, que vai para o git.
 
-## 12. O que não existe (`docs/08`, "Limites conhecidos")
+## 12. O que não existe (`doc:referencia`, "Limites conhecidos")
 
 Não prometa nada disto:
 
@@ -318,21 +339,8 @@ Não prometa nada disto:
 
 ## 13. Exemplos canônicos
 
-Na modelagem `exemplos-c4` do cfourdev, que existe para isto e vem com o
-repositório de quem o tem. **Não presuma que estão à mão** — se não estiverem,
-as regras acima bastam, e `cfour init` escreve um exemplo mínimo que carrega e
-valida.
+**Em `${CLAUDE_PLUGIN_ROOT}/skills/modelagem/references/exemplos.md`, aqui do
+lado** — um trecho por forma, sem rede e sem depender de nada estar instalado.
+Leia de lá quando a tabela de campos não bastar para ver a forma inteira.
 
-Caminhos relativos ao `model/` daquela modelagem:
-
-| arquivo | mostra |
-|---|---|
-| `model/loja/elements/containers.yaml` | várias caixas e setas num arquivo só |
-| `model/loja/elements/checkout/pedido-service.yaml` | setas co-locadas na caixa de origem |
-| `model/loja/relations/integracoes.yaml` | setas entre projetos e a partir de `shared/` |
-| `model/loja/diagrams/contexto.yaml` | visão de topo curada, sem `scope` |
-| `model/loja/diagrams/containers.yaml` | diagrama mínimo: `scope` e mais nada |
-| `model/loja/flows/checkout.yaml` | fluxo completo: caminhos tristes, `reply`, chamada interna, entrega para dentro |
-| `model/estoque/flows/reserva.yaml` | fluxo que começa em outro projeto |
-| `model/loja/notes/riscos.yaml` | notas presas a caixas e a diagramas |
-| `model/workspace.yaml` | rótulos de `meta` e o vocabulário de uma modelagem |
+As duas modelagens completas, com todos os arquivos, estão em `doc:exemplos`.

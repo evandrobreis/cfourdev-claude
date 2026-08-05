@@ -62,7 +62,7 @@ notas, conteúdo inalcançável, passos `!` e as contagens.
 
 Confronte o inventário com o que a memória diz. Procure:
 
-- **contagens diferentes de `model_fingerprint`** → alguém editou fora do harness;
+- **contagens diferentes de `model_fingerprint`** → alguém editou fora do plugin;
 - caixas, visões ou fluxos que nenhuma decisão previa;
 - convenção declarada e não seguida (id fora do padrão, `meta` que ninguém usa,
   taxonomia que cresceu sem decisão);

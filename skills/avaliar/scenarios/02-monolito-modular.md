@@ -23,7 +23,7 @@
 ## Armadilhas
 
 - Módulo com deploy único **não é container**. O teste do deploy responde isso, e
-  o harness precisa aplicá-lo em vez de aceitar a palavra "módulo".
+  o plugin precisa aplicá-lo em vez de aceitar a palavra "módulo".
 - Modelar os doze módulos com o mesmo detalhe é ruído: a decisão é sobre o
   fiscal e o que ele toca.
 - Leitura cruzada de tabelas é o achado central (sinal 4 — dados compartilhados),

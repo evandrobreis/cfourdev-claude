@@ -23,7 +23,7 @@
 ## Armadilhas
 
 - Jornada em ordem, atravessando sistemas, é **fluxo** — não uma pilha de
-  diagramas nem um diagrama de contexto com setas numeradas (`docs/09`).
+  diagramas nem um diagrama de contexto com setas numeradas (`doc:perguntas-frequentes`).
 - Os finais ruins **são** o assunto: fila manual de dois dias e cartão pendente
   sem monitoração. Um fluxo só com caminho feliz aqui não responde nada.
 - Já existe modelagem parcial de dois sistemas: reaproveitar é obrigatório, e o

@@ -25,7 +25,7 @@
   reprocessamento**, não mais um mapa de tópicos.
 - Tópico Kafka roda separado → é **container**, não componente.
 - "Evento com nome de evento mas semântica de comando" é o achado arquitetural
-  central (sinal 3), e só aparece se o harness perguntar.
+  central (sinal 3), e só aparece se o plugin perguntar.
 
 ## Critérios específicos
 

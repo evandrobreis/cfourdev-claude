@@ -1,7 +1,7 @@
 # Rubrica comum dos cenários
 
 Aplica-se a **todos** os cenários. Cada critério vale `PASSA` / `FALHA` /
-`PARCIAL`, sempre com a evidência — a frase do harness que o comprova.
+`PARCIAL`, sempre com a evidência — a frase do plugin que a comprova.
 
 O critério 13 só se aplica quando o cenário coloca mais de uma realidade em jogo;
 nos demais, marque `n/a` — e note que **o cenário não avisa** quando é o caso:
@@ -35,7 +35,7 @@ Além dos treze, cada rodada de avaliação verifica **entre** cenários:
 - **Convergência:** cenários com rótulos diferentes e as mesmas necessidades
   comunicacionais (03 × 10) receberam estratégias **semelhantes**?
 
-Se a estratégia acompanhou o rótulo em vez das necessidades, o harness falhou —
+Se a estratégia acompanhou o rótulo em vez das necessidades, o plugin falhou —
 mesmo com os treze critérios passando.
 
 ## Como pontuar
@@ -43,4 +43,4 @@ mesmo com os treze critérios passando.
 Um cenário passa quando: nenhum critério `FALHA`, e no máximo dois `PARCIAL`.
 
 Critérios 1, 2 e 5 são **eliminatórios**: falhar em qualquer um reprova o
-cenário, porque são o princípio central do harness, não detalhes de execução.
+cenário, porque são o princípio central do plugin, não detalhes de execução.

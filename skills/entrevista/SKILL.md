@@ -33,7 +33,7 @@ obrigatórios; os do meio, na medida do que a fala trouxe.
    já existe e vai ser reaproveitado.
 5. **Identificar ambiguidades relevantes** — só as que mudam o que vai ser escrito.
    Ambiguidade que não muda nada não vira pergunta.
-6. **Levantar as perguntas arquiteturais** — pelos sinais (`heuristics.md`), duas
+6. **Levantar as perguntas arquiteturais** — pelos sinais (`${CLAUDE_PLUGIN_ROOT}/skills/modelagem/references/heuristics.md`), duas
    ou três, não a lista inteira.
 7. **Sugerir alternativas** — quando houver mais de uma leitura defensável,
    apresente as duas com o trade-off.
@@ -68,7 +68,7 @@ que produziu aquela arquitetura. Perguntar é como essas duas coisas se encontra
 | corrige uma interpretação sua | corrija o registro **e** o que dele derivou; não deixe a inferência antiga viva |
 | pede recomendação | dê uma, com justificativa e alternativa — recomendar não é prescrever |
 | muda o nível de detalhe | acompanhe; granularidade é decisão dele, e você registra o critério |
-| não sabe o detalhe interno | modele no nível que ele conhece e mova depois (`docs/09`). Não invente componente |
+| não sabe o detalhe interno | modele no nível que ele conhece e mova depois (`doc:perguntas-frequentes`). Não invente componente |
 
 ## Ritmo
 

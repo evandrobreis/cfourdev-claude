@@ -29,7 +29,7 @@ open_threads:
   - ...
 
 # Contagens de `cfour check --inventory --json` quando a sessao fechou.
-# Se ao retomar elas nao baterem, alguem editou o modelo fora do harness.
+# Se ao retomar elas nao baterem, alguem editou o modelo fora do plugin.
 model_fingerprint:
   elements: 0
   relations: 0

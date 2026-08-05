@@ -34,7 +34,7 @@ Duas perguntas de corte, antes de continuar:
 
 ## Passo 2 — mapa ou história
 
-O modelo tem duas espécies de visão, com papéis declarados (`docs/01`):
+O modelo tem duas espécies de visão, com papéis declarados (`doc:conceitos`):
 
 ```
 DIAGRAMA   o mapa:      o que existe e quem conversa com quem
@@ -55,7 +55,7 @@ ele narra em ordem ("aí o serviço chama…", "quando o pagamento volta…"), u
 tempo verbal de sequência, ou pergunta o que acontece **quando falha**.
 
 Jornada ponta a ponta, atravessando sistemas e times, é fluxo — não uma pilha de
-diagramas (`docs/09`).
+diagramas (`doc:perguntas-frequentes`).
 
 ## Passo 3 — traduza para os recursos que existem
 

@@ -78,7 +78,7 @@ depois de saber em qual modelagem se está.
 O `cfourdev` aceita as duas: vários projetos convivem no mesmo `model/`, e setas
 atravessam projetos normalmente (`estoque/estoque-api`). Times que precisam de
 ciclos de revisão independentes ficam em **modelagens** separadas, registradas no
-`cfour.yaml` — inclusive em outro repositório (`docs/10`). O que essa
+`cfour.yaml` — inclusive em outro repositório (`doc:modelagens`). O que essa
 separação cobra é a seta: entre modelagens não existe nenhuma.
 
 ## Taxonomia emergente
@@ -101,7 +101,7 @@ vira filtro sozinha — o custo de escrever é baixo, o de manter uma taxonomia 
 ninguém usa é alto.
 
 Nomes como `migrationWave`, `legacy`, `tenant`, `domain` ou `criticality` **não
-são padrão do harness**: só existem se o projeto responder "sim" à pergunta 1.
+são padrão do plugin**: só existem se o projeto responder "sim" à pergunta 1.
 
 ## Visões
 

@@ -118,7 +118,7 @@ Pergunta obrigatória desta dimensão, porque o modelo tem duas espécies de vis
 > **Que casos de uso essa modelagem precisa contar — e o que acontece quando eles
 > dão errado?**
 
-Se houver história a contar, ela é matéria de **fluxo** (`docs/05`), e os finais
+Se houver história a contar, ela é matéria de **fluxo** (`doc:fluxos`), e os finais
 ruins costumam ser o motivo pelo qual alguém pediu o desenho.
 
 ### 5. Tempo
