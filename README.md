@@ -189,4 +189,5 @@ os três testes cruzados.
 
 ## Licença
 
-Proprietária — uso vinculado ao serviço cfourdev. Veja `LICENSE`.
+Use à vontade, inclusive comercialmente; não redistribua fora do marketplace.
+**O que o plugin escreve a seu pedido é seu.** Veja `LICENSE` — são doze linhas.
