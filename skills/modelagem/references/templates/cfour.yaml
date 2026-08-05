@@ -1,0 +1,24 @@
+# O registro das modelagens.
+#
+# Mora em cfour.yaml, na raiz do repositorio, e e o UNICO caminho que o plugin
+# e o viewer resolvem pelo diretorio de trabalho — subindo a arvore ate achar.
+#
+# Dele saem os dois lados de uma modelagem: o MODELO pelo `path` de cada
+# entrada, e a MEMORIA pelo `id`, sempre em `.claude/cfour/history/<id>/`.
+# Por isso uma modelagem que mora fora do repositorio tambem tem memoria — e por
+# isso a memoria nao viaja junto com a pasta do modelo.
+#
+# Quando criar uma modelagem nova em vez de um projeto novo:
+#   ${CLAUDE_PLUGIN_ROOT}/skills/modelagem/references/modelagem-ou-projeto.md
+version: 1
+
+# A modelagem usada quando ninguem diz qual. `C4_MODELAGEM` no ambiente e
+# `--modelagem <id>` na linha de comando vencem este campo.
+active: <slug>
+
+modelagens:
+  - id: <slug>
+    name: <Nome legivel>
+    # Relativo a raiz do repositorio, absoluto, ou com `~`. Aponta so para o
+    # MODELO: a memoria e derivada do `id` acima, nao daqui.
+    path: ./<slug>

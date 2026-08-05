@@ -1,0 +1,10 @@
+{
+  "name": "cfour",
+  "version": "0.1.0",
+  "description": "Modelagem C4 conduzida por conversa: descobre o proposito antes de propor estrutura, escreve o YAML pelo contrato do viewer, e guarda a memoria do trabalho no repositorio.",
+  "author": { "name": "Evandro Barbosa dos Reis" },
+  "homepage": "https://cfourdev.com.br",
+  "repository": "https://github.com/evandrobreis/cfourdev-claude",
+  "license": "SEE LICENSE IN LICENSE",
+  "keywords": ["c4", "arquitetura", "diagramas", "modelagem", "cfourdev"]
+}

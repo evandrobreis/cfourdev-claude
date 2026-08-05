@@ -1,0 +1,40 @@
+# Onde o trabalho parou. Curto e descartavel: o que merece sobreviver a semana
+# pertence ao modelo, a uma decisao ou ao project-context.yaml.
+version: 1
+updated: AAAA-MM-DD
+
+# Em que assunto a modelagem estava trabalhando.
+focus: |
+  ...
+
+# O ultimo passo concluido — util para nao refazer o que ja foi feito.
+last_step: |
+  ...
+
+# O proximo passo registrado. E o que /cfour:retomar vai propor.
+next_step: |
+  ...
+
+# Coisas que voce propos e o arquiteto ainda nao confirmou. NAO escreva no modelo
+# o que estiver aqui.
+pending_confirmations:
+  - ...
+
+# Arquivos tocados nesta sessao, para a proxima saber onde olhar.
+touched_files:
+  - ...
+
+# Assuntos abertos que nao viraram pergunta formal ainda.
+open_threads:
+  - ...
+
+# Contagens de `cfour check --inventory --json` quando a sessao fechou.
+# Se ao retomar elas nao baterem, alguem editou o modelo fora do harness.
+model_fingerprint:
+  elements: 0
+  relations: 0
+  diagrams: 0
+  flows: 0
+  notes: 0
+  errors: 0
+  warnings: 0

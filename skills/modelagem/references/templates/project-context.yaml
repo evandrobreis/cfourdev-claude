@@ -1,0 +1,118 @@
+# Por que este modelo existe.
+#
+# Este arquivo responde ao que o YAML do modelo nao consegue responder: para que
+# ele serve, para quem, e o que ainda nao se sabe. Uma sessao nova le isto antes
+# de qualquer outra coisa.
+#
+# Regra unica: todo item carrega `status`. `unknown` explicito vale mais que
+# campo ausente — ausencia nao distingue "nao perguntei" de "nao importa".
+version: 1
+updated: AAAA-MM-DD
+
+# ---------------------------------------------------------------------------
+# Proposito — a pergunta que abre tudo: que decisao ou conversa esta modelagem
+# precisa apoiar?
+# ---------------------------------------------------------------------------
+purpose:
+  problem: |
+    O que motivou modelar. Em uma frase, na voz de quem pediu.
+  decision: |
+    A decisao ou conversa concreta que os desenhos precisam apoiar.
+  risk_to_expose: |
+    O que precisa ficar visivel para quem ler. Vazio e uma resposta valida.
+  status: unknown        # fact | hypothesis | unknown
+
+# ---------------------------------------------------------------------------
+# Audiencias — quem le, e o que e ruido para essa pessoa
+# ---------------------------------------------------------------------------
+audiences:
+  - id: A-001
+    who: quem e
+    technical_depth: alta | media | baixa
+    questions:           # o que essa pessoa precisa responder olhando o desenho
+      - ...
+    noise:               # o que atrapalha essa pessoa
+      - ...
+    status: hypothesis
+
+# ---------------------------------------------------------------------------
+# Escopo — e, principalmente, o que fica de fora
+# ---------------------------------------------------------------------------
+scope:
+  inside: []             # o que esta sendo modelado
+  outside: []            # o que deliberadamente nao esta
+  context_only: []       # aparece so como vizinho, para dar contexto
+  undecided: []          # ainda em discussao: NAO modele como se estivesse decidido
+
+# ---------------------------------------------------------------------------
+# Perspectivas — o aspecto que a modelagem trata. Atravessa niveis C4: uma
+# perspectiva de dados ou de seguranca aparece em contexto, container e
+# componente ao mesmo tempo.
+# ---------------------------------------------------------------------------
+perspectives:
+  - name: estrutura      # estrutura | comportamento | dados | seguranca | ownership
+                         # | integracao | dependencia | implantacao | operacao
+                         # | evolucao | risco | jornada | transformacao
+    why: por que ela importa aqui
+    status: fact
+
+# ---------------------------------------------------------------------------
+# Tempo — so preencha se houver mais de um horizonte, E se eles apoiarem
+# decisoes DIFERENTES. Visões temporais que ninguem compara custam manutencao
+# dobrada.
+# ---------------------------------------------------------------------------
+time:
+  horizons: []           # ex.: atual, transicao, alvo
+  why_separate: |
+    Que decisao distinta cada horizonte apoia. Sem resposta aqui, nao separe.
+  status: unknown
+
+# ---------------------------------------------------------------------------
+# Granularidade — o nivel de detalhe que responde a pergunta, e nada alem
+# ---------------------------------------------------------------------------
+granularity:
+  current: contexto | container | componente | codigo
+  rationale: |
+    Por que este nivel. Decompor porque da para decompor e ruido; parar cedo
+    demais esconde a responsabilidade de que a decisao depende.
+  status: hypothesis
+
+# ---------------------------------------------------------------------------
+# Fronteiras
+# ---------------------------------------------------------------------------
+boundaries:
+  known: []              # fronteiras que ninguem discute
+  under_discussion:      # as que ainda estao em aberto
+    - what: ...
+      positions: []      # as leituras possiveis, sem escolher uma
+      blocks: ...        # o que nao anda enquanto isso nao se decide
+
+# ---------------------------------------------------------------------------
+# Hipoteses — o que voce inferiu, e nao o que te contaram
+# ---------------------------------------------------------------------------
+hypotheses:
+  - id: H-001
+    statement: ...
+    basis: em que se apoia
+    refuted_by: o que a derrubaria    # sem isto, a hipotese nunca morre
+    status: open                       # open | confirmed | refuted
+    # confirmada -> vira YAML do modelo e SAI daqui
+    # refutada   -> permanece marcada como refuted, para nao ser redescoberta
+
+# ---------------------------------------------------------------------------
+# Perguntas abertas sem alvo no modelo. Pergunta sobre uma caixa especifica NAO
+# vem para ca: vira uma nota `question` presa aquela caixa.
+# ---------------------------------------------------------------------------
+questions:
+  - id: Q-001
+    question: ...
+    blocks: o que nao anda enquanto isso estiver aberto
+    asked_on: AAAA-MM-DD
+    status: open                       # open | answered
+    answer: null
+
+# ---------------------------------------------------------------------------
+# Glossario — obrigatorio assim que um termo aparecer com dois sentidos
+# ---------------------------------------------------------------------------
+glossary:
+  termo: o que ele significa NESTA iniciativa

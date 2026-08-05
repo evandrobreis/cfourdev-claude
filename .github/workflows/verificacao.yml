@@ -1,0 +1,27 @@
+# Os contratos, em todo push e todo pull request.
+#
+# Não há build nem lint: o repositório inteiro é prosa. O que se pode verificar
+# automaticamente é se a prosa se refere a arquivos que existem, se os nomes
+# batem, e se não sobrou resíduo da substituição mecânica — que é exatamente o
+# que `scripts/verificar.mjs` faz.
+#
+# O que ele NÃO alcança é o comportamento, e isso é deliberado: quem mede
+# comportamento é `/cfour:avaliar`, que precisa de um modelo de linguagem e de
+# onze subagentes. Roda à mão, antes de subir a versão.
+name: verificação
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+jobs:
+  contratos:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: contratos
+        run: node --test scripts/verificar.mjs

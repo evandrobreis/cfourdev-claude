@@ -1,0 +1,27 @@
+# Identidade desta modelagem. O `id` tem que bater com o do registry.
+#
+# Isto e so a etiqueta: o que basta para listar as modelagens sem abrir a memoria
+# de todas. O PORQUE desta modelagem existir mora em
+# .claude/cfour/history/<id>/project-context.yaml.
+#
+# Este e o unico arquivo de identidade que viaja com o modelo. E por ele que o
+# `id` chega a outro repositorio — e e o `id` que reencontra a memoria.
+version: 1
+
+# kebab-case, unico no registry, estavel. Aparece na URL do viewer
+# (#/<modelagem>/<projeto>/<visão>), em todo comando e no nome da pasta da
+# memoria: renomear quebra links e desliga a memoria do modelo.
+id: <slug>
+
+# O nome que aparece no seletor do viewer.
+name: <Nome legivel>
+
+description: |
+  Uma ou duas frases: que realidade e esta. Nao repita o proposito — isso e
+  purpose.problem no project-context.yaml.
+
+# active   | em trabalho
+# paused   | parada, mas viva
+# archived | encerrada; fica no registry porque continua sendo historico
+# reference| material de apoio, nao descreve sistema real
+status: active
