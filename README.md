@@ -7,6 +7,11 @@ O [cfourdev](https://cfourdev.com.br) resolve metade disso — o modelo vira YAM
 versionado, com pull request e histórico, e um viewer o desenha. Sobra a metade
 difícil, que é **decidir o que vale a pena representar**. É o que este plugin faz.
 
+> O formato é aberto e documentado em
+> [cfourdev.com.br/docs](https://cfourdev.com.br/docs/), sem login. É de lá que
+> as skills tiram cada regra do YAML que escrevem, e é lá que você confere o que
+> elas afirmam.
+
 Ele não gera diagramas a partir do que você pediu. Ele pergunta que decisão os
 desenhos precisam apoiar, para quem, e o que acontece quando dá errado — e só
 então escreve. A conversa é o produto; o YAML é a consequência.
@@ -86,7 +91,10 @@ npm i -g cfourdev
 
 O plugin decide e escreve; o `cfour` **valida e desenha**. São dois instaláveis
 porque fazem coisas diferentes — e você pode querer o CLI sem nunca abrir o
-Claude Code.
+Claude Code. O que ele faz, comando a comando, está na
+[documentação](https://cfourdev.com.br/docs/) e não aqui: duplicar a referência
+de um CLI que sobe de versão sozinho é escrever a mesma coisa em dois lugares
+para que um deles minta depois.
 
 Sem o `cfour` instalado, o plugin ainda conversa e ainda escreve YAML. O que não
 acontece:
@@ -171,8 +179,9 @@ node --test scripts/verificar.mjs
 ```
 
 Os contratos: nomes de skill contra nomes de diretório, todo caminho citado que
-tem de existir, e o resíduo que uma substituição mecânica deixa. Sem dependência
-e sem framework — o repositório inteiro é prosa, e é a prosa que é o contrato.
+tem de existir, as marcas `doc:` contra a lista de documentos publicados, e o
+resíduo que uma substituição mecânica deixa. Sem dependência e sem framework — o
+repositório inteiro é prosa, e é a prosa que é o contrato.
 
 Comportamento nenhum teste estático alcança. Quem mede é `/cfour:avaliar`, que
 custa: peça o subconjunto mínimo (`01`, `03`, `04`, `09`, `10`, `11`), que cobre
