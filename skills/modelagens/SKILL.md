@@ -58,11 +58,11 @@ Para cada modelagem registrada, leia também `focus` e `next_step` de
 
 ```
 MODELAGENS
-  ● componentizacao-nstech   Componentização nstech
+  ● arquitetura              Arquitetura do produto
       onde parou: <focus>
       próximo:    <next_step>
       modelo:     N caixa(s), N diagrama(s), N fluxo(s)
-    exemplos-c4              Exemplos do cfourdev
+    cliente-acme             Arquitetura da Acme
       ...
 ```
 

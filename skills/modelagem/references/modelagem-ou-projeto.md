@@ -46,7 +46,7 @@ diz de quem aquela caixa é espelho:
   name: Pedido Confirmado
   shape: external
   bind:
-    modelagem: exemplos-c4
+    modelagem: vendas
     ref: loja/pedido-confirmado
 ```
 
