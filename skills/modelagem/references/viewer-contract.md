@@ -7,25 +7,24 @@
 2. **Os números dos documentos já mudaram uma vez.** Se um documento citado aqui
    não existir, consulte o índice antes de citar.
 
-## Onde a documentação mora
+## `docs/NN` — o que essas marcas são, e o que não são
 
-Ela **não** está no repositório de quem usa o plugin: mora no repositório do
-cfourdev, e `docs/NN` neste arquivo é abreviação de
+Ao longo deste arquivo, `docs/NN` marca **de onde cada regra veio**: o documento
+do cfourdev que a decidiu. É proveniência, não um link para você abrir.
 
-```
-https://github.com/evandrobreis/cfourdev/blob/v0.3.0/docs/NN-*.md
-```
+**Você não tem essa documentação em mãos, e não precisa dela para escrever.**
+Este arquivo carrega a regra; o `docs/NN` ao lado existe para que, quando alguém
+questionar uma regra, se saiba onde ela foi decidida. A documentação vem
+instalada com o cfourdev — `docs/` no repositório de quem tem acesso a ele, e
+[cfourdev.com.br](https://cfourdev.com.br) para o produto.
 
-O índice é `docs/README.md` no mesmo lugar. A tag é fixa de propósito: o
-`formatVersion: 1` do bundle é contrato, e a documentação que o descreve não
-pode se mexer debaixo do pé desta skill. Quando o plugin subir de versão, a tag
-sobe junto — as duas coisas mudam no mesmo commit ou não mudam.
+**Quando a regra aqui não bastar, a resposta não é procurar a doc: é rodar
+`cfour check`.** Ele carrega com o mesmo loader do viewer e diz o que aceita.
+Correção técnica é o que ele responder — nunca o que você deduziu lendo.
 
-Buscar essas páginas custa uma ida à rede. Faça isso quando a regra abaixo não
-bastar; o índice existe justamente para bastar na maioria das vezes.
-
-Este arquivo é um **índice**, não uma cópia: cada regra em uma linha, com o
-documento onde ela mora. A doc é a fonte; duplicá-la aqui garantiria divergência.
+E se nem o check resolver, **pergunte ao arquiteto em vez de inventar**. Um
+campo inventado não falha: ele é ignorado em silêncio, e o desenho fica sem a
+coisa que você achou que tinha escrito.
 
 ---
 
@@ -293,15 +292,12 @@ Não prometa nada disto:
 
 ## 13. Exemplos canônicos
 
-Todos na modelagem `exemplos-c4` do repositório do cfourdev, que existe para
-isto. Prefixo:
+Na modelagem `exemplos-c4` do cfourdev, que existe para isto e vem com o
+repositório de quem o tem. **Não presuma que estão à mão** — se não estiverem,
+as regras acima bastam, e `cfour init` escreve um exemplo mínimo que carrega e
+valida.
 
-```
-https://github.com/evandrobreis/cfourdev/blob/v0.3.0/examples/exemplos-c4/
-```
-
-Eles **não** estão no repositório de quem usa o plugin. Cite-os pelo endereço, e
-só vá buscar um quando a regra acima não bastar.
+Caminhos relativos ao `model/` daquela modelagem:
 
 | arquivo | mostra |
 |---|---|

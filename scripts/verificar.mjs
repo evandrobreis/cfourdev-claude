@@ -192,6 +192,28 @@ test('os manifestos parseiam, e o marketplace aponta para um plugin de verdade',
   )
 })
 
+test('nada aponta para um repositorio que o leitor nao pode abrir', () => {
+  // Este plugin e publico; o repositorio do cfourdev nao e. Um link para la nao
+  // falha em lugar nenhum: da 404 na cara de quem instalou, meses depois, e o
+  // texto em volta continua parecendo certo.
+  //
+  // O mesmo vale para URL com tag: `blob/v0.3.0/` so resolve depois de a tag
+  // existir, e uma tag prometida no texto e uma tag que ninguem lembra de criar.
+  const proibidas = []
+  for (const f of [...textos(), path.join(RAIZ, 'README.md')]) {
+    const linhas = fs.readFileSync(f, 'utf8').split('\n')
+    linhas.forEach((linha, i) => {
+      if (/github\.com\/evandrobreis\/cfourdev(?!-claude)/.test(linha)) {
+        proibidas.push(`${rel(f)}:${i + 1}: o repositorio do cfourdev e privado`)
+      }
+      if (/github\.com\/[\w-]+\/[\w-]+\/blob\/v\d/.test(linha)) {
+        proibidas.push(`${rel(f)}:${i + 1}: URL fixada numa tag que pode nao existir`)
+      }
+    })
+  }
+  assert.deepEqual(proibidas, [])
+})
+
 test('as skills e o README concordam sobre quais skills existem', () => {
   // O README e a unica porta de entrada de quem ainda nao instalou. Uma skill
   // que existe e nao esta la e uma skill que ninguem descobre.

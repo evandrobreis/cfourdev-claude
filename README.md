@@ -2,12 +2,12 @@
 
 Modelar arquitetura em C4 conversando, e não preenchendo YAML.
 
-O [cfourdev](https://github.com/evandrobreis/cfourdev) desenha e publica
-diagramas C4 escritos como código. Este plugin é a outra metade: doze skills que
-conduzem a modelagem — descobrem que decisão os diagramas precisam apoiar antes
-de propor qualquer estrutura, entrevistam, escrevem o YAML pelo contrato do
-viewer, revisam, e guardam no seu repositório a memória do que virou fato, do
-que ainda é hipótese e do que continua sendo pergunta.
+O [cfourdev](https://cfourdev.com.br) desenha e publica diagramas C4 escritos
+como código — é o pacote npm `cfourdev`. Este plugin é a outra metade: treze
+skills que conduzem a modelagem — descobrem que decisão os diagramas precisam
+apoiar antes de propor qualquer estrutura, entrevistam, escrevem o YAML pelo
+contrato do viewer, revisam, e guardam no seu repositório a memória do que virou
+fato, do que ainda é hipótese e do que continua sendo pergunta.
 
 ## Instalar
 
@@ -54,7 +54,7 @@ skills se chamam entre si. Se preferir dirigir:
 | voltar a um trabalho de outro dia | `/cfour:retomar` |
 | ver os diagramas, validar tudo, publicar | `/cfour:operar` |
 
-## As doze skills
+## As treze skills
 
 | | |
 |---|---|
