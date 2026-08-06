@@ -49,6 +49,28 @@ modelagem, e `$M` é a dela.
 Se **nada disso existir**, não invente estado: diga que esta modelagem está
 registrada mas não tem memória, e ofereça `cfour:descoberta` nela.
 
+### 1b. Descobrir em que etapa o trabalho parou
+
+De `session.yaml`, o bloco `workflow`: `current_stage`, `completed_stages`,
+`next_stage`, `modeling_wave`. De `project-context.yaml`: `complexity.profile` e
+`strategy.status`.
+
+**Memória escrita por uma versão anterior não tem esses blocos.** Não recomece
+por isso: **infira a etapa** pelo que existe, diga que inferiu, e grave o bloco
+na primeira escrita desta sessão
+(`${CLAUDE_PLUGIN_ROOT}/skills/modelagem/references/jornada.md`, "Onde a etapa fica gravada"):
+
+| o que a memória tem | etapa inferida |
+|---|---|
+| nem `purpose` | `enquadramento` |
+| `purpose`, nenhuma decisão estrutural | `descoberta` |
+| decisão estrutural `proposed` | `confirmacao` |
+| `MD-NNN` `accepted` e modelo vazio | `escrita`, onda 1 por começar |
+| modelo com conteúdo | `escrita`, onda em curso |
+
+O perfil, quando ausente, se classifica de novo a partir do que o contexto já
+descreve (`${CLAUDE_PLUGIN_ROOT}/skills/modelagem/references/calibragem.md`) — sem perguntar nada ao arquiteto.
+
 ### 2. Inventariar o modelo
 
 ```bash
@@ -78,13 +100,20 @@ Curto, nesta forma:
 ```
 MODELAGEM        <id> — <name>
 ONDE ESTÁ        propósito em uma linha · o que já está modelado (números)
+ETAPA            <concluídas> → **<atual>** → <próxima> · perfil <leve|intermediario|profundo> · onda N
+ESTRATÉGIA       a organização validada, em uma linha (ou "ainda não validada")
 ÚLTIMA SESSÃO    data · o que foi feito
-EM ABERTO        decisões proposed · hipóteses open · perguntas open
+EM ABERTO        decisões proposed · hipóteses open · perguntas open · áreas técnicas unknown
 DIVERGÊNCIAS     o que a memória e o modelo dizem diferente (ou "nenhuma")
 PRÓXIMO PASSO    o `next_step` registrado, e por que ele era o próximo
 ```
 
 Números vêm do inventário, não da lembrança do arquivo.
+
+**A linha `ESTRATÉGIA` é o que impede a repetição.** Uma sessão que terminou
+depois da estratégia e antes da escrita precisa voltar com a organização
+apresentada de novo — em uma linha, como fato já decidido — e seguir para a onda
+1, **não** com a primeira pergunta da descoberta.
 
 ### 5. Perguntar só o necessário
 
@@ -97,8 +126,15 @@ Se houver muitas divergências, ou se elas parecerem sistemáticas, ofereça
 
 ## Depois de retomar
 
-Atualize `$MEM/session.yaml` com o `focus` da nova sessão e siga para a
-skill que o próximo passo pede — normalmente `cfour:entrevista`.
+Atualize `$MEM/session.yaml` com o `focus` da nova sessão e o bloco `workflow`
+(gravando-o, se ele não existia), e siga para a skill que a **etapa** pede:
+
+| etapa | skill |
+|---|---|
+| `enquadramento` · `calibragem` · `descoberta` | `cfour:descoberta` |
+| `estrategia` · `confirmacao` | `cfour:estrategia` |
+| `escrita` | `cfour:entrevista`, na onda registrada |
+| `encerramento` | `cfour:revisao` ou `cfour:encerrar` |
 
 Se a modelagem retomada não for a `active` do registry, pergunte se o `active`
 deve mudar. Trocar por conta própria reescreve uma afirmação que vai para o git.
@@ -113,3 +149,6 @@ deve mudar. Trocar por conta própria reescreve uma afirmação que vai para o g
   precedência, o YAML é o 2.
 - Corrigir divergência em silêncio. Mostrar antes de mexer é o ponto inteiro.
 - Recomeçar a descoberta quando ela já foi feita — releia, não repita.
+- Recomeçar a jornada porque a memória não tem o bloco `workflow`. Infira, diga
+  que inferiu, e grave.
+- Repropor uma estratégia já validada como se fosse pauta aberta.

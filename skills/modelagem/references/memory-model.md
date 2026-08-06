@@ -19,11 +19,20 @@ $M/                               = o `path:` do registro  O MODELO
 cfour.yaml                        as modelagens e qual está ativa — o ÚNICO caminho resolvido pelo cwd
 
 .claude/cfour/history/<id>/       = $MEM                 A MEMÓRIA
-    project-context.yaml          propósito, audiências, escopo, hipóteses, perguntas, glossário
-    session.yaml                  onde o trabalho parou
+    project-context.yaml          propósito, audiências, escopo, complexidade, cobertura, estratégia
+    session.yaml                  onde o trabalho parou, e em que etapa
     decisions/MD-001-*.md         decisões de MODELAGEM — numeração LOCAL à modelagem
     sessions/YYYY-MM-DD-*.md      resumos estruturados do que aconteceu
+
+.claude/cfour/docs-cache/                                A DOCUMENTAÇÃO EM CACHE
+    manifest.yaml                 origem oficial, páginas, datas, hashes, falhas
+    pages/<slug>.md               o conteúdo — da PLATAFORMA, não de modelagem nenhuma
 ```
+
+O `docs-cache/` fica **fora** de `history/` de propósito: ele descreve o contrato
+da plataforma, que é o mesmo para todas as modelagens. Documentação dentro da
+memória de uma modelagem seria N cópias divergindo entre si →
+`cfour:documentacao`.
 
 Tudo isso vai para o git. É o que permite revisar mudança de modelagem em pull
 request, do mesmo jeito que se revisa código.
@@ -55,7 +64,12 @@ dois lugares garante que um deles vai mentir.
 | uma decisão sobre **como o modelo é organizado** | `$MEM/decisions/MD-NNN-*.md` |
 | uma convenção a seguir daqui para frente | `$M/model/MODELING-CONVENTIONS.md` |
 | propósito, audiência, escopo, hipótese, pergunta sem alvo no modelo | `$MEM/project-context.yaml` |
-| onde o trabalho parou, o que falta confirmar | `$MEM/session.yaml` |
+| o perfil de complexidade, e por que ele é esse | `$MEM/project-context.yaml` (`complexity`) |
+| quais áreas técnicas foram verificadas, e o que restou | `$MEM/project-context.yaml` (`technical_coverage`) |
+| a organização recomendada, validada, e o plano de ondas | `$MEM/project-context.yaml` (`strategy`) + a `MD-NNN` |
+| onde o trabalho parou, em que etapa e em que onda | `$MEM/session.yaml` (`workflow`) |
+| que página da documentação sustentou uma decisão | `$MEM/session.yaml` (`consulted_docs`) + `Fontes` da `MD-NNN` |
+| o texto da documentação oficial | `.claude/cfour/docs-cache/` — **nunca** dentro de `history/` |
 | o que aconteceu numa sessão | `$MEM/sessions/YYYY-MM-DD-*.md` |
 | que realidades existem, e qual está aberta | `cfour.yaml` |
 
@@ -72,21 +86,27 @@ antes (`doc:configuracao`). Proponha; não assuma.
 
 ## Precedência
 
-1. a documentação do cfourdev (`https://cfourdev.com.br/docs/`) e o contrato em
-   `viewer-contract.md`, que a resume
-2. o YAML atual do modelo (`$M/model/`)
-3. decisões aceitas (`$MEM/decisions/`)
-4. convenções (`$M/model/MODELING-CONVENTIONS.md`)
-5. contexto consolidado (`$MEM/project-context.yaml`)
-6. estado da sessão (`$MEM/session.yaml`)
-7. histórico (`$MEM/sessions/`)
-8. sua inferência agora
+Duas escadas, definidas no núcleo (`${CLAUDE_PLUGIN_ROOT}/skills/modelagem/SKILL.md`,
+"Precedência das fontes"):
+
+**o que o formato permite** — doc pública oficial → `cfour` instalado → cache
+local da doc → instruções deste plugin → exemplos do projeto → sua inferência.
+
+**a verdade sobre esta modelagem:**
+
+1. o YAML atual do modelo (`$M/model/`)
+2. decisões aceitas (`$MEM/decisions/`)
+3. convenções (`$M/model/MODELING-CONVENTIONS.md`)
+4. contexto consolidado (`$MEM/project-context.yaml`)
+5. estado da sessão (`$MEM/session.yaml`)
+6. histórico (`$MEM/sessions/`)
+7. sua inferência agora
 
 **Nunca substitua silenciosamente uma fonte de maior autoridade por uma de menor.**
 Divergência entre níveis é assunto de `/cfour:reconciliar`: mostre antes de mexer.
 
-Do 2 ao 7, a escada é **de uma modelagem**. Memória de outra não é fonte fraca —
-é fonte de outro assunto, e não entra na comparação em nível nenhum.
+A segunda escada é **de uma modelagem**. Memória de outra não é fonte fraca — é
+fonte de outro assunto, e não entra na comparação em nível nenhum.
 
 ## Os arquivos
 
@@ -95,8 +115,9 @@ Do 2 ao 7, a escada é **de uma modelagem**. Memória de outra não é fonte fra
 O que uma sessão nova precisa para entender **por que** este modelo existe.
 Template comentado em `templates/project-context.yaml`.
 
-Blocos: `purpose` · `audiences` · `scope` · `perspectives` · `time` ·
-`granularity` · `boundaries` · `hypotheses` · `questions` · `glossary`.
+Blocos: `purpose` · `complexity` · `audiences` · `scope` · `perspectives` ·
+`time` · `granularity` · `boundaries` · `technical_coverage` · `strategy` ·
+`hypotheses` · `questions` · `glossary`.
 
 Regras:
 
@@ -113,8 +134,9 @@ Regras:
 
 Curto e descartável. Template em `templates/session.yaml`.
 
-Campos: `focus` · `last_step` · `next_step` · `pending_confirmations` ·
-`touched_files` · `open_threads` · `model_fingerprint`.
+Campos: `workflow` · `focus` · `last_step` · `next_step` ·
+`pending_confirmations` · `touched_files` · `open_threads` · `consulted_docs` ·
+`model_fingerprint`.
 
 O `model_fingerprint` são as contagens de
 `cfour check --modelagem <id> --inventory --json` (projetos, caixas, setas,
@@ -154,6 +176,28 @@ refutadas) · perguntas abertas · arquivos alterados · próximo foco.
 
 Transcrição não é memória: ninguém relê, e o que importa fica enterrado. Se um
 detalhe merece sobreviver, ele pertence a um dos outros arquivos.
+
+## Memórias de versões anteriores
+
+`complexity`, `technical_coverage`, `strategy`, `workflow` e `consulted_docs`
+**são opcionais**, e memória escrita antes deles existir continua sendo memória
+válida. Não há migração a rodar, e ninguém precisa reescrever arquivo nenhum.
+
+O contrato de leitura é **tolerante**, e tem três regras:
+
+1. **Campo ausente é `unknown`, nunca zero e nunca erro.** Um
+   `project-context.yaml` sem `technical_coverage` não significa que nada foi
+   verificado — significa que a matriz não existia quando ele foi escrito.
+2. **Reconstrua em vez de perguntar.** O perfil se classifica a partir do que o
+   contexto já descreve; a etapa se infere pelo que existe
+   (`jornada.md`, "Onde a etapa fica gravada"); a estratégia validada se lê da
+   `MD-NNN` `accepted`. **Diga que inferiu**, e siga.
+3. **Grave na primeira escrita.** A sessão que tocar a memória preenche os blocos
+   que faltavam. Nada é perdido: os blocos antigos ficam como estão, e os novos
+   nascem ao lado.
+
+O inverso também vale: uma memória escrita hoje é legível por uma versão antiga
+do plugin, que simplesmente ignora os blocos que não conhece.
 
 ## Ciclo de vida da informação
 

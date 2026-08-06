@@ -14,16 +14,25 @@ dele, o problema é a regra, não o cenário.
 
 ## O que existe
 
-- `${CLAUDE_PLUGIN_ROOT}/skills/avaliar/rubric.md` — os treze critérios comuns e os três
+- `${CLAUDE_PLUGIN_ROOT}/skills/avaliar/rubric.md` — os dezoito critérios comuns e os
   testes transversais.
 - `${CLAUDE_PLUGIN_ROOT}/skills/avaliar/scenarios/NN-*.md` — briefing, respostas
-  preparadas, armadilhas e critérios específicos de cada caso.
+  preparadas, armadilhas e critérios específicos de cada caso. Alguns trazem uma
+  seção **`## Preparação`**: o que precisa existir no repositório descartável
+  **antes** de o subagente abrir a conversa — um arquivo plantado, uma memória
+  pela metade, um cache com data velha. Sem isso o cenário testa outra coisa.
+
+Os cenários `01`–`11` medem o método: propósito, agnosticismo de rótulo,
+alternativas, contrato. Os `12`–`21` medem o **processo**: proporcionalidade,
+jornada, recomendação, cobertura técnica, documentação e retomada.
 
 ## Como rodar
 
-**Peça confirmação antes.** Rodar os onze cenários gasta bastante — pergunte
-quantos e quais, e ofereça o subconjunto mínimo útil: `01`, `03`, `04`, `09`,
-`10`, `11` (que cobrem os três testes transversais).
+**Peça confirmação antes.** Rodar os vinte e um cenários gasta bastante —
+pergunte quantos e quais, e ofereça o subconjunto mínimo útil: `01`, `03`, `04`,
+`09`, `10`, `11`, `12`, `13`, `14`, `16`, `20` — que cobrem os quatro testes
+transversais, os dois extremos de calibragem e as duas falhas eliminatórias mais
+caras.
 
 ### Cada cenário roda num repositório descartável
 
@@ -77,7 +86,7 @@ Os cenários são independentes: rode-os em paralelo, cada um na sua modelagem.
 
 ## Depois das execuções
 
-### Os três testes transversais
+### Os quatro testes transversais
 
 Nenhum cenário sozinho detecta isto:
 
@@ -91,25 +100,33 @@ Nenhum cenário sozinho detecta isto:
   modelagens saiu do que precisa aparecer junto, ou saiu do CNPJ? Um plugin que
   responde "empresas diferentes → modelagens diferentes" acerta o 11 por acaso e
   erra o 04.
+- **Calibragem (01 × 13, e 12 × 21)** — dois cenários chamados "plataforma"
+  receberam perfis **diferentes** (01 leve, 13 profundo)? E dois que **começam**
+  parecidos terminaram diferentes, porque um cresceu (12 leve, 21 recalibrado)?
+  Perfil que acompanha o vocabulário do briefing, ou que nunca se revisa, é o
+  mesmo defeito da estratégia que segue rótulo.
 
-Se a estratégia acompanhou o rótulo em vez das necessidades, o plugin falhou —
-mesmo com todos os treze critérios passando em cada cenário isolado.
+Se a estratégia — ou o peso do processo — acompanhou o rótulo em vez das
+necessidades, o plugin falhou, mesmo com todos os dezoito critérios passando em
+cada cenário isolado.
 
 ### O placar
 
 ```
-cenário            eliminatórios   demais        veredito
-01 aplicação nova  1✓ 2✓ 5✓         10✓ 2~        PASSA
-09 componentização 1✓ 2✗ 5✓         ...           REPROVA — assumiu strangler antes de perguntar
-11 duas frentes    1✓ 2✓ 5✓         ...           REPROVA — separou por empresa, sem perguntar o que atravessa
+cenário            eliminatórios      demais        veredito
+01 aplicação nova  1✓ 2✓ 5✓ 16✓        10✓ 2~        PASSA
+09 componentização 1✓ 2✗ 5✓ 16✓        ...           REPROVA — assumiu strangler antes de perguntar
+11 duas frentes    1✓ 2✓ 5✓ 16✓        ...           REPROVA — separou por empresa, sem perguntar o que atravessa
+14 decide você     1✓ 2✓ 5✓ 16✗        ...           REPROVA — ofereceu duas opções e não recomendou nenhuma
 ...
 divergência 01×09  ...
 convergência 03×10 ...
 corte 04×11        ...
+calibragem 01×13   ...
 ```
 
-Um cenário passa com nenhum `FALHA` e no máximo dois `PARCIAL`. Critérios 1, 2 e
-5 são eliminatórios.
+Um cenário passa com nenhum `FALHA` e no máximo dois `PARCIAL`. Critérios 1, 2,
+5 e 16 são eliminatórios.
 
 ### O que fazer com uma falha
 
@@ -124,6 +141,11 @@ Falha aponta para **uma skill**, não para um cenário:
 | 9, 10 (YAML, contrato) | `cfour:editor`, `${CLAUDE_PLUGIN_ROOT}/skills/modelagem/references/viewer-contract.md` |
 | 11 (memória) | `cfour:encerrar`, `${CLAUDE_PLUGIN_ROOT}/skills/modelagem/references/memory-model.md` |
 | 13 (modelagem ou projeto) | `${CLAUDE_PLUGIN_ROOT}/skills/modelagem/references/modelagem-ou-projeto.md`, `cfour:modelagens`, passo 0 de `cfour:descoberta` |
+| 14 (proporcional) | `${CLAUDE_PLUGIN_ROOT}/skills/modelagem/references/calibragem.md`, e a seção de calibragem de `cfour:descoberta` |
+| 15 (jornada) | `${CLAUDE_PLUGIN_ROOT}/skills/modelagem/references/jornada.md`, `cfour:retomar` |
+| 16 (recomenda) | `${CLAUDE_PLUGIN_ROOT}/skills/modelagem/references/decisoes-de-quem.md`, guarda-corpo 4, `cfour:setup`, `cfour:estrategia` |
+| 17 (cobertura técnica) | `${CLAUDE_PLUGIN_ROOT}/skills/modelagem/references/cobertura-tecnica.md`, `cfour:entrevista` |
+| 18 (documentação) | `cfour:documentacao`, `${CLAUDE_PLUGIN_ROOT}/skills/modelagem/references/viewer-contract.md` |
 
 Corrija a skill e rode **de novo o cenário que falhou**, mais os dois
 transversais — uma correção que resolve um caso costuma quebrar outro.

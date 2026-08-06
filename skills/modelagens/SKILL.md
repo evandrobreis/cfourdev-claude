@@ -104,6 +104,12 @@ Regras:
   viewer (`#/<modelagem>/<projeto>/<visão>`), em todo comando e no **nome da
   pasta da memória**; renomear depois quebra links que alguém já compartilhou, e
   desliga a memória do modelo até alguém renomear a pasta junto.
+- **O `id` se propõe, não se pergunta.** Derive-o do assunto que a conversa já
+  nomeou — produto, sistema, iniciativa, repositório —, apresente com o custo
+  acima junto, e siga
+  (`${CLAUDE_PLUGIN_ROOT}/skills/modelagem/references/decisoes-de-quem.md`). Só peça escolha manual quando o id
+  derivado colidir com um já registrado, quando dois nomes forem igualmente
+  plausíveis, ou quando houver convenção interna que você não conhece.
 - **Nada de `MODELING-CONVENTIONS.md` no nascimento.** Convenção só entra depois
   que uma decisão a criou. Um arquivo de convenções que ninguém decidiu é
   prescrição disfarçada de memória.

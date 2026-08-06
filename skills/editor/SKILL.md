@@ -10,10 +10,30 @@ tradutor de frases: nem tudo que foi dito na conversa pertence ao modelo.
 
 Leia `${CLAUDE_PLUGIN_ROOT}/skills/modelagem/references/viewer-contract.md` antes de escrever.
 
-Resolva a modelagem antes do primeiro arquivo (núcleo, "A modelagem ativa") e
-anuncie qual é. **Uma alteração nunca toca duas modelagens.** Se o que foi
-confirmado parece pertencer a duas, ele pertence a nenhuma ainda: leve o caso
-para `${CLAUDE_PLUGIN_ROOT}/skills/modelagem/references/modelagem-ou-projeto.md` antes de escrever qualquer coisa.
+## Condição de entrada
+
+Duas coisas antes do primeiro arquivo, e a segunda é nova:
+
+1. **a modelagem resolvida** (núcleo, "A modelagem ativa"), anunciada;
+2. **uma estratégia mínima validada** — `strategy.status: validated` em
+   `$MEM/project-context.yaml`, ou uma `MD-NNN` `accepted` que responda onde as
+   coisas vão morar.
+
+Sem a segunda, **pare e chame `cfour:estrategia`**. Escrever antes disso produz
+um modelo que nasce de um palpite sobre organização, e reorganizar depois custa
+`parent`, `to`, `scope` e os arquivos de layout de tudo que já existe.
+
+A exceção é a correção pontual: consertar um campo, renomear um `label`, remover
+uma seta duplicada. Isso não precisa de estratégia nenhuma.
+
+**Leia a estratégia; não a redescubra.** `strategy.recommended_structure`,
+`user_constraints` e `waves` já dizem quantos projetos existem, o que fica em
+`shared/`, qual a convenção de `id` e o que entra nesta onda. Reabrir essa
+conversa na hora de escrever é fazer o arquiteto decidir duas vezes.
+
+**Uma alteração nunca toca duas modelagens.** Se o que foi confirmado parece
+pertencer a duas, ele pertence a nenhuma ainda: leve o caso para
+`${CLAUDE_PLUGIN_ROOT}/skills/modelagem/references/modelagem-ou-projeto.md` antes de escrever qualquer coisa.
 
 ## Passo 1 — classificar antes de escrever
 
@@ -64,6 +84,11 @@ nem abrir aquilo por dentro, provavelmente é `description` de outra caixa.
 - **Declare antes de usar.** `shape`, `kind` de relação ou nota, `outcome` de
   fluxo que não existam ainda precisam entrar em `$M/model/workspace.yaml` primeiro
   — proponha ao arquiteto, não decida sozinho.
+- **Confirme o recurso antes de escrevê-lo.** Campo, seletor ou comportamento que
+  não esteja no contrato resumido, ou sobre o qual você tenha dúvida, se confere
+  na documentação oficial antes: `cfour:documentacao`. Campo inventado **não
+  falha** — ele é ignorado em silêncio, e o desenho fica sem a coisa que você
+  achou que tinha escrito. Registre em `consulted_docs` o que sustentou a escrita.
 
 ### Elemento
 

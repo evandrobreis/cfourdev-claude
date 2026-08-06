@@ -40,3 +40,11 @@ decisão nunca é revisitada — ela apenas envelhece.
 - o que muda em `model/`;
 - convenção que passa a valer (e vai para `$M/model/MODELING-CONVENTIONS.md`);
 - o que passa a ser proibido ou desnecessário.
+
+## Fontes
+
+Só quando a decisão dependeu do que o formato permite. `doc:<slug>` e a data em
+que foi consultado — é o que permite, seis meses depois, distinguir "a doc dizia
+isso" de "achávamos que dizia".
+
+- `doc:diagramas#agrupamento` — 2026-08-05, confirmou que `groupBy` só age sem `groups`.

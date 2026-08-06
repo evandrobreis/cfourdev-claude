@@ -103,7 +103,12 @@ test('todo ${CLAUDE_PLUGIN_ROOT} citado aponta para um arquivo que existe', () =
  * `docs/…` estava aqui e saiu: a documentacao do cfourdev virou publica, e as
  * marcas viraram `doc:<slug>` — conferiveis pelo teste dos slugs, abaixo.
  */
-const FORA_DO_PLUGIN = [/^model\//]
+const FORA_DO_PLUGIN = [
+  /^model\//,
+  // A memoria e o cache da documentacao moram no repositorio de quem modela.
+  // O contrato deles e conferido pelos testes de estado e de cache, abaixo.
+  /^\.claude\/cfour\//,
+]
 
 /**
  * Nomes que sao arquivos DO USUARIO, e nao deste repositorio.
@@ -122,6 +127,13 @@ const DO_USUARIO = new Set([
   'project-context.yaml',
   'session.yaml',
   'MODELING-CONVENTIONS.md',
+  // O manifesto do cache da documentacao nasce em `.claude/cfour/docs-cache/`
+  // do repositorio de quem modela — nao existe aqui, e citar pelo nome nu e o
+  // certo, como os quatro arquivos de memoria acima.
+  'manifest.yaml',
+  // Arquivos que a cobertura tecnica manda LER no repositorio do arquiteto
+  // antes de perguntar. Sao dele, e nenhum deles mora aqui.
+  'docker-compose.yml',
 ])
 
 test('todo caminho de arquivo citado entre crases existe', () => {
@@ -237,6 +249,12 @@ test('nao sobrou nada do monorepo', () => {
     [/\bharness\b/i, 'isto e um plugin, e nao um harness'],
     // A modelagem de exemplo do cfourdev nao esta no repositorio de ninguem.
     [/\bexemplos-c4\b/, 'os exemplos moram em `references/exemplos.md` e em doc:exemplos'],
+    // O setup mandava, com todas as letras, "pergunte o slug em vez de
+    // inventa-lo". Era a estrategia sendo terceirizada para quem pediu ajuda
+    // com ela, e voltar a escrever isso desfaz `decisoes-de-quem.md` inteiro.
+    // Contraexemplo marcado com ❌ passa: e assim que a regra se ensina.
+    [/\b(qual|que)\s+slug\b/i, 'identificador derivavel se propoe, nao se pergunta', 'eval-ok'],
+    [/em vez de invent[áa]-lo/i, 'identificador derivavel se propoe, nao se pergunta', 'eval-ok'],
   ]
   // `cfour:setup` e a UNICA skill que pode falar do endereco antigo e da palavra
   // antiga: o trabalho dela e achar a memoria que ficou la e oferecer a
@@ -246,17 +264,188 @@ test('nao sobrou nada do monorepo', () => {
   const MIGRACAO = path.join(SKILLS, 'setup', 'SKILL.md')
   const SO_NA_MIGRACAO = /c4-harness|\\bharness\\b/
 
+  // O eval DESCREVE a falha para poder pontua-la: a rubrica precisa escrever
+  // "que slug quer?" na coluna do que reprova, e um cenario precisa poder
+  // armar a armadilha. Proibir a string ali seria proibir o teste do defeito.
+  const EVAL = path.join(SKILLS, 'avaliar')
+
   const sobras = []
   for (const f of textos()) {
     const linhas = fs.readFileSync(f, 'utf8').split('\n')
     linhas.forEach((linha, i) => {
-      for (const [re, porque] of PROIBIDO) {
+      // Linha marcada como contraexemplo mostra a forma errada de proposito. Um
+      // plugin que ensina pelo par ✅/❌ nao pode ser proibido de escrever o ❌.
+      if (linha.includes('❌')) return
+      for (const [re, porque, excecao] of PROIBIDO) {
         if (f === MIGRACAO && SO_NA_MIGRACAO.test(String(re))) continue
+        if (excecao === 'eval-ok' && f.startsWith(EVAL)) continue
         if (re.test(linha)) sobras.push(`${rel(f)}:${i + 1}: ${porque} — ${linha.trim().slice(0, 70)}`)
       }
     })
   }
   assert.deepEqual(sobras, [])
+})
+
+// ---------------------------------------------------------------------------
+// A jornada, os perfis e a cobertura: tres vocabularios fechados que varias
+// skills escrevem na memoria de outra pessoa. Um nome divergente nao falha em
+// lugar nenhum — ele produz uma sessao que retoma na etapa errada, ou um perfil
+// que ninguem reconhece na sessao seguinte.
+// ---------------------------------------------------------------------------
+
+const ETAPAS = [
+  'enquadramento',
+  'calibragem',
+  'descoberta',
+  'estrategia',
+  'confirmacao',
+  'escrita',
+  'encerramento',
+]
+
+const PERFIS = ['leve', 'intermediario', 'profundo']
+
+const AREAS = [
+  'estrutura-funcional',
+  'aplicacoes',
+  'dados',
+  'integracoes',
+  'infraestrutura',
+  'seguranca',
+  'operacao',
+]
+
+const ref = (nome) => path.join(SKILLS, 'modelagem', 'references', nome)
+const tpl = (nome) => path.join(SKILLS, 'modelagem', 'references', 'templates', nome)
+
+test('a jornada declara as sete etapas, e ninguem cita etapa fora delas', () => {
+  const jornada = fs.readFileSync(ref('jornada.md'), 'utf8')
+  const naoDeclaradas = ETAPAS.filter((e) => !jornada.includes(`\`${e}\``))
+  assert.deepEqual(naoDeclaradas, [], 'etapas que `jornada.md` nao declara')
+
+  // `current_stage: escrit`, `next_stage: revisao` e afins: nomes que uma skill
+  // manda gravar e a retomada nao sabe interpretar.
+  const invalidas = []
+  for (const f of textos()) {
+    const texto = fs.readFileSync(f, 'utf8')
+    for (const [, campo, valor] of texto.matchAll(
+      /\b(current_stage|next_stage):\s*([a-z][a-z-]*)/g,
+    )) {
+      if (!ETAPAS.includes(valor)) invalidas.push(`${rel(f)}: ${campo}: ${valor}`)
+    }
+    for (const [, lista] of texto.matchAll(/\bcompleted_stages:\s*\[([^\]]+)\]/g)) {
+      for (const item of lista.split(',').map((s) => s.trim()).filter(Boolean)) {
+        if (!ETAPAS.includes(item)) invalidas.push(`${rel(f)}: completed_stages: ${item}`)
+      }
+    }
+  }
+  assert.deepEqual(invalidas, [])
+})
+
+test('os tres perfis sao os mesmos na calibragem, no template e nas skills', () => {
+  const calibragem = fs.readFileSync(ref('calibragem.md'), 'utf8')
+  const contexto = fs.readFileSync(tpl('project-context.yaml'), 'utf8')
+
+  const semSecao = PERFIS.filter((p) => !calibragem.includes(`### \`${p}\``))
+  assert.deepEqual(semSecao, [], 'perfis sem secao propria em `calibragem.md`')
+
+  const comentario = contexto.match(/profile:.*#\s*(.+)$/m)?.[1] ?? ''
+  const doTemplate = comentario.split('|').map((s) => s.trim())
+  assert.deepEqual(doTemplate, PERFIS, 'o template oferece perfis diferentes dos da calibragem')
+
+  const invalidos = []
+  for (const f of textos()) {
+    const texto = fs.readFileSync(f, 'utf8')
+    for (const [, valor] of texto.matchAll(/\bprofile:\s*([a-z][a-z-]*)/g)) {
+      if (!PERFIS.includes(valor)) invalidos.push(`${rel(f)}: profile: ${valor}`)
+    }
+  }
+  assert.deepEqual(invalidos, [])
+})
+
+test('as sete areas de cobertura tecnica batem com as do template', () => {
+  const cobertura = fs.readFileSync(ref('cobertura-tecnica.md'), 'utf8')
+  const semSecao = AREAS.filter((a) => !cobertura.includes(`### \`${a}\``))
+  assert.deepEqual(semSecao, [], 'areas sem secao em `cobertura-tecnica.md`')
+
+  const contexto = fs.readFileSync(tpl('project-context.yaml'), 'utf8')
+  const bloco = contexto.split('technical_coverage:')[1]?.split(/\n# ---/)[0] ?? ''
+  const doTemplate = [...bloco.matchAll(/^ {2}([a-z][a-z-]*):/gm)].map((m) => m[1])
+  assert.deepEqual(doTemplate, AREAS, 'o template cobre areas diferentes da referencia')
+})
+
+test('o estado persistido que as skills citam existe nos templates', () => {
+  // Uma skill que manda gravar `strategy.status` num template que nao tem
+  // `strategy` produz memoria com formato inventado, e cada sessao inventa o
+  // seu. O contrato do estado e o template.
+  const contexto = fs.readFileSync(tpl('project-context.yaml'), 'utf8')
+  const sessao = fs.readFileSync(tpl('session.yaml'), 'utf8')
+
+  const BLOCOS = [
+    ['complexity', contexto],
+    ['technical_coverage', contexto],
+    ['strategy', contexto],
+    ['workflow', sessao],
+    ['consulted_docs', sessao],
+  ]
+  const ausentes = BLOCOS.filter(([chave, arq]) => !new RegExp(`^${chave}:`, 'm').test(arq))
+  assert.deepEqual(
+    ausentes.map(([c]) => c),
+    [],
+    'blocos que as skills escrevem e o template nao declara',
+  )
+
+  // E o inverso: bloco no template que nenhuma skill sabe preencher e contrato
+  // morto, que envelhece sem ninguem perceber.
+  const todas = textos()
+    .filter((f) => f.endsWith('SKILL.md'))
+    .map((f) => fs.readFileSync(f, 'utf8'))
+    .join('\n')
+  const orfaos = BLOCOS.map(([c]) => c).filter((c) => !todas.includes(c))
+  assert.deepEqual(orfaos, [], 'blocos de estado que nenhuma skill menciona')
+})
+
+test('a documentacao oficial e a unica fonte, e o cache tem contrato', () => {
+  const doc = fs.readFileSync(path.join(SKILLS, 'documentacao', 'SKILL.md'), 'utf8')
+
+  assert.ok(
+    doc.includes('https://cfourdev.com.br/docs/'),
+    'a skill de documentacao nao declara a origem oficial',
+  )
+  assert.ok(
+    doc.includes('.claude/cfour/docs-cache/'),
+    'a skill de documentacao nao declara onde o cache mora',
+  )
+  // Sem estes campos uma pagina em cache e uma copia sem procedencia: no dia em
+  // que ela contradisser o site, ninguem sabe qual das duas envelheceu.
+  const METADADOS = ['source:', 'url:', 'fetched_at:', 'content_hash:', 'status:', 'failures:']
+  const semMetadado = METADADOS.filter((m) => !doc.includes(m))
+  assert.deepEqual(semMetadado, [], 'campos que o manifesto do cache precisa declarar')
+})
+
+test('nenhuma URL de documentacao aponta para fora do dominio oficial', () => {
+  // Uma doc privada fixada no texto vira fonte primaria sem que ninguem tenha
+  // decidido isso — e da 404 na cara de quem instalou o plugin.
+  const HOSTS = new Set([
+    'cfourdev.com.br',
+    'app.cfourdev.com.br',
+    'github.com',
+    'www.npmjs.com',
+    'exemplo.interno',
+  ])
+  const problemas = []
+  for (const f of [...textos(), path.join(RAIZ, 'README.md')]) {
+    const linhas = fs.readFileSync(f, 'utf8').split('\n')
+    linhas.forEach((linha, i) => {
+      for (const [url, host] of linha.matchAll(/https?:\/\/([a-zA-Z0-9.-]+)(\/\S*)?/g)) {
+        if (!HOSTS.has(host)) problemas.push(`${rel(f)}:${i + 1}: host ${host}`)
+        if (/\/docs?\b/.test(url) && host !== 'cfourdev.com.br') {
+          problemas.push(`${rel(f)}:${i + 1}: documentacao fora do dominio oficial — ${url}`)
+        }
+      }
+    })
+  }
+  assert.deepEqual(problemas, [])
 })
 
 test('os manifestos parseiam, e o marketplace aponta para um plugin de verdade', () => {

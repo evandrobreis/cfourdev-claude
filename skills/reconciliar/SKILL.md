@@ -29,7 +29,7 @@ Mais: `$MEM/project-context.yaml`, `$MEM/session.yaml`,
 `$MEM/decisions/*.md`, `$MEM/sessions/*.md`,
 `$M/model/MODELING-CONVENTIONS.md`.
 
-## 2. Procurar as onze divergências
+## 2. Procurar as quinze divergências
 
 | # | procurar | como se reconhece |
 |---|---|---|
@@ -44,14 +44,18 @@ Mais: `$MEM/project-context.yaml`, `$MEM/session.yaml`,
 | 9 | **fluxo apontando para integração que sumiu** | passos `!` no inventário — a estrutura mudou e a história não |
 | 10 | **registry × disco** | entrada apontando para pasta que não existe; `active` nomeando um id que não está na lista; `modelagem.yaml` com `id` diferente do registrado |
 | 11 | **modelagem fora do registry** | pasta com `model/` e `modelagem.yaml` que ninguém registrou — invisível para o viewer e para toda skill |
+| 12 | **estratégia × modelo** | `strategy.recommended_structure` prometendo projetos, taxonomia ou visões que o modelo não tem — ou o modelo organizado de um jeito que a estratégia não previu |
+| 13 | **cobertura técnica parada** | área `relevant` ainda `unknown` num modelo que já tem containers; área `not_applicable` que o YAML contradiz (uma fila desenhada onde integrações era "não se aplica") |
+| 14 | **perfil desatualizado** | `complexity.profile: leve` num modelo que cresceu para vários domínios, times ou integrações — recalibre, com a evidência |
+| 15 | **cache da doc vencido** | `manifest.yaml` com páginas além do prazo de revalidação, ou `failures` que ninguém retomou |
 
 Use o `facets` do inventário para o item 6: chaves e valores próximos aparecem
 lado a lado ali, com a contagem de cada um.
 
-Os itens 10 e 11 são os únicos que olham **acima** da modelagem. Rode-os uma vez
-por reconciliação, não uma vez por modelagem — e ao encontrar 11, ofereça
+Os itens 10, 11 e 15 são os únicos que olham **acima** da modelagem. Rode-os uma
+vez por reconciliação, não uma vez por modelagem — e ao encontrar 11, ofereça
 `cfour:modelagens` para registrar, nunca registre por conta própria: uma pasta fora
-do registry pode ser rascunho deliberado.
+do registry pode ser rascunho deliberado. Para o 15, `cfour:documentacao` revalida.
 
 ## 3. Apresentar
 

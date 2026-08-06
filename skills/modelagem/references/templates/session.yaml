@@ -3,6 +3,21 @@
 version: 1
 updated: AAAA-MM-DD
 
+# Em que etapa da jornada o trabalho esta, e em qual onda de escrita.
+# Ver: ${CLAUDE_PLUGIN_ROOT}/skills/modelagem/references/jornada.md
+#
+# Bloco OPCIONAL: sessao gravada por uma versao anterior nao o tem. Quem retomar
+# sem ele INFERE a etapa pelo que a memoria mostra, diz que inferiu, e grava —
+# nunca recomeca a jornada por causa de um campo ausente.
+#
+# etapas: enquadramento | calibragem | descoberta | estrategia | confirmacao
+#         | escrita | encerramento
+workflow:
+  current_stage: enquadramento
+  completed_stages: []
+  next_stage: calibragem
+  modeling_wave: 0       # 0 = ainda nao entrou na escrita
+
 # Em que assunto a modelagem estava trabalhando.
 focus: |
   ...
@@ -27,6 +42,12 @@ touched_files:
 # Assuntos abertos que nao viraram pergunta formal ainda.
 open_threads:
   - ...
+
+# O que da documentacao oficial sustentou decisao ou escrita nesta sessao.
+# Uma afirmacao sobre o formato sem fonte registrada e indistinguivel de palpite
+# seis meses depois. Ver: cfour:documentacao
+consulted_docs:
+  - doc:referencia#fluxo    # AAAA-MM-DD — o que ele confirmou
 
 # Contagens de `cfour check --inventory --json` quando a sessao fechou.
 # Se ao retomar elas nao baterem, alguem editou o modelo fora do plugin.

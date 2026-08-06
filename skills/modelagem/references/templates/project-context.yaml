@@ -23,6 +23,25 @@ purpose:
   status: unknown        # fact | hypothesis | unknown
 
 # ---------------------------------------------------------------------------
+# Complexidade — quanto processo esta iniciativa merece. Sai das
+# CARACTERISTICAS descobertas, nunca de uma palavra do briefing.
+# Ver: ${CLAUDE_PLUGIN_ROOT}/skills/modelagem/references/calibragem.md
+#
+# Bloco OPCIONAL: memoria escrita por uma versao anterior nao o tem. Quem ler
+# uma memoria sem ele classifica agora, diz que classificou, e grava.
+# ---------------------------------------------------------------------------
+complexity:
+  profile: leve          # leve | intermediario | profundo
+  rationale: |
+    As tres ou quatro evidencias que decidiram. Nao produza nota numerica.
+  evidence: []           # aplicacoes, dominios, times, integracoes, assincronia,
+                         # dados, legado, implantacao, tenancy, seguranca,
+                         # federacao, audiencias, decisoes, incerteza, longevidade
+  previous: null         # o perfil anterior, quando houve recalibragem
+  reviewed_at: AAAA-MM-DD
+  status: hypothesis     # fact | hypothesis | unknown
+
+# ---------------------------------------------------------------------------
 # Audiencias — quem le, e o que e ruido para essa pessoa
 # ---------------------------------------------------------------------------
 audiences:
@@ -86,6 +105,44 @@ boundaries:
     - what: ...
       positions: []      # as leituras possiveis, sem escolher uma
       blocks: ...        # o que nao anda enquanto isso nao se decide
+
+# ---------------------------------------------------------------------------
+# Cobertura tecnica — as sete areas, e o que se sabe de cada uma. Existe para
+# que nada importante fique de fora EM SILENCIO: `unknown` explicito e divida
+# declarada; area ausente e area esquecida.
+# Ver: ${CLAUDE_PLUGIN_ROOT}/skills/modelagem/references/cobertura-tecnica.md
+#
+# status: relevant | not_applicable | unknown | deferred
+# source: repo | architect | inference | null
+# ---------------------------------------------------------------------------
+technical_coverage:
+  estrutura-funcional: { status: unknown, source: null }
+  aplicacoes:          { status: unknown, source: null }
+  dados:               { status: unknown, source: null }
+  integracoes:         { status: unknown, source: null }
+  infraestrutura:      { status: unknown, source: null }
+  seguranca:           { status: unknown, source: null }
+  operacao:            { status: unknown, source: null }
+
+# ---------------------------------------------------------------------------
+# Estrategia — a organizacao recomendada e o estado dela. E daqui que o
+# cfour:editor le o que ja foi decidido, em vez de redescobrir na hora de
+# escrever. A decisao formal continua sendo o MD-NNN; isto e o atalho.
+# ---------------------------------------------------------------------------
+strategy:
+  recommended_structure: |
+    Em uma ou duas frases: quantas modelagens, quantos projetos, por qual
+    criterio, e o que fica em shared/.
+  alternatives: []       # as que foram consideradas, com o que cada uma cobrava
+  rationale: |
+    Por que esta e nao a outra, ligado ao proposito.
+  user_constraints: []   # convencoes e restricoes que o arquiteto trouxe
+  waves:                 # o plano de ondas da escrita
+    - id: 1
+      goal: ...
+      done_when: ...
+  decision_ref: null     # MD-NNN, quando houver
+  status: proposed       # proposed | validated | superseded
 
 # ---------------------------------------------------------------------------
 # Hipoteses — o que voce inferiu, e nao o que te contaram

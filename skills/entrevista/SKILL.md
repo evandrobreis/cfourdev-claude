@@ -18,6 +18,44 @@ Leia primeiro `${CLAUDE_PLUGIN_ROOT}/skills/modelagem/SKILL.md`. Use
 você não sabe que granularidade serve, e vai registrar detalhe que ninguém pediu
 → `cfour:descoberta`.
 
+Leia também, antes da primeira pergunta:
+
+- `complexity` — quantas perguntas por rodada e quanta profundidade cabem aqui
+  (`${CLAUDE_PLUGIN_ROOT}/skills/modelagem/references/calibragem.md`);
+- `strategy` — a organização já validada. **Não reabra o que foi decidido**; se
+  o que ele está descrevendo contradiz a estratégia, isso é um achado a levantar,
+  não uma discussão a refazer;
+- `technical_coverage` — o que já foi verificado, para não perguntar duas vezes.
+
+## Onde esta skill fica na jornada
+
+Ela atende duas etapas, e elas se comportam de formas diferentes:
+
+| etapa | o que a entrevista faz |
+|---|---|
+| `descoberta` | varre o que falta saber, incluindo as áreas técnicas que ninguém mencionou |
+| `escrita` | preenche a **onda corrente**, e para quando ela fecha |
+
+Diga em qual está. *"Ainda estamos mapeando"* e *"estou escrevendo a onda 2"* são
+conversas com expectativas diferentes, e o arquiteto precisa saber qual é.
+
+## A varredura proativa
+
+O ciclo abaixo é **reativo**: ele responde ao que o arquiteto disse. Isso não
+alcança o que ele não disse porque para ele é óbvio — e é assim que uma fila
+essencial fica de fora do desenho.
+
+A cada duas ou três rodadas, olhe a matriz de
+`${CLAUDE_PLUGIN_ROOT}/skills/modelagem/references/cobertura-tecnica.md` e traga o que está `unknown` **e é
+relevante** para o recorte em curso, agrupado numa pergunta só:
+
+> Antes de eu escrever os containers: tem banco por serviço ou compartilhado, e
+> alguma coisa passando por fila entre eles?
+
+Nunca leia a lista em voz alta, e nunca pergunte por área que não muda o que vai
+ser escrito. Área verificada que não se aplica vira `not_applicable` com o
+porquê — silenciosamente `unknown` é o único desfecho proibido.
+
 ## O ciclo
 
 Cada rodada da conversa passa por dez passos. Os passos 1–3 e 9–10 são
@@ -72,6 +110,10 @@ que produziu aquela arquitetura. Perguntar é como essas duas coisas se encontra
 
 ## Ritmo
 
+- **A entrevista tem fim, e ele é declarado.** A rodada termina quando a onda
+  corrente tem o que precisa — não quando as perguntas acabam, porque elas não
+  acabam. Ao atingir o critério, diga: *"tenho o suficiente para a onda 1; vou
+  escrever e volto com o desenho"*, e vá para `cfour:editor`.
 - Não transforme a conversa em formulário. Uma pergunta boa por vez vale mais que
   seis medianas.
 - Não escreva no modelo o que ainda é hipótese: hipótese vai para
@@ -88,6 +130,9 @@ Ao pausar ou encerrar a rodada:
 - o que virou fato está no YAML e o check passou;
 - o que virou dúvida está em nota ou em `Q-NNN`;
 - o que você inferiu está marcado como hipótese, com refutação;
-- `session.yaml` tem `focus`, `last_step`, `next_step` e o que falta confirmar.
+- `technical_coverage` reflete o que foi verificado nesta rodada;
+- `session.yaml` tem `focus`, `last_step`, `next_step`, o que falta confirmar, e
+  o `workflow` com a etapa e a onda corrente;
+- se a onda fechou, isso foi **dito**, com o que entra na próxima.
 
 Para encerrar o dia de trabalho, chame `cfour:encerrar`.

@@ -86,6 +86,11 @@ Achados típicos desta dimensão:
 - caixa presente em todas as visões (sinal 9);
 - **passos `!`** — o fluxo achou um buraco na estrutura (sinal 13);
 - **fluxo sem caminho triste** — o caso de uso só tem final feliz mesmo?
+- **área técnica relevante nunca verificada** — `technical_coverage` com
+  `unknown` onde a decisão em jogo depende da resposta
+  (`${CLAUDE_PLUGIN_ROOT}/skills/modelagem/references/cobertura-tecnica.md`). Um modelo sem banco, sem fila e sem
+  integração pode estar certo; o que ele não pode é estar assim porque ninguém
+  perguntou.
 
 ## Formato do relatório
 

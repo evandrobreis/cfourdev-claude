@@ -14,10 +14,10 @@ instala nada, não cria arquivo e não move pasta sem um sim explícito: instala
 pacote global e escrever na raiz do repositório de alguém são atos dessa pessoa,
 não seus.
 
-## Os quatro diagnósticos, nesta ordem
+## Os cinco diagnósticos, nesta ordem
 
-Rode os quatro antes de falar. Um relatório só, com o que falta e o que já está
-pronto, vale mais que quatro perguntas em sequência.
+Rode os cinco antes de falar. Um relatório só, com o que falta e o que já está
+pronto, vale mais que cinco perguntas em sequência.
 
 ### 1. O CLI existe?
 
@@ -56,9 +56,22 @@ Diga o que ele escreve antes de rodar: um `cfour.yaml` na raiz e uma modelagem
 mínima em `./<slug>/` — um usuário, um sistema, uma seta e um diagrama. Cinco
 arquivos, e nada além disso.
 
-**Pergunte o `<slug>` em vez de inventá-lo.** Ele vai para a URL do viewer, para
-todo comando e para o nome da pasta da memória; renomear depois quebra links que
-alguém já compartilhou.
+**Proponha o `<slug>`; não peça que ele seja escolhido.** Derive-o do que você já
+sabe — o nome do repositório, o do diretório, o produto que o arquiteto acabou de
+nomear —, em minúsculas, sem acento e com `-` entre palavras
+(`${CLAUDE_PLUGIN_ROOT}/skills/modelagem/references/decisoes-de-quem.md`). Apresente com o custo junto, porque o custo
+é real: ele vai para a URL do viewer, para todo comando e para o nome da pasta da
+memória, e renomear depois quebra links que alguém já compartilhou.
+
+> Repositório `acme-pagamentos`, então eu usaria `pagamentos` como id. Ele vai
+> para a URL e para a pasta da memória, então renomear depois quebra link que
+> alguém compartilhou — por isso estou dizendo antes. Encaixa, ou vocês têm
+> convenção própria?
+
+**Pergunte apenas** quando não houver nome nenhum de onde derivar, quando dois
+nomes forem igualmente plausíveis, ou quando o id já existir no registro. Um
+`cfour init` parado à espera de o arquiteto inventar um identificador que você
+poderia ter derivado é este plugin pedindo a ele que faça o trabalho dele.
 
 Se já houver registro, apenas diga quantas modelagens ele lista e qual está
 `active`. Não proponha criar mais uma: quando é modelagem nova e quando é
@@ -100,25 +113,43 @@ cfour check --all
 Erro aqui não é motivo para consertar nada agora — é informação que a próxima
 skill precisa. Diga o que apareceu e siga.
 
+### 5. Há cache da documentação?
+
+```bash
+ls .claude/cfour/docs-cache/manifest.yaml 2>/dev/null
+```
+
+Uma linha no relatório, e nada mais: o cache **nasce na primeira consulta**, não
+no setup (`cfour:documentacao`). Baixar documentação que ninguém pediu é
+exatamente o download integral que a política proíbe.
+
+Se ele já existir, diga a data da última verificação. Se não existir, diga que
+será criado quando for preciso, e que ele vai para o git junto com a memória —
+quem preferir cache descartável acrescenta `.claude/cfour/docs-cache/` ao
+`.gitignore`, e nada quebra.
+
 ## O relatório
 
-Um bloco, com as quatro respostas e **uma** proposta de próximo passo:
+Um bloco, com as cinco respostas e **uma** proposta de próximo passo:
 
 ```
 cfour            nao encontrado no PATH
 cfour.yaml       nao existe neste repositorio (nem acima dele)
 memoria antiga   nao ha
 modelagens       nenhuma
+cache da doc     nao ha (nasce na primeira consulta)
 
 Sem o CLI voce ainda modela: o que some e a validacao e o viewer
 local. Posso:
 
   1. instalar o cfour           npm i -g cfourdev
-  2. criar a primeira modelagem cfour init --id <slug>
+  2. criar a primeira modelagem cfour init --id pagamentos
 
-Faco os dois? E que slug? (ele vai para a URL e para o nome da
-pasta da memoria, entao vale escolher com calma)
+Usei `pagamentos` porque e o nome do repositorio; ele vai para a URL
+e para a pasta da memoria. Faco os dois?
 ```
+
+O slug aparece **preenchido** na proposta, e não como `<slug>` esperando alguém.
 
 Sem acento na saída de terminal — o CLI já escreve assim, e o terminal do
 Windows nem sempre está em UTF-8.
