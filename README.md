@@ -41,7 +41,7 @@ O núcleo roteia sozinho — você conversa, não escolhe comando.
 |---|---|
 | `cfour:modelagem` | o núcleo: método, guarda-corpos, modelagem ativa, roteamento |
 | `cfour:setup` | confere CLI, registro e memória antiga; oferece o que falta |
-| `cfour:descoberta` | objetivo, audiência, escopo, perfil de complexidade, cobertura técnica |
+| `cfour:descoberta` | objetivo, audiência, escopo, perfil de complexidade, cobertura técnica, e o que o leitor vai querer isolar e ver por cor |
 | `cfour:estrategia` | organização, projetos, taxonomia, visões e o plano de ondas |
 | `cfour:entrevista` | o arquiteto descreve; a skill separa fato de inferência |
 | `cfour:editor` | escreve e altera o YAML, pelo contrato, e valida |

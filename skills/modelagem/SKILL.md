@@ -235,6 +235,7 @@ Leia sob demanda, não de uma vez:
 | `references/calibragem.md` | assim que houver contexto suficiente para dimensionar a iniciativa |
 | `references/decisoes-de-quem.md` | antes de fazer qualquer pergunta cuja resposta você poderia derivar |
 | `references/cobertura-tecnica.md` | antes de fechar a descoberta e antes da última onda |
+| `references/classificacao.md` | na descoberta, para perguntar o que o leitor vai querer isolar, colorir e abrir; e na estratégia, para traduzir isso em `tags`, `meta`, cor e link |
 | `references/viewer-contract.md` | antes de escrever ou revisar qualquer YAML |
 | `references/exemplos.md` | quando a tabela de campos não bastar para ver a forma inteira |
 | `references/modelagem-ou-projeto.md` | quando um assunto novo chegar e não estiver claro se é outra realidade |

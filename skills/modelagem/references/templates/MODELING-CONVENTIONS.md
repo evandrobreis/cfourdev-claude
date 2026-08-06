@@ -45,7 +45,11 @@ nome legível; as demais funcionam com a chave crua.
 ## Extensões declaradas
 
 O que foi acrescentado em `$M/model/workspace.yaml` e por quê: `shapes`,
-`relationKinds`, `noteKinds`, `flowOutcomes`.
+`relationKinds`, `noteKinds`, `flowOutcomes` e `metadata`.
+
+`metadata` é o que dá nome legível a uma chave e a libera em "Colorir por"
+(`color: true`). Sem ele a chave da tabela acima continua filtrando — só não
+colore, e aparece com o nome cru.
 
 ## Visões
 

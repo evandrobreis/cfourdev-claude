@@ -14,7 +14,7 @@ dele, o problema é a regra, não o cenário.
 
 ## O que existe
 
-- `${CLAUDE_PLUGIN_ROOT}/skills/avaliar/rubric.md` — os dezoito critérios comuns e os
+- `${CLAUDE_PLUGIN_ROOT}/skills/avaliar/rubric.md` — os dezenove critérios comuns e os
   testes transversais.
 - `${CLAUDE_PLUGIN_ROOT}/skills/avaliar/scenarios/NN-*.md` — briefing, respostas
   preparadas, armadilhas e critérios específicos de cada caso. Alguns trazem uma
@@ -23,12 +23,12 @@ dele, o problema é a regra, não o cenário.
   pela metade, um cache com data velha. Sem isso o cenário testa outra coisa.
 
 Os cenários `01`–`11` medem o método: propósito, agnosticismo de rótulo,
-alternativas, contrato. Os `12`–`21` medem o **processo**: proporcionalidade,
-jornada, recomendação, cobertura técnica, documentação e retomada.
+alternativas, contrato. Os `12`–`22` medem o **processo**: proporcionalidade,
+jornada, recomendação, cobertura técnica, classificação, documentação e retomada.
 
 ## Como rodar
 
-**Peça confirmação antes.** Rodar os vinte e um cenários gasta bastante —
+**Peça confirmação antes.** Rodar os vinte e dois cenários gasta bastante —
 pergunte quantos e quais, e ofereça o subconjunto mínimo útil: `01`, `03`, `04`,
 `09`, `10`, `11`, `12`, `13`, `14`, `16`, `20` — que cobrem os quatro testes
 transversais, os dois extremos de calibragem e as duas falhas eliminatórias mais
@@ -107,7 +107,7 @@ Nenhum cenário sozinho detecta isto:
   mesmo defeito da estratégia que segue rótulo.
 
 Se a estratégia — ou o peso do processo — acompanhou o rótulo em vez das
-necessidades, o plugin falhou, mesmo com todos os dezoito critérios passando em
+necessidades, o plugin falhou, mesmo com todos os dezenove critérios passando em
 cada cenário isolado.
 
 ### O placar

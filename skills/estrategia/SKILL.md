@@ -30,17 +30,23 @@ pare e aplique `${CLAUDE_PLUGIN_ROOT}/skills/modelagem/references/modelagem-ou-p
 
 A lista abaixo é o teto, não o piso. **O perfil gravado em `complexity`
 (`${CLAUDE_PLUGIN_ROOT}/skills/modelagem/references/calibragem.md`) decide quanto dela vale a pena escrever**: com
-perfil `leve`, os itens 1, 5, 7 e 12 cabem em um parágrafo e o resto é ruído;
+perfil `leve`, os itens 1, 5, 6, 7 e 12 cabem em um parágrafo e o resto é ruído;
 com perfil `profundo`, todos existem, e os itens 1 e 2 vêm com alternativa
 comparada.
+
+O item 6 entra **em todos os perfis**, e isso mudou: ele já esteve fora do perfil
+leve, pelo receio de inflar taxonomia. O receio é real e continua valendo para
+seis chaves; ele não vale para uma. `domain` colorível e um `adr` pendurado
+custam duas linhas, e são o que faz o viewer de uma aplicação pequena valer mais
+que um desenho no quadro.
 
 1. **Unidades de organização em `$M/model/`** — quantas pastas, e o critério.
 2. **Candidatos a projeto** — e o que fica em `shared/`.
 3. **Elementos potencialmente compartilhados** — quem é citado por mais de um.
 4. **Hierarquia inicial** — quem é filho de quem, no nível que se conhece hoje.
 5. **Convenções de identificação** — formato de `id`, e o que o `name` carrega.
-6. **Taxonomia inicial** — o mínimo de `tags` e `meta`, cada uma com a pergunta
-   que responde.
+6. **Taxonomia, cor e links** — o mínimo de `tags` e `meta`, cada uma com a
+   pergunta que responde; qual delas é colorível; e o que vira link na caixa.
 7. **Visões recomendadas** — separadas em diagramas e fluxos.
 8. **Visões desnecessárias** — e por que não valem o custo.
 9. **Elementos ainda desconhecidos** — o que falta descobrir para detalhar.
@@ -137,15 +143,25 @@ separação cobra é a seta: entre modelagens não existe nenhuma.
 **Não imponha uma taxonomia completa no começo.** Comece com o mínimo e cresça
 conforme aparecer necessidade de filtrar, agrupar, colorir, analisar ou governar.
 
-Antes de criar uma tag ou uma chave de `meta`, responda às sete:
+O insumo não é seu: `classification` em `$MEM/project-context.yaml` traz os eixos
+por que a organização já fala e os documentos que já têm endereço fixo — foi a
+descoberta que perguntou
+(`${CLAUDE_PLUGIN_ROOT}/skills/modelagem/references/classificacao.md`). **Se aquele bloco estiver
+`unknown`, você não tem o que recomendar aqui**, e a pergunta que falta é dele,
+não sua.
+
+Antes de propor uma tag ou uma chave de `meta`, responda às oito:
 
 1. que pergunta essa classificação permite responder?
 2. é acumulável (`tag`) ou tem nome e valor (`meta`)?
 3. será usada para filtro?
 4. para agrupamento?
-5. para coloração?
-6. é estável ou temporária?
-7. já existe outra equivalente?
+5. para coloração? **Se sim, ela precisa de `color: true` em
+   `$M/model/workspace.yaml`** — sem isso a chave filtra e não colore, e
+   responder "sim" aqui não produz efeito nenhum no modelo escrito;
+6. o valor é uma **URL**? Então ela vira um link na caixa, e não vira filtro;
+7. é estável ou temporária?
+8. já existe outra equivalente?
 
 `tags` para sinalizador; `meta` para classificação com valor. Toda chave de `meta`
 vira filtro sozinha — o custo de escrever é baixo, o de manter uma taxonomia que
@@ -153,6 +169,9 @@ ninguém usa é alto.
 
 Nomes como `migrationWave`, `legacy`, `tenant`, `domain` ou `criticality` **não
 são padrão do plugin**: só existem se o projeto responder "sim" à pergunta 1.
+
+O que sobrar das oito vai para `classification.keys`, e é de lá que
+`cfour:editor` lê em vez de redescobrir.
 
 ## Visões
 
@@ -208,6 +227,16 @@ objeção, não pela escolha:
 > Vou seguir com a (1). Alguma restrição, convenção interna ou preferência que
 > torne isso inadequado?
 
+**A taxonomia entra neste mesmo checkpoint**, e no mesmo formato — ela é escolha
+estrutural como as outras, e some se ficar de fora:
+
+> Três chaves, e nenhuma a mais: `domain` **colorível** — o comitê precisa ver de
+> que domínio é cada caixa sem ler rótulo —, `owner` como filtro ("quem conserta
+> quando quebra"), e a tag `legado`. A ADR de cada sistema vai como `meta: adr:`,
+> que vira um link na quina da caixa. Considerei `criticality`, e deixei fora até
+> existir a conversa de priorização que ela responderia. Alguma convenção de
+> vocês que atrapalhe?
+
 E as respostas vão para lugares diferentes:
 
 | ele disse | a decisão nasce |
@@ -230,6 +259,9 @@ o aceite pode ser silencioso, a recomendação não pode.
   `$MEM/decisions/MD-NNN-*.md` (template no núcleo), com opções
   consideradas e critério de revisão. `accepted` só depois do sim, pela seção
   acima; sem ele, `proposed`.
+- `classification.keys` fica preenchido, ou `classification.status` diz por que
+  não — e isso se diz em voz alta, como as áreas técnicas desconhecidas. Uma
+  modelagem sem cor nenhuma é uma escolha; ela só é escolha se alguém a fez.
 - **Cada `viewProposal` preenchido foi para algum lugar** — nota `info` presa ao
   diagrama, ou uma linha na decisão de modelagem correspondente
   (`${CLAUDE_PLUGIN_ROOT}/skills/modelagem/references/view-or-flow.md`, passo 5).

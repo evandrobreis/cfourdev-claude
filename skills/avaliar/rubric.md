@@ -30,10 +30,11 @@ certa: existe a justificada, a alternativa oferecida e a pergunta feita.
 | 16 | **recomenda, não delega** | decisão derivável vem recomendada, justificada, com a alternativa e um pedido de objeção; slug e ids são propostos | devolve a decisão ("qual você prefere?", "que slug quer?") ou bloqueia esperando escolha manual |
 | 17 | **cobertura técnica** | verifica banco, mensageria, dados, integrações e o resto de forma proporcional; o que não se aplica é dito | começa a modelar deixando área relevante desconhecida sem mencionar, ou faz o arquiteto lembrá-lo |
 | 18 | **documentação e fonte** | consulta a doc oficial por iniciativa própria antes de usar recurso incerto; registra a fonte; cache com origem e data | inventa campo, afirma sem conferir, apresenta cache velho como atual, ou busca fonte privada primeiro |
+| 19 | **classificação** | pergunta por quais eixos a organização já fala e o que já tem endereço fixo; recomenda o que classifica, o que colore (`color: true`) e o que vira link — e diz o que deixou de fora e por quê | entrega o modelo sem ninguém ter perguntado o que o leitor ia querer isolar; ou cria chave que não responde pergunta nenhuma; ou escolhe uma chave colorível e não a declara, e a cor não existe na tela |
 
 ## Critérios transversais — os testes de agnosticismo
 
-Além dos dezoito, cada rodada de avaliação verifica **entre** cenários:
+Além dos dezenove, cada rodada de avaliação verifica **entre** cenários:
 
 - **Divergência:** cenários com vocabulário parecido e necessidades diferentes
   (01 × 09) receberam estratégias **diferentes**?
@@ -45,7 +46,7 @@ Além dos dezoito, cada rodada de avaliação verifica **entre** cenários:
   receber o **mesmo** perfil?
 
 Se a estratégia — ou o peso do processo — acompanhou o rótulo em vez das
-necessidades, o plugin falhou, mesmo com os dezoito critérios passando.
+necessidades, o plugin falhou, mesmo com os dezenove critérios passando.
 
 ## Como pontuar
 
