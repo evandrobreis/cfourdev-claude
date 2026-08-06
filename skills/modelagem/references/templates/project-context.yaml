@@ -145,6 +145,24 @@ strategy:
   status: proposed       # proposed | validated | superseded
 
 # ---------------------------------------------------------------------------
+# Classificacao — o que o leitor consegue FAZER com o desenho: isolar, agrupar,
+# ver por cor, e sair da caixa para o documento que a explica.
+#
+# `axes` e `artifacts` sao fato do arquiteto, e a descoberta pergunta; `keys` e
+# a traducao para o formato, e a estrategia recomenda. Ver o reference
+# `skills/modelagem/references/classificacao.md`.
+#
+# Os mesmos quatro `status` da cobertura tecnica, pela mesma razao: ausencia nao
+# distingue "nao perguntei" de "nao importa". Um desenho cinza de proposito e uma
+# escolha, e so e escolha se alguem a fez.
+# ---------------------------------------------------------------------------
+classification:
+  status: unknown        # relevant | not_applicable | unknown | deferred
+  axes: []               # por quais eixos a organizacao ja fala: dominio, squad...
+  artifacts: []          # { tipo: adr|runbook|painel|repo, escopo: ..., note: ... }
+  keys: []               # { chave, tipo: meta|tag, responde, usada_para: [...], color }
+
+# ---------------------------------------------------------------------------
 # Hipoteses — o que voce inferiu, e nao o que te contaram
 # ---------------------------------------------------------------------------
 hypotheses:

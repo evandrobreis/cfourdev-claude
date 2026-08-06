@@ -84,6 +84,12 @@ nem abrir aquilo por dentro, provavelmente é `description` de outra caixa.
 - **Declare antes de usar.** `shape`, `kind` de relação ou nota, `outcome` de
   fluxo que não existam ainda precisam entrar em `$M/model/workspace.yaml` primeiro
   — proponha ao arquiteto, não decida sozinho.
+- **`metadata` também se declara.** Uma chave de `meta` funciona sem declaração,
+  mas aparece com o nome cru na barra lateral e **não entra em "Colorir por"**.
+  O bloco `metadata: { <chave>: { label: …, color: true } }` do `workspace.yaml`
+  é o que dá o rótulo legível e libera a cor — e sem ele a chave que a estratégia
+  escolheu como colorível simplesmente não colore. O que colorir está em
+  `classification.keys`, no `project-context.yaml`; não redecida aqui.
 - **Confirme o recurso antes de escrevê-lo.** Campo, seletor ou comportamento que
   não esteja no contrato resumido, ou sobre o qual você tenha dúvida, se confere
   na documentação oficial antes: `cfour:documentacao`. Campo inventado **não

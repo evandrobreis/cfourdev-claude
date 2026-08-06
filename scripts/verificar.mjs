@@ -548,3 +548,64 @@ test('o eval nao manda escrever no repositorio sob teste', () => {
     'o eval ainda fala em apagar entradas do registro do repositorio',
   )
 })
+
+test('a descoberta pergunta o que o leitor vai querer isolar, colorir e abrir', () => {
+  // O silencio de que ninguem reclama. Um modelo sai correto e cinza, sem filtro
+  // util, sem cor e sem link — e o arquiteto nao diz "voce nao perguntou da cor",
+  // porque quem nunca abriu o viewer nao sabe que ela existe. Diferente da
+  // cobertura tecnica, que ele lembra sozinho ("voce nao perguntou do Kafka").
+  const REF = path.join(SKILLS, 'modelagem', 'references', 'classificacao.md')
+  assert.ok(fs.existsSync(REF), 'o reference da classificacao sumiu')
+
+  const ref = fs.readFileSync(REF, 'utf8')
+  const eixos = ['localizar', 'filtrar', 'colorir', 'linkar']
+  assert.deepEqual(
+    eixos.filter((e) => !ref.includes(`### \`${e}\``)),
+    [],
+    'eixos que o reference nao cobre',
+  )
+
+  const descoberta = fs.readFileSync(path.join(SKILLS, 'descoberta', 'SKILL.md'), 'utf8')
+  assert.ok(
+    descoberta.includes('references/classificacao.md'),
+    'a descoberta nao chama o reference da classificacao',
+  )
+  // O portao: sem isto o eixo vira uma secao que se pula quando a conversa
+  // aperta, e e exatamente quando ela aperta que ele e esquecido.
+  assert.match(descoberta, /classification/, 'a descoberta nao grava o que ouviu')
+})
+
+test('a estrategia recomenda a taxonomia, e diz o que a cor exige', () => {
+  const estrategia = fs.readFileSync(path.join(SKILLS, 'estrategia', 'SKILL.md'), 'utf8')
+  // Responder "sim, essa chave e colorivel" nao produzia efeito nenhum no modelo
+  // escrito: sem `color: true` no workspace.yaml a chave filtra e nao colore, e
+  // nao ha aviso nenhum.
+  assert.ok(estrategia.includes('color: true'), 'a estrategia nao diz o que a cor exige')
+  assert.ok(
+    estrategia.includes('classification'),
+    'a estrategia nao le nem preenche o bloco da memoria',
+  )
+})
+
+test('o editor sabe que `metadata` tambem se declara', () => {
+  // A lista dizia `shape`, `kind` e `outcome`. `metadata` faltava — e falha de
+  // outro jeito, mais calado: a chave continua filtrando, so nao colore, e o
+  // modelo esta certo.
+  const editor = fs.readFileSync(path.join(SKILLS, 'editor', 'SKILL.md'), 'utf8')
+  assert.ok(editor.includes('metadata'), 'o editor nao manda declarar metadata')
+})
+
+test('o template de memoria tem onde gravar a classificacao', () => {
+  // Sem endereco na memoria, a taxonomia decidida nao e lida pelo editor nem
+  // comparada pelo reconciliar: ela vive so na conversa que a decidiu.
+  const template = fs.readFileSync(
+    path.join(SKILLS, 'modelagem', 'references', 'templates', 'project-context.yaml'),
+    'utf8',
+  )
+  const campos = ['classification:', 'axes:', 'artifacts:', 'keys:']
+  assert.deepEqual(
+    campos.filter((c) => !template.includes(c)),
+    [],
+    'campos que o template nao declara',
+  )
+})

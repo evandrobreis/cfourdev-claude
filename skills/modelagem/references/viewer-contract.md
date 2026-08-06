@@ -320,6 +320,12 @@ sem código: `shapes` (combinando `primitive`/`stereotype`/`palette`/`outline`/`
 **Usar um `kind`, `shape` ou `outcome` novo exige declará-lo antes.** Sem isso ele
 funciona degradado e com aviso — nunca some, mas não é o que você quis dizer.
 
+**`metadata` falha de outro jeito, e mais calado.** Uma chave de `meta` não
+declarada continua funcionando como filtro; ela só aparece com o nome cru e
+**não entra em "Colorir por"**, que é a única coisa que `color: true` liga. Não há
+aviso nenhum — o modelo está certo, e a cor que alguém decidiu simplesmente não
+existe na tela.
+
 ## 11. O que é erro e o que é aviso (`doc:referencia`)
 
 Nada é fatal: o modelo carrega degradado e os problemas sobem para o topo da tela.

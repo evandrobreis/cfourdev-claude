@@ -205,11 +205,40 @@ Cada área termina com um `status` gravado em `technical_coverage` —
 `relevant`, `not_applicable`, `unknown` ou `deferred`. **Área que não se aplica
 se registra; não se omite.**
 
+## Como eles localizam uma coisa, e o que já tem endereço
+
+A cobertura técnica garante que nada **existe** em silêncio. Falta a outra
+metade: o que o leitor vai conseguir **fazer** com o desenho — isolar, agrupar,
+enxergar por cor, e sair da caixa para o documento que a explica.
+
+Percorra os quatro eixos de
+`${CLAUDE_PLUGIN_ROOT}/skills/modelagem/references/classificacao.md` — localizar,
+filtrar, colorir, linkar — **na medida do perfil**. Com perfil `leve`, uma
+pergunta agrupada resolve:
+
+> Quando o desenho estiver pronto, o que você vai querer distinguir nele — por
+> time, por domínio, por criticidade? E tem documento por sistema (ADR, runbook,
+> painel) que valha deixar a um clique da caixa?
+
+**Pergunte pelo vocabulário deles, nunca pelo formato.** "Por quais eixos vocês
+localizam um serviço aqui" é uma pergunta sobre o trabalho dele; "você quer tags
+ou metadados?" é devolver a ele o que ele veio buscar. A tradução para `tag`,
+`meta`, cor e link é da estratégia, e é recomendação — não pergunta.
+
+O resultado vai para `classification` em `$MEM/project-context.yaml`, com os
+mesmos quatro `status` da cobertura técnica. **Eixo que não se aplica se
+registra; não se omite** — um desenho cinza de propósito é uma escolha, e só é
+escolha se alguém a tiver feito.
+
 ## Estado de conhecimento
 
 Descubra também **o que já existe**: diagramas antigos, ADRs, planilhas, código,
 uma modelagem anterior. E o que ninguém sabe — as áreas onde a resposta vai ser
 "precisamos perguntar para o time X" são material de `Q-NNN`, não de silêncio.
+
+O que tiver **endereço fixo** não fica só na conversa: é candidato a `meta` com
+URL, que vira um link na caixa. Ver o eixo `linkar` de
+`${CLAUDE_PLUGIN_ROOT}/skills/modelagem/references/classificacao.md`.
 
 Se a modelagem já tiver modelo, rode
 `cfour check --modelagem <id> --inventory --json` antes de perguntar
@@ -225,7 +254,7 @@ uma resposta.
 A descoberta termina quando `$MEM/project-context.yaml` responde — ou
 marca explicitamente como `unknown` — as catorze, **e** quando a matriz de
 cobertura técnica não tem área `relevant` em `unknown` sem que isso tenha sido
-dito em voz alta.
+dito em voz alta, **e** quando `classification` tem um `status`.
 
 **A profundidade das catorze é do perfil, não da lista.** Com perfil `leve`, uma
 frase por item basta e várias se respondem juntas; com perfil `profundo`, cada
@@ -268,7 +297,11 @@ Criar o esqueleto é com `cfour:modelagens`.
 ## O que nunca fazer aqui
 
 - Propor pastas, projetos, hierarquia, taxonomia ou visões. **Nada de estrutura
-  na descoberta** — nem "só para ilustrar".
+  na descoberta** — nem "só para ilustrar". Perguntar por quais eixos a
+  organização já fala **não** é isto: vocabulário em uso e documento que já
+  existe são fato dele, e são exatamente a matéria-prima que a estratégia precisa
+  ter antes de propor uma taxonomia. O que não se faz aqui é decidir se aquilo
+  vira `tag` ou `meta`.
 - Classificar a iniciativa por um rótulo e derivar consequências disso — nem a
   estrutura, nem o perfil de complexidade.
 - Apresentar inferência sua com a mesma cara de coisa que o arquiteto afirmou.
@@ -276,6 +309,9 @@ Criar o esqueleto é com `cfour:modelagens`.
   voz alta.
 - Continuar perguntando depois que a condição de saída foi satisfeita. Sempre há
   mais uma pergunta possível; o critério é o que **muda o desenho**.
-- Fechar deixando área técnica relevante como desconhecida sem dizer.
+- Fechar deixando área técnica relevante como desconhecida sem dizer. Vale igual
+  para `classification`: entregar um modelo sem ninguém ter perguntado o que o
+  leitor ia querer isolar é o silêncio de que ninguém reclama, porque quem nunca
+  abriu o viewer não sabe que aquilo existe.
 - Gravar sem ter feito o passo 0. Escrever propósito na modelagem errada é o
   único erro desta skill que a próxima sessão não consegue perceber.
