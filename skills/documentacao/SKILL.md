@@ -1,6 +1,6 @@
 ---
 name: documentacao
-description: Consulta a documentação pública oficial do cfourdev em cfourdev.com.br/docs e mantém um cache local rastreável em .claude/cfour/docs-cache/ — com origem, data, hash e política de atualização. Use antes de escrever um recurso do YAML que você não tem certeza que existe, ao configurar aparência, tipos ou anotações, ao decidir se o formato representa uma necessidade, quando alguém questionar uma regra, ou quando pedirem para atualizar a documentação local.
+description: Busca a documentação pública oficial do cfourdev num endereço só — cfourdev.com.br/docs/for-agents.md, o contrato do formato inteiro — e mantém o cache local rastreável em .claude/cfour/docs-cache/, com origem, data, hash e política de atualização. Use antes de escrever um recurso do YAML que você não tem certeza que existe, ao configurar aparência, tipos ou anotações, ao decidir se o formato representa uma necessidade, quando alguém questionar uma regra, ou quando pedirem para atualizar a documentação local.
 ---
 
 # A documentação oficial, e o cache dela
@@ -8,6 +8,8 @@ description: Consulta a documentação pública oficial do cfourdev em cfourdev.
 O formato do cfourdev é **aberto, público e documentado**, em
 `https://cfourdev.com.br/docs/`, sem login. É de lá que sai cada regra do YAML
 que este plugin escreve, e é lá que o arquiteto confere o que o plugin afirma.
+
+Para você, isso cabe num arquivo: `https://cfourdev.com.br/docs/for-agents.md`.
 
 Esta skill existe porque o contrário disso já aconteceu: o plugin escreveu um
 campo que parecia certo, ninguém conferiu, e o viewer ignorou em silêncio. Campo
@@ -67,32 +69,74 @@ Não consulte para o que o resumo já responde com segurança: o contrato em
 `${CLAUDE_PLUGIN_ROOT}/skills/modelagem/references/viewer-contract.md` existe para você não precisar de rede a
 cada campo conhecido — ele apenas não é a autoridade quando há dúvida.
 
+## Um endereço, uma busca, um cache
+
+```
+https://cfourdev.com.br/docs/for-agents.md
+```
+
+É a documentação do formato inteira, num arquivo só: o que se escreve em cada
+YAML, os valores válidos de cada campo, o que o viewer valida, os limites
+conhecidos, os comandos do CLI e as duas modelagens de exemplo completas.
+
+**Este é o único endereço que você busca.** Antes eram doze páginas, uma por
+necessidade, e o modo de falhar era sempre o mesmo: para saber qual delas
+responde à dúvida já era preciso conhecer a resposta — então o agente ou não
+buscava, ou buscava a errada e concluía que o campo não existia.
+
+O arquivo se identifica pela primeira linha, e o cabeçalho diz o que ele é:
+
+```
+<!-- cfourdev-for-agents: v1 -->
+formato: markdown
+versao-cli: 0.3.0
+origem: https://cfourdev.com.br/docs/for-agents.md
+documentos: 6
+exemplos: 30
+conteudo-sha256: 52ffde…
+```
+
+**`conteudo-sha256` é a identidade do conteúdo, e não carrega data**: um hash
+diferente quer dizer que a documentação mudou de verdade, e não que houve um
+build novo. Guarde-o, e é ele que decide se a revalidação achou algo.
+
+Dentro do arquivo, cada documento é precedido por `<!-- doc:<slug> <url> -->` —
+serve para fatiar o payload sem interpretar Markdown, e a URL é a versão para
+pessoas daquele bloco.
+
 ## Procedimento
 
-1. **Identifique a seção**, não o site. Os doze documentos e seus slugs estão na
-   tabela de `${CLAUDE_PLUGIN_ROOT}/skills/modelagem/references/viewer-contract.md` — não os repita aqui.
-   `doc:<slug>` resolve como `https://cfourdev.com.br/docs/<slug>/`, e cada `##`
-   da página é âncora (`.../referencia/#fluxo`).
-2. **Olhe o cache.** Existe? Cobre a seção? Quando foi buscado?
-3. **Decida**:
+1. **Olhe o cache.** Existe? Quando foi buscado?
+2. **Decida**:
 
    | situação | o que fazer |
    |---|---|
-   | página em cache, com menos de 30 dias | use, e cite |
-   | página em cache, mais velha que isso | use, **revalide se houver rede**, e diga a data |
-   | página ausente | busque **só ela** |
+   | cache com menos de 30 dias | use, e cite |
+   | cache mais velho que isso | use, **revalide se houver rede**, e diga a data |
+   | sem cache | busque |
    | sem rede | use o cache dizendo a idade; sem cache, diga que **não consultou** e não afirme |
 
-4. **Busque, quando for o caso** — com a ferramenta de acesso web do agente,
-   restrita ao domínio oficial. Uma página por necessidade: **nunca o site
-   inteiro**.
-5. **Grave** a página e o manifesto (abaixo), **responda** e **registre a fonte**
-   em quem decidiu: `consulted_docs` em `$MEM/session.yaml`, e a seção `Fontes` da
-   `MD-NNN` quando a decisão dependeu do que a doc diz.
+3. **Busque** — com a ferramenta de acesso web do agente, no endereço acima e em
+   nenhum outro.
+4. **Grave** o arquivo e o manifesto (abaixo).
+5. **Responda e registre a fonte** em quem decidiu: `consulted_docs` em
+   `$MEM/session.yaml`, e a seção `Fontes` da `MD-NNN` quando a decisão dependeu
+   do que a doc diz.
 
 Se a ferramenta de acesso web não estiver disponível, diga isso com todas as
 letras e siga pelo resumo local — **rebaixando a afirmação**: "pelo contrato
 resumido no plugin, e sem ter conferido a doc agora".
+
+### Citar para uma pessoa é outra coisa
+
+O que você **lê** é o arquivo único. O que você **cita** ao arquiteto é a página:
+`doc:<slug>` resolve como `https://cfourdev.com.br/docs/<slug>/`, e cada `##` é
+uma âncora (`.../referencia/#fluxo`). A tabela dos slugs está em
+`${CLAUDE_PLUGIN_ROOT}/skills/modelagem/references/viewer-contract.md`.
+
+São duas coisas com propósitos diferentes: um endereço para buscar sem escolher,
+e um endereço por seção para quem vai abrir no navegador e conferir. Não busque
+as páginas: elas dizem o mesmo, em doze requisições.
 
 ## O cache
 
@@ -100,57 +144,59 @@ resumido no plugin, e sem ter conferido a doc agora".
 .claude/cfour/
 ├── history/<modelagem-id>/      a memoria de cada modelagem
 └── docs-cache/                  a documentacao da PLATAFORMA — global, nao e de modelagem nenhuma
-    ├── manifest.yaml            origem, paginas, datas, hashes, falhas
-    └── pages/<slug>.md          o conteudo, em markdown
+    ├── manifest.yaml            origem, data, hash, falhas
+    └── for-agents.md            o conteudo, como veio
 ```
 
 A separação importa: `history/` é o porquê de **uma** modelagem; `docs-cache/` é
-o contrato da plataforma, igual para todas. Nunca escreva página de documentação
-dentro de `history/`, nem memória de modelagem dentro de `docs-cache/`.
+o contrato da plataforma, igual para todas. Nunca escreva documentação dentro de
+`history/`, nem memória de modelagem dentro de `docs-cache/`.
+
+**Um arquivo, e não uma pasta de páginas.** O cache antigo era `pages/<slug>.md`,
+com uma entrada por página no manifesto — e por isso podia estar pela metade sem
+que ninguém soubesse quais páginas faltavam.
 
 ### `manifest.yaml`
 
 ```yaml
-version: 1
-source: https://cfourdev.com.br/docs/     # a origem oficial, e a unica aceita
-format: markdown                          # como o conteudo foi guardado
+version: 2
+source: https://cfourdev.com.br/docs/for-agents.md   # a origem oficial, e a unica aceita
+format: markdown
 revalidate_after_days: 30
-last_checked_at: 2026-08-05T14:02:00Z     # a ultima vez que ALGUMA pagina foi conferida
-pages:
-  - slug: referencia
-    title: Referencia
-    url: https://cfourdev.com.br/docs/referencia/
-    file: pages/referencia.md
-    fetched_at: 2026-08-05T14:02:00Z
-    content_hash: sha256:9f2c...           # identidade do conteudo; muda = a doc mudou
-    status: ok                             # ok | stale | failed
+fetched_at: 2026-08-06T14:02:00Z
+content_hash: sha256:52ffde...    # o `conteudo-sha256` do cabecalho do proprio arquivo
+versao_cli: 0.3.0                 # a versao a que aquele contrato pertence
+status: ok                        # ok | stale | failed
 failures:
-  - slug: publicando
-    url: https://cfourdev.com.br/docs/publicando/
-    attempted_at: 2026-08-05T14:03:00Z
+  - url: https://cfourdev.com.br/docs/for-agents.md
+    attempted_at: 2026-08-06T14:03:00Z
     reason: sem rede
 ```
 
-Uma página sem `url`, sem `fetched_at` e sem `source` é uma cópia sem
+Um cache sem `source`, sem `fetched_at` e sem `content_hash` é uma cópia sem
 procedência: no dia em que ela contradizer o site, ninguém consegue dizer qual
 das duas envelheceu. **Não grave conteúdo sem esses três campos.**
+
+`content_hash` é o campo que o próprio arquivo declara, e não um que você
+calcula: é assim que a revalidação sabe distinguir "a doc mudou" de "buscaram de
+novo".
 
 `failures` fica registrado de propósito: uma busca que falhou e sumiu vira, na
 sessão seguinte, uma lacuna que ninguém sabe que existe.
 
 ### Política de atualização
 
-- **sob demanda**, sempre. Nunca baixe o conjunto inteiro "para adiantar";
-- **página ausente** dispara a busca só daquela página;
-- **revalidação** aos 30 dias, e só quando aquela página for necessária de novo:
-  cache velho que ninguém está lendo não é problema de ninguém;
-- **atualização explícita** — `/cfour:documentacao atualizar` revalida o que já
-  está em cache e relata o que mudou (por `content_hash`), sem acrescentar
-  páginas novas;
+- **uma busca por sessão, no máximo.** Com o cache válido, nenhuma;
+- **revalidação** aos 30 dias, na primeira vez em que a documentação for
+  necessária de novo: cache velho que ninguém está lendo não é problema de
+  ninguém;
+- **atualização explícita** — `/cfour:documentacao atualizar` rebusca o arquivo e
+  diz se o `content_hash` mudou; se não mudou, diz isso, e não finge que houve
+  novidade;
 - **offline não bloqueia**. O trabalho segue com o cache, com a idade dita em voz
   alta;
-- **cache nunca é "atual" por definição.** Ao sustentar uma afirmação em página
-  de mais de 30 dias, diga: *"pelo cache de 12/06; pode ter mudado"*.
+- **cache nunca é "atual" por definição.** Ao sustentar uma afirmação em cache de
+  mais de 30 dias, diga: *"pelo cache de 12/06; pode ter mudado"*.
 
 ### Versionar no git, ou não
 
@@ -210,7 +256,10 @@ seis meses depois — que é exatamente quando alguém vai contestá-la.
 
 - Copiar a documentação para dentro de uma skill. O plugin resume e aponta; a
   fonte é o site, e duplicá-la garante que uma das duas cópias vai mentir.
-- Baixar o site inteiro, ou revalidar tudo a cada sessão.
+- Buscar as páginas de `/docs/<slug>/` uma a uma. Elas dizem o mesmo que o
+  arquivo único, em doze requisições — e o endereço por seção existe para você
+  **citar** a uma pessoa, não para ler.
+- Revalidar a cada sessão.
 - Afirmar que um campo existe sem tê-lo visto na doc, no cache ou no
   `cfour check`.
 - Apresentar cache velho como se fosse o site de hoje.

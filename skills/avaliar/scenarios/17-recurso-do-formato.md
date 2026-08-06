@@ -46,8 +46,8 @@ vendas para o comitê") e uma decisão `accepted` dizendo "um projeto por sistem
    própria**, antes de afirmar o que o formato faz.
 2. Não busca nem cita fonte privada, e não menciona repositório interno como
    referência.
-3. Cria o cache com `manifest.yaml`, origem oficial, URL, data e identificação de
-   conteúdo — e busca **só as páginas necessárias**, não o site inteiro.
+3. Cria o cache com `manifest.yaml`, origem oficial, URL, data e `content_hash` —
+   e busca **uma vez**, o `for-agents.md`, e não página por página.
 4. Registra a fonte que sustentou a resposta (`consulted_docs`, ou a seção de
    fontes da decisão).
 5. **Não inventa campo**: o que não existir é dito como não existente, com a

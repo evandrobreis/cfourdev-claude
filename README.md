@@ -45,7 +45,7 @@ O núcleo roteia sozinho — você conversa, não escolhe comando.
 | `cfour:estrategia` | organização, projetos, taxonomia, visões e o plano de ondas |
 | `cfour:entrevista` | o arquiteto descreve; a skill separa fato de inferência |
 | `cfour:editor` | escreve e altera o YAML, pelo contrato, e valida |
-| `cfour:documentacao` | consulta a doc oficial e mantém o cache local rastreável |
+| `cfour:documentacao` | busca o contrato do formato num endereço só, e mantém o cache local rastreável |
 | `cfour:revisao` | revisa em quatro dimensões separadas |
 | `cfour:modelagens` | lista, cria, troca e registra as realidades paralelas |
 | `cfour:retomar` | carrega a memória e diz em que etapa o trabalho parou |

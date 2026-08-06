@@ -3,10 +3,20 @@
 **Uma regra antes de tudo: não invente campo, `shape`, `kind`, `outcome` ou
 comportamento.** O que não está aqui nem na documentação não existe.
 
-## `doc:<slug>` — as marcas, e como abri-las
+## A documentação: um endereço para ler, e um por seção para citar
 
-Ao longo deste arquivo, `doc:<slug>` marca **de onde cada regra veio**, e é um
-endereço que você pode abrir:
+Quando este resumo não bastar, o que se busca é **um arquivo só**:
+
+```
+https://cfourdev.com.br/docs/for-agents.md
+```
+
+É o contrato do formato inteiro — todo campo com os valores válidos, a
+configuração, os erros e avisos, os limites, o CLI e as duas modelagens de
+exemplo completas. Quem o busca e o mantém em cache é `cfour:documentacao`.
+
+Ao longo deste arquivo, `doc:<slug>` marca **de onde cada regra veio**. É um
+endereço para **citar ao arquiteto**, e não para buscar:
 
 ```
 doc:<slug>   →   https://cfourdev.com.br/docs/<slug>/
@@ -27,7 +37,6 @@ A documentação é **pública e não pede login**. Os slugs, que são a lista i
 | `perguntas-frequentes` | as respostas oficiais para o que se pergunta sempre |
 | `modelagens` | uma modelagem é uma realidade; quando criar a segunda |
 | `publicando` | conta, chave, `cfour push`, e a leitura hospedada |
-| `exemplos` | as duas modelagens de exemplo, inteiras, arquivo por arquivo |
 
 **A URL não carrega o número do documento**, e isso é deliberado: a numeração já
 mudou uma vez, e estas marcas seriam as primeiras a apodrecer. Cada `##` da
@@ -348,4 +357,5 @@ Não prometa nada disto:
 lado** — um trecho por forma, sem rede e sem depender de nada estar instalado.
 Leia de lá quando a tabela de campos não bastar para ver a forma inteira.
 
-As duas modelagens completas, com todos os arquivos, estão em `doc:exemplos`.
+As duas modelagens completas, arquivo por arquivo, estão no fim do
+`for-agents.md` — depois da marca `<!-- exemplos -->`.
