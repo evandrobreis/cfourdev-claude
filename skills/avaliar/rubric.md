@@ -25,22 +25,34 @@ certa: existe a justificada, a alternativa oferecida e a pergunta feita.
 | 11 | **memória** | grava propósito, hipóteses e perguntas **na modelagem certa**, e anuncia qual é; decisão estrutural vira `MD-NNN` | termina a sessão com tudo só na conversa, ou escreve sem dizer em qual modelagem |
 | 12 | **finais tristes** | ao propor fluxo, pergunta o que acontece quando dá errado | fluxo só com caminho feliz, sem justificativa |
 | 13 | **modelagem ou projeto** | havendo mais de uma realidade em jogo, pergunta se é modelagem nova ou projeto na existente, e decide pelo que precisa atravessar | cria modelagem por rótulo novo, ou enfia realidades incompatíveis na mesma por inércia |
+| 14 | **proporcional** | o peso do processo cabe no tamanho da iniciativa; o perfil sai das características descobertas e fica registrado com justificativa | mesmo ritual para um app de três devs e uma plataforma; ou perfil deduzido de uma palavra do briefing |
+| 15 | **jornada visível** | diz em que etapa está, o que sai dela e qual é a próxima; há transição explícita entre descobrir, propor e escrever | perguntas indefinidas sem condição de saída, ou começa a escrever YAML sem anunciar |
+| 16 | **recomenda, não delega** | decisão derivável vem recomendada, justificada, com a alternativa e um pedido de objeção; slug e ids são propostos | devolve a decisão ("qual você prefere?", "que slug quer?") ou bloqueia esperando escolha manual |
+| 17 | **cobertura técnica** | verifica banco, mensageria, dados, integrações e o resto de forma proporcional; o que não se aplica é dito | começa a modelar deixando área relevante desconhecida sem mencionar, ou faz o arquiteto lembrá-lo |
+| 18 | **documentação e fonte** | consulta a doc oficial por iniciativa própria antes de usar recurso incerto; registra a fonte; cache com origem e data | inventa campo, afirma sem conferir, apresenta cache velho como atual, ou busca fonte privada primeiro |
 
-## Critério transversal — o teste de agnosticismo
+## Critérios transversais — os testes de agnosticismo
 
-Além dos treze, cada rodada de avaliação verifica **entre** cenários:
+Além dos dezoito, cada rodada de avaliação verifica **entre** cenários:
 
 - **Divergência:** cenários com vocabulário parecido e necessidades diferentes
   (01 × 09) receberam estratégias **diferentes**?
 - **Convergência:** cenários com rótulos diferentes e as mesmas necessidades
   comunicacionais (03 × 10) receberam estratégias **semelhantes**?
+- **Calibragem:** dois cenários que se chamam "plataforma" (01 × 09) receberam
+  **perfis diferentes** — e a diferença veio de escala, ownership e audiência,
+  não do vocabulário? E dois cenários com nomes diferentes (12 × 01) podem
+  receber o **mesmo** perfil?
 
-Se a estratégia acompanhou o rótulo em vez das necessidades, o plugin falhou —
-mesmo com os treze critérios passando.
+Se a estratégia — ou o peso do processo — acompanhou o rótulo em vez das
+necessidades, o plugin falhou, mesmo com os dezoito critérios passando.
 
 ## Como pontuar
 
 Um cenário passa quando: nenhum critério `FALHA`, e no máximo dois `PARCIAL`.
 
-Critérios 1, 2 e 5 são **eliminatórios**: falhar em qualquer um reprova o
-cenário, porque são o princípio central do plugin, não detalhes de execução.
+Critérios 1, 2, 5 e 16 são **eliminatórios**: falhar em qualquer um reprova o
+cenário, porque são o princípio central do plugin, não detalhes de execução. O 16
+entrou na lista porque devolver ao arquiteto a decisão que ele pediu ajuda para
+tomar anula o valor do resto — uma conversa impecável que termina em "e aí, como
+você prefere?" não entregou nada.

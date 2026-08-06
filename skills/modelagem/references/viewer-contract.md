@@ -34,10 +34,15 @@ mudou uma vez, e estas marcas seriam as primeiras a apodrecer. Cada `##` da
 página é uma âncora, então `https://cfourdev.com.br/docs/referencia/#fluxo`
 aponta para a seção, e não para o documento inteiro.
 
-**Este arquivo é o resumo normativo; a documentação é a fonte.** Para escrever, o
-resumo basta — ele existe para você não precisar de rede a cada campo. Vá à doc
-quando a regra aqui não bastar, quando alguém questionar uma regra, ou quando
-precisar citar onde ela foi decidida.
+**Este arquivo é resumo; a documentação é a fonte** — e o resumo é o quarto
+degrau da precedência, não o primeiro. Ele existe para você não precisar de rede
+a cada campo conhecido; ele **não** decide quando há dúvida.
+
+Vá à documentação — por iniciativa própria, via `cfour:documentacao`, que também
+mantém o cache local — sempre que: a regra aqui não bastar; você for escrever um
+recurso que não usou ainda; for afirmar que o formato **não** faz algo; alguém
+questionar uma regra; ou a decisão depender de o recurso existir. Esperar o
+arquiteto lembrar você é o modo de falhar que esta linha existe para evitar.
 
 **Mas correção técnica não sai de leitura nenhuma: sai do `cfour check`.** Ele
 carrega com o mesmo loader do viewer e diz o que aceita. Quando o check e a sua

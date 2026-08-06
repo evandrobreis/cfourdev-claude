@@ -54,6 +54,20 @@ de `cfour check --modelagem <id> --inventory --json` — **desta** modelagem.
 Um fingerprint tirado com `--all`, ou de outra raiz, garante uma divergência falsa
 na próxima retomada.
 
+E o bloco `workflow`, que é o que a próxima sessão lê para não recomeçar:
+`current_stage`, `completed_stages`, `next_stage`, `modeling_wave`. Se a sessão
+terminou no meio de uma onda, é a onda que fica registrada — não a próxima.
+
+Em `$MEM/project-context.yaml`, confira antes de fechar:
+
+- `complexity` — se o perfil foi recalibrado hoje, a justificativa e o
+  `previous` estão gravados;
+- `technical_coverage` — o que foi verificado hoje mudou de `unknown` para o que
+  é, e o que continua desconhecido **aparece no relatório de fechamento**;
+- `strategy.status` — `validated` só se o arquiteto viu a recomendação.
+
+E `consulted_docs`, com o que a documentação oficial sustentou hoje.
+
 `next_step` precisa ser acionável: "escrever o fluxo de conciliação e perguntar ao
 time de finanças o que acontece quando a captura não bate" é próximo passo;
 "continuar a modelagem" não é.
@@ -74,7 +88,10 @@ importa fica enterrado nela.
 - nada duplicado entre modelo e memória;
 - toda decisão `accepted` tem consequência visível no modelo — ou uma linha
   dizendo por que ainda não tem;
-- `next_step` do `session.yaml` bate com o "próximo foco" do resumo;
+- `next_step` do `session.yaml` bate com o "próximo foco" do resumo, e com
+  `workflow.next_stage`;
+- nenhuma área técnica `relevant` continua `unknown` sem estar na lista de
+  pendências declaradas;
 - tudo que foi escrito hoje está **na mesma modelagem** que você anunciou ao
   abrir a sessão.
 

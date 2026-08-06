@@ -98,7 +98,9 @@ Duas perguntas de corte, na conversa, antes de tocar no registry:
    um espelho por seta, para sempre.
 
 E a regra que vale sempre: **havendo duas organizações plausíveis, apresente as
-duas** (guarda-corpo 4). Modelagem nova é decisão do arquiteto, não sua.
+duas — e diga qual você escolheria, com o custo da outra** (guarda-corpo 4).
+Depois peça a objeção. A decisão continua sendo do arquiteto; devolvê-la como
+pergunta aberta é que não é uma forma de respeitá-la.
 
 ## Quando a decisão for tomada
 
