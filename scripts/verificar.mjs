@@ -131,6 +131,10 @@ const DO_USUARIO = new Set([
   // do repositorio de quem modela — nao existe aqui, e citar pelo nome nu e o
   // certo, como os quatro arquivos de memoria acima.
   'manifest.yaml',
+  // O payload da documentacao. Nao e arquivo de ninguem aqui: e o que se busca
+  // em `https://cfourdev.com.br/docs/for-agents.md` e se guarda em
+  // `.claude/cfour/docs-cache/`, no repositorio de quem modela.
+  'for-agents.md',
   // Arquivos que a cobertura tecnica manda LER no repositorio do arquiteto
   // antes de perguntar. Sao dele, e nenhum deles mora aqui.
   'docker-compose.yml',
@@ -186,7 +190,6 @@ const SLUGS = [
   'perguntas-frequentes',
   'modelagens',
   'publicando',
-  'exemplos',
 ]
 
 test('toda marca doc: aponta para um documento que existe', () => {
@@ -416,11 +419,43 @@ test('a documentacao oficial e a unica fonte, e o cache tem contrato', () => {
     doc.includes('.claude/cfour/docs-cache/'),
     'a skill de documentacao nao declara onde o cache mora',
   )
-  // Sem estes campos uma pagina em cache e uma copia sem procedencia: no dia em
-  // que ela contradisser o site, ninguem sabe qual das duas envelheceu.
+  // Sem estes campos o cache e uma copia sem procedencia: no dia em que ele
+  // contradisser o site, ninguem sabe qual das duas envelheceu.
   const METADADOS = ['source:', 'url:', 'fetched_at:', 'content_hash:', 'status:', 'failures:']
   const semMetadado = METADADOS.filter((m) => !doc.includes(m))
   assert.deepEqual(semMetadado, [], 'campos que o manifesto do cache precisa declarar')
+})
+
+test('a skill e o contrato citam o endereco unico da documentacao', () => {
+  // O agente busca UM arquivo, e nao doze paginas: para saber qual pagina
+  // responde a duvida ja era preciso conhecer a resposta, e o modo de falhar era
+  // concluir que o campo nao existe.
+  //
+  // Nao ha teste possivel do outro lado — o gerador da doc mora noutro
+  // repositorio, e este roda sem rede de proposito. O que da para afirmar aqui e
+  // que o endereco esta escrito onde o modelo vai le-lo.
+  const ENDERECO = 'https://cfourdev.com.br/docs/for-agents.md'
+  const onde = [
+    path.join(SKILLS, 'documentacao', 'SKILL.md'),
+    path.join(SKILLS, 'modelagem', 'references', 'viewer-contract.md'),
+  ]
+  const ausentes = onde.filter((f) => !fs.readFileSync(f, 'utf8').includes(ENDERECO))
+  assert.deepEqual(ausentes.map(rel), [], 'arquivos que nao citam o endereco unico')
+})
+
+test('nada manda buscar a pagina de exemplos, que deixou de existir', () => {
+  // Os trinta YAMLs viraram um bloco do `for-agents.md`. Um `doc:exemplos`
+  // sobrevivente manda o agente a uma URL que responde 404 — e o resultado e uma
+  // linha em `failures:`, que e falha silenciosa do tipo que a skill de
+  // documentacao existe para evitar.
+  const restos = []
+  for (const f of textos()) {
+    const linhas = fs.readFileSync(f, 'utf8').split('\n')
+    linhas.forEach((linha, i) => {
+      if (/doc:exemplos|\/docs\/exemplos/.test(linha)) restos.push(`${rel(f)}:${i + 1}`)
+    })
+  }
+  assert.deepEqual(restos, [])
 })
 
 test('nenhuma URL de documentacao aponta para fora do dominio oficial', () => {

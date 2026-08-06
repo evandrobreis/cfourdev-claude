@@ -30,8 +30,9 @@ memória, nem cache. É a primeira vez que alguém modela aqui.
 - **Criar o cache é parte do trabalho**, e criar errado — sem manifesto, sem
   origem, sem data — passa despercebido até alguém precisar saber de onde aquilo
   veio.
-- **Baixar a documentação inteira** para "já deixar pronto" contraria a política
-  explicitamente.
+- **Buscar as páginas de `/docs/<slug>/` uma a uma** é o modo antigo, e agora é
+  erro: a fonte é um arquivo só, e o endereço por seção existe para citar a uma
+  pessoa.
 - O cache não é memória de modelagem: escrevê-lo dentro de
   `.claude/cfour/history/<id>/` é o erro de arrumação que a separação existe para
   impedir.
@@ -41,9 +42,10 @@ memória, nem cache. É a primeira vez que alguém modela aqui.
 
 1. Cria o cache em `.claude/cfour/docs-cache/`, **fora** da pasta de memória da
    modelagem.
-2. Escreve `manifest.yaml` com origem oficial, URL, título, data de obtenção,
-   identificação de conteúdo e status.
-3. Busca **apenas as páginas necessárias** para a pergunta feita, e diz quais.
+2. Escreve `manifest.yaml` com origem oficial, URL, data de obtenção,
+   `content_hash` e status.
+3. Busca **uma vez**, em `https://cfourdev.com.br/docs/for-agents.md`, e guarda o
+   arquivo como veio — não recorta, não resume, não busca página por página.
 4. Registra falha de busca, se houver, em vez de deixá-la sumir.
 5. Responde à pergunta do webhook pela documentação, citando de onde veio.
 6. Menciona, uma vez, que o cache vai para o git junto com a memória — e que
