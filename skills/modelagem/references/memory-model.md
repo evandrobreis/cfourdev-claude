@@ -25,8 +25,8 @@ cfour.yaml                        as modelagens e qual está ativa — o ÚNICO 
     sessions/YYYY-MM-DD-*.md      resumos estruturados do que aconteceu
 
 .claude/cfour/docs-cache/                                A DOCUMENTAÇÃO EM CACHE
-    manifest.yaml                 origem oficial, páginas, datas, hashes, falhas
-    pages/<slug>.md               o conteúdo — da PLATAFORMA, não de modelagem nenhuma
+    manifest.yaml                 origem oficial, data, hash, falhas
+    llms-full.txt                 o conteúdo — da PLATAFORMA, não de modelagem nenhuma
 ```
 
 O `docs-cache/` fica **fora** de `history/` de propósito: ele descreve o contrato

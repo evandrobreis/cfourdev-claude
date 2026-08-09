@@ -6,7 +6,7 @@ eles ficam juntos**, que é o que uma tabela de campos não consegue mostrar.
 Está aqui dentro, e não numa URL, de propósito: você escreve YAML durante a
 conversa, e nesse momento não deve depender de rede nem de o arquiteto ter algo
 instalado. As duas modelagens completas, com todos os arquivos, estão no fim do
-`for-agents.md` que `cfour:documentacao` busca — vá lá quando precisar ver uma
+`llms-full.txt` que `cfour:documentacao` busca — vá lá quando precisar ver uma
 modelagem inteira, e não um trecho.
 
 Os exemplos usam o vocabulário de uma loja com estoque: os projetos `loja`,

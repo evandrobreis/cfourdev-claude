@@ -8,7 +8,7 @@ comportamento.** O que não está aqui nem na documentação não existe.
 Quando este resumo não bastar, o que se busca é **um arquivo só**:
 
 ```
-https://cfourdev.com.br/docs/for-agents.md
+https://cfourdev.com.br/llms-full.txt
 ```
 
 É o contrato do formato inteiro — todo campo com os valores válidos, a
@@ -87,7 +87,7 @@ coisa que você achou que tinha escrito.
 | `shared/gateway-pagamento` | exatamente ali — barra é caminho completo |
 | `estoque/estoque-api` | em outro projeto |
 
-## 2. Os cinco documentos (`doc:conceitos`, `doc:primeiros-passos`)
+## 2. Os seis documentos (`doc:conceitos`, `doc:primeiros-passos`)
 
 `kind: element | relation | diagram | flow | note | project` no topo, ou as chaves
 de lista `elements:`, `relations:`, `diagrams:`, `flows:`, `notes:`.
@@ -102,6 +102,18 @@ documento, e a nota fica sem onde declarar o dela — ver §8.
 | **diagrama** | uma visão estrutural — *o mapa* |
 | **fluxo** | um caso de uso como sequência — *a história* |
 | **nota** | uma anotação: risco, dúvida, bloqueio, decisão |
+| **projeto** | a ficha da própria pasta — como ela aparece na árvore |
+
+**Projeto é o sexto, e o único opcional:** a pasta já é o projeto, e o documento
+só existe para dar nome e ordem a ela. `kind: project`, num arquivo qualquer
+dentro da pasta:
+
+| campo | se omitido |
+|---|---|
+| `id` | o nome da pasta — **a pasta vence**, e divergência gera aviso |
+| `name` | o `id` — é o que sai na árvore |
+| `order` | `500` — ordena os projetos entre si |
+| `tags` / `meta` | `[]` / `{}` |
 
 ## 3. O nível vem do `parent` — sempre (`doc:conceitos`, `doc:modelagem`)
 
@@ -112,8 +124,9 @@ filho de container  -> componente
 filho de componente -> código
 ```
 
-- **Não se declara nível.** `level:` escrito à mão que discorde da hierarquia gera
-  aviso e vence o escrito — não use isso para "consertar" um desenho.
+- **Não se declara nível.** `level:` é campo válido de elemento, e o escrito é o
+  que vale — mas discordar da hierarquia gera aviso, e a caixa fica num nível que
+  o `parent` dela contradiz. Não use isso para "consertar" um desenho.
 - Caixa no nível errado = `parent` errado, nunca diagrama errado.
 - A mesma hierarquia decide quatro coisas: nível, moldura, descer/subir e lifting.
 - Teste container × componente: *"se eu derrubar isto sozinho, o resto continua de
@@ -127,6 +140,7 @@ filho de componente -> código
 | `name` | o `id` |
 | `shape` | `system` |
 | `parent` | nenhum → é um sistema |
+| `level` | vem do `parent` — **não declare** (§3) |
 | `description` | — (não é desenhada; sai no hover) |
 | `technology` | — (letra pequena na caixa) |
 | `tags` / `meta` | `[]` / `{}` |
@@ -145,7 +159,10 @@ desenho: não muda nível nem comportamento. Desconhecido → caixa cinza + avis
 | `to` | **obrigatório** |
 | `kind` | `sync` |
 | `label` | — (curto: o que trafega; sai no hover, **não** no desenho) |
-| `description`, `route`, `bidirectional`, `tags`, `meta` | — |
+| `description` | — (forma longa; sai no hover) |
+| `route` | o padrão do diagrama — `straight`, `orthogonal` ou `bezier` |
+| `bidirectional` | `false` → acrescenta ponta também na origem |
+| `tags` / `meta` | `[]` / `{}` |
 | `id` | derivado: `origem~tipo~destino`, repetidos ganham `#2` |
 
 `kind` prontos: `sync`, `async`, `event`, `batch`, `dep`, `peer`. Convenção de
@@ -192,13 +209,15 @@ dono dela.
 |---|---|
 | `id` | o nome do arquivo (único no projeto, compartilhado com fluxos) |
 | `title` | o `id` |
+| `level` | vem dos membros — aqui é **só rótulo na árvore**, e não recorta nada |
 | `scope` | nenhum → visão de topo, fim da subida |
 | `include` | os filhos de `scope` |
 | `exclude`, `where`, `groups`, `groupBy`, `subject` | — |
 | `neighbors` | `0` |
-| `relations` | `auto` (`none` = visão puramente estrutural) |
+| `relations` | `auto`; também `none` (visão puramente estrutural), `[ids]` e `{ exclude: [ids] }` |
 | `notes` | `[]` — aninhadas, com o `scope` implícito (§8) |
 | `order` | `500` |
+| `tags` / `meta` | `[]` / `{}` — o diagrama também entra nos filtros |
 
 - `scope` faz quatro coisas: escolhe membros, desenha a moldura, é o destino do
   descer e a origem do subir. **A caixa do `scope` não é membro do próprio diagrama.**
@@ -213,8 +232,10 @@ dono dela.
   leitor não a distingue de uma seta dos membros. Saltos diferentes sobrevivem,
   senão o segundo anel de `neighbors: 2` ficaria mudo. A moldura nunca conta como
   vizinho, então a seta que nomeia o `scope` não cai nessa regra.
-- `groupBy: meta.<chave> | level | shape | project | tag:<prefixo>`; só age se
-  `groups` não existir.
+- `groupBy: meta.<chave> | level | shape | project`; só age se `groups` não
+  existir. **Etiqueta não agrupa**: banda é partição, e uma caixa com três
+  etiquetas não tem uma banda. `groupBy: tag:<prefixo>` existiu até a `0.4.x`, e
+  hoje é **erro** na carga. Etiqueta serve para filtrar.
 - A árvore lateral vem da **pasta** do arquivo; uma pasta `diagrams`/`flows` no
   começo do caminho é ignorada.
 - **O viewer nunca inventa visão.** Caixa com filhos e sem diagrama com
@@ -236,6 +257,8 @@ deveria ser uma seta que já foi declarada. Quando não é, o viewer avisa e des
 | `participants` | ordem de primeira aparição |
 | `steps` | **obrigatório** |
 | `paths` | `[]` |
+| `order` | `500` — ordena na árvore; empate resolve por título |
+| `tags` / `meta` | `[]` / `{}` — o fluxo também entra nos filtros |
 
 `level` é o campo em que a conversa em português vira defeito silencioso:
 `componente` **não** é `component`. Um valor fora dos quatro sai como **aviso**,
@@ -244,8 +267,8 @@ cuja projeção por nível não funciona.
 
 **Passo:** `to` é o único obrigatório; `from` omitido herda o `to` do anterior
 (obrigatório no primeiro); `kind` herda o da seta declarada; `label` idem;
-`reply` é uma resposta curta tracejada na linha seguinte; `id` só é preciso se
-algum caminho desviar dali.
+`description` é a forma longa, e sai no hover; `reply` é uma resposta curta
+tracejada na linha seguinte; `id` só é preciso se algum caminho desviar dali.
 
 **`from` e `to` de passo resolvem pela regra do §1, e não pelo passo anterior.**
 Um id nu é procurado no projeto que declara o **fluxo** e depois em `shared` —
@@ -288,6 +311,7 @@ quebrado conta a coisa errada". Por isso, depois de mexer em fluxo, rodar
 | `kind` | `info` — prontos: `risk`, `blocker`, `warning`, `question`, `info`, `tip` |
 | `target` | nenhum → post-it solto (exige `scope`) |
 | `scope` | nenhum → acompanha a caixa em todo diagrama |
+| `meta` | `{}` — sai no hover (quem levantou, quando, o link da ADR) |
 
 **Nota se escreve pela chave de lista `notes:`, ou aninhada** — na caixa (§4) ou
 no diagrama (§6). **Não** como documento com `kind: note` no topo: ali o `kind`
@@ -355,6 +379,9 @@ Não prometa nada disto:
   caixas ou um `where` mais estreito;
 - `metadata.<chave>.facet` não tem efeito; `animated` em tipo de seta, idem;
 - `folder.yaml` não renomeia nem reordena a pasta na árvore;
+- recolher banda no canvas;
+- aviso de seta escondida **no desenho**: a que perdeu uma ponta simplesmente não
+  aparece, e só o `--inventory` conta (§5);
 - seta DIRETA entre modelagens (`to: outra-modelagem/x`) — existe o espelho, §5.
 
 ## 13. Exemplos canônicos
@@ -364,4 +391,4 @@ lado** — um trecho por forma, sem rede e sem depender de nada estar instalado.
 Leia de lá quando a tabela de campos não bastar para ver a forma inteira.
 
 As duas modelagens completas, arquivo por arquivo, estão no fim do
-`for-agents.md` — depois da marca `<!-- exemplos -->`.
+`llms-full.txt` — depois da marca `<!-- exemplos -->`.

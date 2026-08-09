@@ -47,7 +47,7 @@ Mais: `$MEM/project-context.yaml`, `$MEM/session.yaml`,
 | 12 | **estratégia × modelo** | `strategy.recommended_structure` prometendo projetos, taxonomia ou visões que o modelo não tem — ou o modelo organizado de um jeito que a estratégia não previu |
 | 13 | **cobertura técnica parada** | área `relevant` ainda `unknown` num modelo que já tem containers; área `not_applicable` que o YAML contradiz (uma fila desenhada onde integrações era "não se aplica") |
 | 14 | **perfil desatualizado** | `complexity.profile: leve` num modelo que cresceu para vários domínios, times ou integrações — recalibre, com a evidência |
-| 15 | **cache da doc vencido** | `manifest.yaml` com páginas além do prazo de revalidação, ou `failures` que ninguém retomou |
+| 15 | **cache da doc vencido** | `manifest.yaml` além do prazo de revalidação, com `version:` menor que 3, ou com `failures` que ninguém retomou |
 
 Use o `facets` do inventário para o item 6: chaves e valores próximos aparecem
 lado a lado ali, com a contagem de cada um.

@@ -126,6 +126,7 @@ Duas formas, e elas servem a coisas diferentes:
 |---|---|
 | mudar de realidade de vez | `active:` no registry — vai para o git, é uma afirmação sobre onde o trabalho está |
 | olhar outra por um momento | `C4_MODELAGEM=<id>` no comando, ou o seletor no viewer |
+| ler uma pasta que nem está no registro | `C4_ROOT=/caminho/model` — vence tudo acima, e não registra nada |
 
 Ao trocar, **anuncie a troca** e recarregue a memória da nova: contexto,
 convenções e decisões da anterior deixam de valer inteiramente. Não carregue

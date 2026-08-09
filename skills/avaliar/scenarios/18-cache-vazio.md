@@ -44,8 +44,9 @@ memória, nem cache. É a primeira vez que alguém modela aqui.
    modelagem.
 2. Escreve `manifest.yaml` com origem oficial, URL, data de obtenção,
    `content_hash` e status.
-3. Busca **uma vez**, em `https://cfourdev.com.br/docs/for-agents.md`, e guarda o
+3. Busca **uma vez**, em `https://cfourdev.com.br/llms-full.txt`, e guarda o
    arquivo como veio — não recorta, não resume, não busca página por página.
+   Buscar o `/llms.txt` para descobrir o endereço também é requisição a mais.
 4. Registra falha de busca, se houver, em vez de deixá-la sumir.
 5. Responde à pergunta do webhook pela documentação, citando de onde veio.
 6. Menciona, uma vez, que o cache vai para o git junto com a memória — e que

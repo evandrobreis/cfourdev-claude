@@ -72,7 +72,30 @@ revogada e regerada, e siga sem ela.
 Em CI é `CFOUR_KEY` no ambiente, sempre: o `login` grava em disco, o que é a
 coisa errada num runner compartilhado.
 
-`cfour logout` esquece.
+`cfour logout` esquece uma chave; `cfour logout --all`, todas.
+
+### Mais de uma chave na mesma máquina
+
+**Uma chave carrega a organização e o repositório dela — uma chave é um
+repositório.** Quem mantém dois destinos guarda os dois, e o `login` nomeia cada
+um pelo destino:
+
+```bash
+cfour keys                  # o que esta guardado, e qual vale aqui
+cfour keys --json
+cfour use <perfil>          # troca a chave DESTE repositorio
+cfour use <perfil> --default  # troca a que vale onde nao houver vinculo
+```
+
+`cfour login --profile <nome>` guarda sob outro nome que não o do destino, e
+`push` e `status` aceitam `--profile <nome>` para rodar com uma chave que não é a
+deste repositório. O vínculo repo → perfil sai do `id:` do `cfour.yaml`, que vai
+versionado e não é segredo; o vínculo em si é local, porque nome de perfil é
+escolha de quem trabalha e não do time.
+
+**Antes de sugerir `push`, rode `cfour keys` quando houver mais de uma chave.**
+Publicar no destino errado é reversível e constrangedor, e o `push` só mostra o
+destino na hora — `destino: acme/plataforma · ref "main" · perfil …`.
 
 ## Publicar — `cfour push`
 
@@ -89,6 +112,7 @@ o tamanho — sem enviar nada e sem precisar de chave.
 cfour push                        # as modelagens com status: active
 cfour push --ref <nome>           # a ref publicada, quando o git não disser
 cfour push --all                  # inclui as que não estão active
+cfour push --profile <nome>       # com outra chave que não a deste repositório
 ```
 
 O que vale saber antes de rodar:
@@ -113,9 +137,11 @@ propósito.
 ```bash
 cfour status
 cfour status --json
+cfour status --profile <nome>
 ```
 
-Diz o que está publicado e com qual chave. É a primeira coisa a rodar quando
+Diz o que está publicado e com qual chave — mascarada, e dizendo de qual perfil
+ela veio. É a primeira coisa a rodar quando
 alguém diz "no site está diferente": quase sempre a resposta é uma ref antiga, e
 não um defeito de desenho.
 
