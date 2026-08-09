@@ -60,6 +60,13 @@ falhar no meio.
 Apague os diretórios ao final e confira que apagou. São resultado de teste, não
 memória.
 
+**A `## Preparação` do cenário vence este esqueleto**, inclusive quando o que ela
+pede é a **ausência** de um arquivo: há cenário que só testa o que testa num
+repositório sem `cfour.yaml` nenhum, e montar o registro por hábito faz o
+subagente pular justamente o caminho sob teste. Cenário com **partes** (`Parte
+A`, `Parte B`) é o mesmo: um diretório e um subagente **por parte**, conversas
+separadas, e o veredito do cenário reprova se qualquer parte reprovar.
+
 Para cada cenário selecionado, um subagente, com este contrato:
 
 > Você vai interpretar **dois papéis, separadamente**.
@@ -67,8 +74,10 @@ Para cada cenário selecionado, um subagente, com este contrato:
 > **Papel 1 — o arquiteto.** Você recebe o caminho absoluto de
 > `${CLAUDE_PLUGIN_ROOT}/skills/avaliar/scenarios/NN-*.md`. O caminho tem de ser
 > absoluto: o seu `cwd` é o diretório descartável do cenário, e um caminho
-> relativo não resolve de lá. Abra a conversa com
-> o briefing, literalmente. Depois responda **apenas ao que for perguntado**,
+> relativo não resolve de lá. Se o arquivo tiver partes, você recebe **o nome da
+> sua**, e o briefing, a tabela e os critérios que valem são os dela. Abra a
+> conversa com o briefing, literalmente. Depois responda **apenas ao que for
+> perguntado**,
 > usando a tabela de respostas preparadas. Pergunta fora da tabela: responda de
 > forma plausível e mantenha coerência. **Nunca ofereça informação que não foi
 > pedida** e nunca sugira estrutura.
