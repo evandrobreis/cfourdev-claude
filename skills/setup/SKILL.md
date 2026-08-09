@@ -46,32 +46,30 @@ a ser leitura, e leitura não é validação.
 cfour check --all
 ```
 
-Sem `cfour.yaml` em lugar nenhum acima do diretório atual, ofereça:
+Sem `cfour.yaml` em lugar nenhum acima do diretório atual, **relate a ausência e
+não ofereça nada**. Uma linha, no mesmo tom que o passo 5 usa para o cache:
 
-```bash
-cfour init --id <slug> --nome "<Nome legivel>"
+```
+cfour.yaml       nao existe (nasce quando o assunto tiver nome)
 ```
 
-Diga o que ele escreve antes de rodar: um `cfour.yaml` na raiz e uma modelagem
-mínima em `./<slug>/` — um usuário, um sistema, uma seta e um diagrama. Cinco
-arquivos, e nada além disso.
+A alternativa óbvia era oferecer aqui o `cfour init --id <slug>`, com o slug já
+derivado do nome do repositório — e era o que esta skill mandava fazer. Ela
+perdeu por dois motivos. O `init` não escreve só um registro: escreve uma
+modelagem mínima em `./<slug>/` — um usuário, um sistema, uma seta e um diagrama
+—, e estrutura antes de propósito é exatamente o que este plugin existe para não
+fazer, mesmo quando a estrutura é um esqueleto. E o `id` é a decisão mais cara da
+modelagem: vai para a URL do viewer, para todo comando e para o nome da pasta da
+memória, e renomear depois quebra link que alguém já compartilhou. Fixá-lo no
+diagnóstico é decidir isso no ponto de **menor** informação, derivando de um nome
+— o do diretório — que erra justamente nos casos que mais custam: duas frentes no
+mesmo repositório, uma modelagem que não é o repositório, um produto com outro
+nome.
 
-**Proponha o `<slug>`; não peça que ele seja escolhido.** Derive-o do que você já
-sabe — o nome do repositório, o do diretório, o produto que o arquiteto acabou de
-nomear —, em minúsculas, sem acento e com `-` entre palavras
-(`${CLAUDE_PLUGIN_ROOT}/skills/modelagem/references/decisoes-de-quem.md`). Apresente com o custo junto, porque o custo
-é real: ele vai para a URL do viewer, para todo comando e para o nome da pasta da
-memória, e renomear depois quebra links que alguém já compartilhou.
-
-> Repositório `acme-pagamentos`, então eu usaria `pagamentos` como id. Ele vai
-> para a URL e para a pasta da memória, então renomear depois quebra link que
-> alguém compartilhou — por isso estou dizendo antes. Encaixa, ou vocês têm
-> convenção própria?
-
-**Pergunte apenas** quando não houver nome nenhum de onde derivar, quando dois
-nomes forem igualmente plausíveis, ou quando o id já existir no registro. Um
-`cfour init` parado à espera de o arquiteto inventar um identificador que você
-poderia ter derivado é este plugin pedindo a ele que faça o trabalho dele.
+O `id` continua sendo **proposto, e nunca perguntado**; isso não mudou. Mudou
+**quando**: ele se propõe assim que o assunto tem nome, o que acontece em
+`cfour:descoberta`, e o registro nasce em seguida por `cfour:modelagens`
+(`${CLAUDE_PLUGIN_ROOT}/skills/modelagem/references/decisoes-de-quem.md`).
 
 Se já houver registro, apenas diga quantas modelagens ele lista e qual está
 `active`. Não proponha criar mais uma: quando é modelagem nova e quando é
@@ -134,7 +132,7 @@ Um bloco, com as cinco respostas e **uma** proposta de próximo passo:
 
 ```
 cfour            nao encontrado no PATH
-cfour.yaml       nao existe neste repositorio (nem acima dele)
+cfour.yaml       nao existe (nasce quando o assunto tiver nome)
 memoria antiga   nao ha
 modelagens       nenhuma
 cache da doc     nao ha (nasce na primeira consulta)
@@ -142,14 +140,17 @@ cache da doc     nao ha (nasce na primeira consulta)
 Sem o CLI voce ainda modela: o que some e a validacao e o viewer
 local. Posso:
 
-  1. instalar o cfour           npm i -g cfourdev
-  2. criar a primeira modelagem cfour init --id pagamentos
+  1. instalar o cfour  npm i -g cfourdev
 
-Usei `pagamentos` porque e o nome do repositorio; ele vai para a URL
-e para a pasta da memoria. Faco os dois?
+Instalo? Depois disso o proximo passo e descobrir o que a modelagem
+precisa apoiar — o id e o registro nascem de la, ja com nome.
 ```
 
-O slug aparece **preenchido** na proposta, e não como `<slug>` esperando alguém.
+Em repositório sem registro, o setup faz **no máximo uma** oferta, e ela é
+instalar o CLI. Com o `cfour` já no PATH, o relatório fica **sem oferta nenhuma**
+— e isso é o certo, não uma falha: o próximo passo dali é uma pergunta, não um
+comando. Duas propostas, sendo que uma delas grava um identificador que vai para
+a URL, é este passo decidindo o que ele não tem informação para decidir.
 
 Sem acento na saída de terminal — o CLI já escreve assim, e o terminal do
 Windows nem sempre está em UTF-8.
@@ -160,10 +161,10 @@ Com o repositório pronto, o trabalho é de outra skill, e não desta:
 
 | a situação é… | vá para |
 |---|---|
-| repositório pronto, nada modelado ainda | `cfour:descoberta` |
+| sem registro, nada modelado ainda | `cfour:descoberta` — é lá que o assunto ganha nome, e só então o `id` |
 | repositório pronto, com modelagem e memória | `cfour:retomar` |
 | dúvida sobre em qual realidade trabalhar | `cfour:modelagens` |
 | só faltava saber rodar o viewer ou publicar | `cfour:operar` |
 
 Não comece a modelar aqui. Esta skill responde "dá para trabalhar?", e a resposta
-é sim ou é uma lista do que falta — nunca um diagrama.
+é sim ou é uma lista do que falta — nunca um diagrama, e nunca um id.

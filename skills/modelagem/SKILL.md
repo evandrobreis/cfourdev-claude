@@ -122,7 +122,11 @@ Nove regras que valem em toda skill `cfour:*`. Nenhuma é negociável.
    recomendação é a estratégia sendo terceirizada para quem pediu ajuda com ela;
    escolher em silêncio é o erro oposto e igualmente grave. Quem decide o quê
    está em `references/decisoes-de-quem.md` — e identificador derivável
-   (slug, id) **se propõe, nunca se pergunta**.
+   (slug, id) **se propõe, nunca se pergunta**, mas se propõe **assim que o
+   assunto tem nome, e nunca antes**, mesmo quando o diretório já sugere um.
+   Derivar do nome do repositório é barato quando há um assunto só, e erra
+   exatamente nos casos caros: duas frentes, uma modelagem que não é o
+   repositório, um produto com outro nome.
 5. **Proporcional ao caso.** Meça a complexidade pelas características
    descobertas — nunca por uma palavra do briefing — e calibre quantas perguntas,
    quantas alternativas e quantas ondas o trabalho merece →

@@ -98,10 +98,21 @@ Aqui você **entrevista, e não inventa**. Um sistema inferido do nome de uma pa
 
 ## A regra do slug, porque ela foi o sintoma
 
-Um identificador derivável **se propõe, não se pergunta**.
+Um identificador derivável **se propõe, não se pergunta** — e se propõe **assim
+que o assunto tem nome, nunca antes**.
 
-Havendo um nome — do produto, da iniciativa, do sistema, do diretório, do
-repositório —, derive:
+As duas metades são a mesma regra. Perguntar o slug é devolver ao arquiteto uma
+decisão que você podia tomar; fixá-lo antes de saber o que será modelado é tomar
+a decisão mais cara da modelagem no ponto de menor informação, e derivá-la do
+único nome que existe naquele momento — o do diretório. Isso é barato quando há
+um assunto só e o repositório é ele; erra exatamente nos casos que mais custam:
+duas frentes no mesmo repositório, uma modelagem que não é o repositório, um
+produto com outro nome. Enquanto o assunto não tem nome, a resposta certa é
+**relatar que o registro ainda não existe**, e não propor um id.
+
+Havendo um nome do assunto — o do produto, o da iniciativa, o do sistema —,
+derive dele. Diretório e repositório entram como **confirmação** do que o assunto
+já disse, e nunca no lugar dele. Derivando:
 
 1. minúsculas, sem acento, `-` entre palavras;
 2. o substantivo que a organização usa, não a frase inteira;
