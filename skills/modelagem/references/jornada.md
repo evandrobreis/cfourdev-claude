@@ -88,6 +88,16 @@ nenhum outro:
 5. **o irreversível** — `cfour push`, remover elemento, renomear `id`, apagar
    arquivo.
 
+**Quantas paradas isso vira é do perfil** (`calibragem.md`). São cinco assuntos,
+não cinco esperas: em perfil `leve`, **os quatro primeiros acontecem numa rodada
+só** — o objetivo, a fronteira, a organização e o "vou começar a escrever" na
+mesma mensagem, cada um nomeado, uma resposta do arquiteto para todos. Em
+`intermediario` fundem-se 3 e 4; em `profundo`, os cinco são separados.
+
+Fundir não é omitir. A fronteira que entrou na rodada continua **dita em voz
+alta** — o que se economiza é o turno de espera, e é ele que custa caro em uma
+iniciativa pequena.
+
 Fora deles, **proponha e siga**, deixando o registro para trás: o arquiteto
 corrige lendo, e corrigir uma linha é mais barato do que responder a uma pergunta
 que ele não precisava ter recebido.

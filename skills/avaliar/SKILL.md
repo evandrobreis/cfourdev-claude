@@ -23,16 +23,18 @@ dele, o problema é a regra, não o cenário.
   pela metade, um cache com data velha. Sem isso o cenário testa outra coisa.
 
 Os cenários `01`–`11` medem o método: propósito, agnosticismo de rótulo,
-alternativas, contrato. Os `12`–`22` medem o **processo**: proporcionalidade,
+alternativas, contrato. Os `12`–`23` medem o **processo**: proporcionalidade,
 jornada, recomendação, cobertura técnica, classificação, documentação e retomada.
 
 ## Como rodar
 
-**Peça confirmação antes.** Rodar os vinte e dois cenários gasta bastante —
+**Peça confirmação antes.** Rodar os vinte e três cenários gasta bastante —
 pergunte quantos e quais, e ofereça o subconjunto mínimo útil: `01`, `03`, `04`,
-`09`, `10`, `11`, `12`, `13`, `14`, `16`, `20` — que cobrem os quatro testes
-transversais, os dois extremos de calibragem e as duas falhas eliminatórias mais
-caras.
+`09`, `10`, `11`, `12`, `13`, `14`, `16`, `20`, `23` — que cobrem os quatro
+testes transversais, os dois extremos de calibragem e as duas falhas
+eliminatórias mais caras. O `23` está aí porque mede o extremo de leveza que
+nenhum outro mede: um briefing de uma frase, e um portão de saída que pode
+devolver vinte e cinco campos de `unknown` para ele.
 
 ### Cada cenário roda num repositório descartável
 
@@ -109,11 +111,14 @@ Nenhum cenário sozinho detecta isto:
   modelagens saiu do que precisa aparecer junto, ou saiu do CNPJ? Um plugin que
   responde "empresas diferentes → modelagens diferentes" acerta o 11 por acaso e
   erra o 04.
-- **Calibragem (01 × 13, e 12 × 21)** — dois cenários chamados "plataforma"
-  receberam perfis **diferentes** (01 leve, 13 profundo)? E dois que **começam**
-  parecidos terminaram diferentes, porque um cresceu (12 leve, 21 recalibrado)?
-  Perfil que acompanha o vocabulário do briefing, ou que nunca se revisa, é o
-  mesmo defeito da estratégia que segue rótulo.
+- **Calibragem (01 × 13, 12 × 21, e 23 × 13)** — dois cenários chamados
+  "plataforma" receberam perfis **diferentes** (01 leve, 13 profundo)? E dois que
+  **começam** parecidos terminaram diferentes, porque um cresceu (12 leve, 21
+  recalibrado)? E os dois briefings **curtos** — uma frase no 23, três linhas no
+  13 — produziram pesos de processo diferentes, ou o peso veio do tamanho do
+  briefing? Perfil que acompanha o vocabulário, que nunca se revisa, ou que lê
+  falta de informação como complexidade, é o mesmo defeito da estratégia que
+  segue rótulo.
 
 Se a estratégia — ou o peso do processo — acompanhou o rótulo em vez das
 necessidades, o plugin falhou, mesmo com todos os dezenove critérios passando em

@@ -58,9 +58,18 @@ arquitetura sem surpresa, objetivo de documentação ou alinhamento bem delimita
 - enquadramento e calibragem numa rodada só, com no máximo três perguntas;
 - descoberta técnica em **uma pergunta agrupada** (`cobertura-tecnica.md`);
 - estratégia em um parágrafo: um projeto, convenção de id, duas ou três visões;
-- checkpoints 1, 3 e 4 fundidos numa validação só;
+- checkpoints 1, 2, 3 e 4 fundidos numa validação só — a fronteira entra nela,
+  nomeada, em vez de virar parada própria;
+- **o registro também é leve**: grava-se o que foi dito, e o que não foi
+  conversado fica ausente, em vez de datilografado como `unknown`. Os portões de
+  saída da descoberta e da estratégia trazem a regra inteira;
 - entra na escrita rápido, com uma onda e meia;
 - aprofunda **quando aparecer motivo**, não por precaução.
+
+O erro que este perfil corrige tem nome, porque foi cometido: aliviar o
+**perguntar** e manter o **escrever**. Três perguntas seguidas de vinte e cinco
+campos preenchidos com `unknown` não é um caminho curto — é o mesmo caminho, com
+a conta paga na outra ponta.
 
 ### `intermediario`
 
@@ -103,7 +112,9 @@ autoriza mais temas, não mais rodadas por tema.
 | cobertura técnica | 1 pergunta agrupada | áreas relevantes | todas as áreas, nomeadas |
 | alternativas de organização | citada em uma linha | comparada | comparada com custo |
 | decisão de modelagem | só se houver escolha real | sim | sim, com opções consideradas |
-| checkpoints | 3 (fundidos) | 4 | 5 |
+| checkpoints | 2 (1–4 fundidos, mais o 5) | 4 | 5 |
+| registro na memória | o que foi dito; o resto ausente | o dito, mais `unknown` explícito | idem, área por área |
+| memória além do `strategy` | `MD-NNN` curta; o resto se houver | convenções e `Q-NNN` | tudo, com fontes |
 | ondas de escrita | 1–2 | 2–3 | uma por recorte |
 | anúncio da jornada | uma frase | uma frase por etapa | mapa na abertura |
 
