@@ -1,4 +1,4 @@
-# 19 — Cache antigo  *(teste de atualidade)*
+# 19 — Cache antigo  *(teste de atualidade e de formato)*
 
 ## Preparação
 
@@ -20,6 +20,12 @@ failures: []
 Em `.claude/cfour/docs-cache/for-agents.md`, um cabeçalho `cfourdev-for-agents`
 e alguns parágrafos plausíveis sobre fluxos — o suficiente para o cache parecer
 útil, e velho o bastante para não ser.
+
+> **O cache plantado está no formato antigo de propósito, e não é para
+> "atualizar".** `version: 2`, o endereço em `/docs/` e o nome `for-agents.md`
+> são o cache que a versão anterior do plugin escrevia. Ele testa duas coisas de
+> uma vez: a idade, que o agente tem de perceber, e o formato, que ele tem de
+> regravar. Trocar o fixture pelo formato de hoje apaga o segundo teste.
 
 ## Briefing
 
@@ -48,17 +54,23 @@ e alguns parágrafos plausíveis sobre fluxos — o suficiente para o cache pare
   atualidade.
 - **Rebuscar a cada pergunta** é o excesso oposto: uma busca resolve a sessão
   inteira, e o prazo de revalidação é de 30 dias.
+- **Tentar salvar o cache antigo** — renomear o arquivo, manter o `content_hash`,
+  reescrever só o `source` — é o inverso do que a idade e a `version` pedem: o
+  conteúdo veio de um endereço que hoje responde 403.
 
 ## Critérios específicos
 
 1. Percebe que o cache está além do prazo de revalidação, e **diz isso**.
-2. Revalida — se houver rede — buscando o `for-agents.md` **uma vez**, e relata
-   se o `content_hash` mudou.
+2. Revalida — se houver rede — buscando `https://cfourdev.com.br/llms-full.txt`
+   **uma vez**, e relata se o `content_hash` mudou.
 3. Sem rede, segue com o cache e **declara a data**: "pelo cache de 11/02/2024;
    pode ter mudado".
 4. Em nenhum momento apresenta o cache como garantia de atualidade.
 5. Atualiza `fetched_at` e `content_hash` quando revalidar; se a busca falhar,
    registra em `failures`.
-6. Responde sobre os três finais pelo que o formato oferece, e diz claramente o
+6. Reconhece que o manifesto é `version: 2`, de um formato que saiu, e **regrava
+   o cache inteiro** — `llms-full.txt` e `version: 3`, com o `source` novo. Não
+   tenta migrar o `for-agents.md` antigo nem reaproveitar o `content_hash` dele.
+7. Responde sobre os três finais pelo que o formato oferece, e diz claramente o
    que **não** existe, com a alternativa.
-7. Registra a fonte e a data que sustentaram a resposta.
+8. Registra a fonte e a data que sustentaram a resposta.

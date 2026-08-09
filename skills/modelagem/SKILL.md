@@ -43,7 +43,7 @@ cfour.yaml                              o REGISTRO — o índice: id, path e fed
   project-context.yaml · session.yaml · decisions/ · sessions/
 
 .claude/cfour/docs-cache/               a DOCUMENTAÇÃO em cache — da plataforma,
-  manifest.yaml · pages/                não de modelagem nenhuma (`cfour:documentacao`)
+  manifest.yaml · llms-full.txt         não de modelagem nenhuma (`cfour:documentacao`)
 ```
 
 O modelo é um **caminho**, e ele vem do `path:` da entrada no registro — pode ser
@@ -62,11 +62,15 @@ mora sob `.claude/`, que é de quem a escreve.
 **Antes de ler ou escrever qualquer coisa, resolva em qual modelagem você está.**
 Ordem, e ela não é negociável:
 
-1. o id que o arquiteto disse nesta conversa
-2. `C4_MODELAGEM` no ambiente
-3. `active:` de `cfour.yaml` (o único caminho resolvido a
+1. `C4_ROOT` no ambiente — uma pasta avulsa, que nem está no registro. Nomeia
+   uma árvore direto, então **não sobra o que escolher**: nem o id dito na
+   conversa, nem `C4_MODELAGEM`, nem `active:` alcançam. Se ela estiver definida,
+   diga isso em voz alta antes de qualquer coisa
+2. o id que o arquiteto disse nesta conversa
+3. `C4_MODELAGEM` no ambiente
+4. `active:` de `cfour.yaml` (o único caminho resolvido a
    partir do cwd — subindo a árvore até achar)
-4. sem registry → modo avulso: `./model`
+5. sem registry → modo avulso: `./model`
 
 Se o id não resolver, ou se houver mais de um candidato plausível, **pergunte**.
 Escolher em silêncio é como memória vai parar na realidade errada.

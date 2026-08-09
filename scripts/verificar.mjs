@@ -131,9 +131,11 @@ const DO_USUARIO = new Set([
   // do repositorio de quem modela — nao existe aqui, e citar pelo nome nu e o
   // certo, como os quatro arquivos de memoria acima.
   'manifest.yaml',
-  // O payload da documentacao. Nao e arquivo de ninguem aqui: e o que se busca
-  // em `https://cfourdev.com.br/docs/for-agents.md` e se guarda em
-  // `.claude/cfour/docs-cache/`, no repositorio de quem modela.
+  // O nome ANTIGO do payload, que a `0.5.0` aposentou. Continua citado de
+  // proposito: o cenario `19` planta um cache nesse formato, e a skill de
+  // documentacao explica o que fazer ao encontrar um. O nome de hoje —
+  // `llms-full.txt` — nao precisa de entrada nenhuma, porque os dois regexes
+  // abaixo so casam `md|yaml|yml|json|mjs`.
   'for-agents.md',
   // Arquivos que a cobertura tecnica manda LER no repositorio do arquiteto
   // antes de perguntar. Sao dele, e nenhum deles mora aqui.
@@ -434,7 +436,7 @@ test('a skill e o contrato citam o endereco unico da documentacao', () => {
   // Nao ha teste possivel do outro lado — o gerador da doc mora noutro
   // repositorio, e este roda sem rede de proposito. O que da para afirmar aqui e
   // que o endereco esta escrito onde o modelo vai le-lo.
-  const ENDERECO = 'https://cfourdev.com.br/docs/for-agents.md'
+  const ENDERECO = 'https://cfourdev.com.br/llms-full.txt'
   const onde = [
     path.join(SKILLS, 'documentacao', 'SKILL.md'),
     path.join(SKILLS, 'modelagem', 'references', 'viewer-contract.md'),
@@ -443,8 +445,27 @@ test('a skill e o contrato citam o endereco unico da documentacao', () => {
   assert.deepEqual(ausentes.map(rel), [], 'arquivos que nao citam o endereco unico')
 })
 
+test('a skill reconhece o payload de hoje, e o cache que ela mesma escreve', () => {
+  // Tres strings que so o outro repositorio conhece, e que este nao tem como
+  // conferir por HTTP: o marcador da primeira linha do payload, as marcas que
+  // separam os blocos dentro dele, e a versao do manifesto do cache.
+  //
+  // Congelar aqui nao prova que o gerador emite isso — prova que, no dia em que
+  // alguem mexer num dos tres, o outro lado nao muda sozinho e em silencio.
+  const doc = fs.readFileSync(path.join(SKILLS, 'documentacao', 'SKILL.md'), 'utf8')
+
+  const CONTRATO = [
+    'cfourdev-llms: v1', // o marcador da primeira linha; o `v1` e do FORMATO
+    '<!-- cli -->', // o `cfour --help` embutido no payload
+    '<!-- exemplos -->', // as duas modelagens completas
+    'version: 3', // o formato do manifesto que a skill grava
+  ]
+  const ausentes = CONTRATO.filter((c) => !doc.includes(c))
+  assert.deepEqual(ausentes, [], 'o que a skill de documentacao deixou de declarar')
+})
+
 test('nada manda buscar a pagina de exemplos, que deixou de existir', () => {
-  // Os trinta YAMLs viraram um bloco do `for-agents.md`. Um `doc:exemplos`
+  // Os trinta YAMLs viraram um bloco do `llms-full.txt`. Um `doc:exemplos`
   // sobrevivente manda o agente a uma URL que responde 404 — e o resultado e uma
   // linha em `failures:`, que e falha silenciosa do tipo que a skill de
   // documentacao existe para evitar.
@@ -474,7 +495,11 @@ test('nenhuma URL de documentacao aponta para fora do dominio oficial', () => {
     linhas.forEach((linha, i) => {
       for (const [url, host] of linha.matchAll(/https?:\/\/([a-zA-Z0-9.-]+)(\/\S*)?/g)) {
         if (!HOSTS.has(host)) problemas.push(`${rel(f)}:${i + 1}: host ${host}`)
-        if (/\/docs?\b/.test(url) && host !== 'cfourdev.com.br') {
+        // `/docs` pega a pagina para citar; `/llms*.txt` pega o payload, que mora
+        // na RAIZ do site — a guarda antiga so olhava o caminho `/docs` e deixava
+        // passar um `https://app.cfourdev.com.br/llms-full.txt`, que e host
+        // permitido e documentacao errada.
+        if (/\/docs?\b|\/llms(-full)?\.txt\b/.test(url) && host !== 'cfourdev.com.br') {
           problemas.push(`${rel(f)}:${i + 1}: documentacao fora do dominio oficial — ${url}`)
         }
       }

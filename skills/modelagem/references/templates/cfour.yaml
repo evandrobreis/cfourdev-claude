@@ -13,7 +13,8 @@
 version: 1
 
 # A modelagem usada quando ninguem diz qual. `C4_MODELAGEM` no ambiente e
-# `--modelagem <id>` na linha de comando vencem este campo.
+# `--modelagem <id>` na linha de comando vencem este campo. E `C4_ROOT=<pasta>`
+# vence os tres: ele nomeia uma arvore direto, e o registro inteiro sai de cena.
 active: <slug>
 
 modelagens:
