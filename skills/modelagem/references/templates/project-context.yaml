@@ -4,8 +4,16 @@
 # ele serve, para quem, e o que ainda nao se sabe. Uma sessao nova le isto antes
 # de qualquer outra coisa.
 #
-# Regra unica: todo item carrega `status`. `unknown` explicito vale mais que
-# campo ausente — ausencia nao distingue "nao perguntei" de "nao importa".
+# A regra: todo item que a conversa tocou carrega `status`. `unknown` explicito
+# vale mais que campo ausente — ausencia nao distingue "nao perguntei" de "nao
+# importa".
+#
+# A ressalva: em perfil `leve` grava-se o que foi dito, e o que nao foi
+# conversado fica ausente mesmo. Este arquivo continua listando tudo porque ele e
+# o mapa do que existe para gravar, e nao a lista do que precisa ser
+# datilografado hoje: preencher vinte e cinco campos com `unknown` depois de uma
+# conversa de tres perguntas produz um documento que PARECE completo. O portao de
+# saida de `cfour:descoberta` traz a regra inteira, perfil a perfil.
 version: 1
 updated: AAAA-MM-DD
 
@@ -110,6 +118,10 @@ boundaries:
 # Cobertura tecnica — as sete areas, e o que se sabe de cada uma. Existe para
 # que nada importante fique de fora EM SILENCIO: `unknown` explicito e divida
 # declarada; area ausente e area esquecida.
+#
+# Em perfil `leve`, a pergunta agrupada nao toca as sete, e a area que ninguem
+# conversou fica ausente. O que nao muda em perfil nenhum: area marcada
+# `relevant` nao fica em `unknown` sem que isso tenha sido dito em voz alta.
 # Ver: ${CLAUDE_PLUGIN_ROOT}/skills/modelagem/references/cobertura-tecnica.md
 #
 # status: relevant | not_applicable | unknown | deferred

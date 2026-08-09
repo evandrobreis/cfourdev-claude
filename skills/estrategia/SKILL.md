@@ -255,6 +255,22 @@ o aceite pode ser silencioso, a recomendação não pode.
 
 ## Portão de saída
 
+**A forma do registro é do perfil, como a das perguntas** — a lista abaixo é a
+do perfil `intermediario` e `profundo`. Em `leve`, o registro cabe no bloco
+`strategy` mais uma `MD-NNN` curta, e o resto **nasce quando tiver o que
+guardar**:
+
+| o arquivo | em `leve`, nasce quando |
+|---|---|
+| `MODELING-CONVENTIONS.md` | houver convenção que **não seja** o default |
+| `Q-NNN` | houver pergunta aberta que trave alguma coisa |
+| `H-NNN` | houver hipótese sua de verdade, com o que a derrubaria |
+
+Escrever arquivo vazio para cumprir lista é o oposto do que a memória serve:
+quem retomar lê quatro arquivos e descobre que três não dizem nada — e passa a
+não confiar no quarto. O que **não** muda em perfil nenhum é o `strategy`
+preenchido, o destino de cada `viewProposal` dito no fecho, e o `session.yaml`.
+
 - Cada escolha estrutural **aceita** vira uma decisão em
   `$MEM/decisions/MD-NNN-*.md` (template no núcleo), com opções
   consideradas e critério de revisão. `accepted` só depois do sim, pela seção
@@ -268,8 +284,11 @@ o aceite pode ser silencioso, a recomendação não pode.
   Uma proposta que ficou só na conversa
   evapora, e a visão nasce sem a pergunta que a justificava. Diga, no fecho, onde
   cada uma parou; se nenhuma visão foi recomendada, diga isso também.
-- As convenções que passam a valer entram em `$M/model/MODELING-CONVENTIONS.md`.
-- O que ficou em aberto vira `Q-NNN` ou `H-NNN` em `project-context.yaml`.
+- As convenções que passam a valer entram em `$M/model/MODELING-CONVENTIONS.md`
+  — as que **divergem** do default. Um arquivo que só repete o padrão não é
+  convenção registrada, é ruído com nome de contrato.
+- O que ficou em aberto vira `Q-NNN` ou `H-NNN` em `project-context.yaml`. O que
+  não ficou em aberto não vira nada.
 - **O bloco `strategy` de `project-context.yaml` fica preenchido**:
   `recommended_structure`, `alternatives`, `rationale`, `user_constraints`,
   `waves`, `decision_ref` e `status` (`proposed` | `validated` | `superseded`).

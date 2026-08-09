@@ -30,6 +30,12 @@ perfil:
 O arquiteto que sabe quantos passos faltam responde melhor do que o que acha que
 o interrogatório não acaba nunca.
 
+O mapa vem **antes** de a calibragem terminar, então o perfil ainda é palpite:
+comece pelo curto, o de quatro passos acima. Prometer sete etapas a quem pediu
+uma coisa pequena espanta; descobrir no meio que o caso é grande se corrige com
+uma frase — *"isto é maior do que parecia, vou por temas"* —, e recalibrar em voz
+alta já é o que a calibragem manda fazer.
+
 ## Quando NÃO usar
 
 - O propósito já está registrado e o assunto é preencher o modelo →
@@ -131,8 +137,9 @@ Quando um sinal aparecer e você não souber o que perguntar →
 
 ## As seis dimensões
 
-Independentes: não são uma escada, e a conversa vai pular entre elas. Cubra
-todas antes de fechar, ainda que a resposta seja `unknown`.
+Independentes: não são uma escada, e a conversa vai pular entre elas. Percorra
+todas antes de fechar — **o que se grava** de cada uma é assunto do portão de
+saída, no fim desta skill, e a forma do registro é do perfil.
 
 ### 1. Propósito
 Que problema a modelagem resolve · que decisão ela suporta · que discussão ela
@@ -251,15 +258,38 @@ uma resposta.
 
 ## Portão de saída
 
-A descoberta termina quando `$MEM/project-context.yaml` responde — ou
-marca explicitamente como `unknown` — as catorze, **e** quando a matriz de
-cobertura técnica não tem área `relevant` em `unknown` sem que isso tenha sido
-dito em voz alta, **e** quando `classification` tem um `status`.
+A descoberta termina quando `$MEM/project-context.yaml` cobre as catorze **na
+forma que o perfil pede**, **e** quando a matriz de cobertura técnica não tem
+área `relevant` em `unknown` sem que isso tenha sido dito em voz alta, **e**
+quando a classificação foi perguntada e o que se ouviu está gravado em
+`classification`.
 
-**A profundidade das catorze é do perfil, não da lista.** Com perfil `leve`, uma
-frase por item basta e várias se respondem juntas; com perfil `profundo`, cada
-uma merece a resposta que a decisão exige. O que não muda é que **nenhuma fica
-ausente**: `unknown` explícito é resposta, silêncio não é.
+**A profundidade das catorze é do perfil — e a forma do registro também.** É a
+segunda metade que costuma ficar para trás: aliviar o *perguntar* e manter o
+*escrever* produz uma conversa de três perguntas seguida de vinte e cinco campos
+datilografados, e quem pediu uma coisa pequena espera do mesmo jeito.
+
+| perfil | o que o portão cobra |
+|---|---|
+| `leve` | o que **foi dito** está gravado. O que não foi conversado fica **ausente** |
+| `intermediario`, `profundo` | o que foi dito, **e** `unknown` explícito no resto |
+
+A diferença entre ausência e `unknown` não é formalidade — é a substância disto:
+
+- **`unknown` explícito é uma afirmação:** *"perguntei, e não se sabe"*. É dívida
+  declarada, e vale nos perfis em que houve rodada para perguntar;
+- **ausência é o estado natural de uma conversa curta.** Enchê-la de `unknown`
+  produz um documento que **parece** completo e não é: a sessão seguinte lê vinte
+  e cinco dívidas onde houve uma conversa de dez minutos, e não sabe distinguir o
+  que ninguém sabe do que ninguém precisou.
+
+Duas coisas **não** são do perfil, e valem em `leve` igual:
+
+- nenhuma área técnica marcada `relevant` fica em `unknown` sem que isso tenha
+  sido **dito em voz alta** ao arquiteto;
+- a classificação foi **perguntada**. A resposta pode caber em meia linha, e o
+  `status` sai dela; o que não pode é ninguém ter perguntado o que o leitor ia
+  querer distinguir no desenho.
 
 As catorze:
 
@@ -285,7 +315,14 @@ propósito, e o nome da próxima etapa (`estrategia`, quase sempre
 bloco `workflow` — `current_stage`, `completed_stages`, `next_stage` —, que é o
 que permite a `cfour:retomar` voltar aqui sem repetir nada.
 
-Este é o **checkpoint 2** da jornada: peça a validação da fronteira, e só dela.
+Este é o **checkpoint 2** da jornada, e ele tem forma por perfil, como o portão
+acima. Em `intermediario` e `profundo` é parada própria: peça a validação da
+fronteira, e só dela. Em `leve` ele entra na **rodada de confirmação fundida**
+(`${CLAUDE_PLUGIN_ROOT}/skills/modelagem/references/calibragem.md`), com o
+objetivo, a organização e a entrada na escrita — uma parada, e não duas.
+
+Fundir **não** é omitir: a fronteira continua nomeada em voz alta, dentro da
+mesma rodada. O que se economiza é o turno de espera, não a pergunta.
 
 ## Quando a modelagem ainda não existe
 
@@ -307,6 +344,9 @@ Criar o esqueleto é com `cfour:modelagens`.
 - Apresentar inferência sua com a mesma cara de coisa que o arquiteto afirmou.
 - Perguntar as catorze de uma vez, ou tratá-las como formulário a preencher em
   voz alta.
+- Datilografar `unknown` em campo que ninguém conversou, para fechar o portão em
+  perfil `leve`. O portão não é a lista preenchida: é a conversa que houve estar
+  gravada.
 - Continuar perguntando depois que a condição de saída foi satisfeita. Sempre há
   mais uma pergunta possível; o critério é o que **muda o desenho**.
 - Fechar deixando área técnica relevante como desconhecida sem dizer. Vale igual
