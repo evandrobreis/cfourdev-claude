@@ -428,6 +428,43 @@ test('a documentacao oficial e a unica fonte, e o cache tem contrato', () => {
   assert.deepEqual(semMetadado, [], 'campos que o manifesto do cache precisa declarar')
 })
 
+test('a escolha de versionar o cache e oferecida onde o cache nasce, e tem endereco', () => {
+  // Tres execucoes independentes criaram o `docs-cache/` versionado sem dizer
+  // que havia escolha ali. Nenhuma delas foi descuidada: a instrucao morava no
+  // FIM da secao de politica de atualizacao, longe do passo que cria o
+  // diretorio — quem le a skill de cima para baixo ja gravou o cache quando
+  // chega a frase que manda oferecer.
+  //
+  // O contrato aqui e fraco de proposito, no espirito do teste do estado
+  // persistido: nao da para afirmar que o agente vai anunciar, mas da para
+  // afirmar que a oferta esta no passo certo e que o que a skill manda gravar
+  // tem endereco.
+  const doc = fs.readFileSync(path.join(SKILLS, 'documentacao', 'SKILL.md'), 'utf8')
+
+  const procedimento = doc.split('\n## Procedimento')[1]?.split('\n## ')[0] ?? ''
+  assert.ok(procedimento, 'a skill de documentacao perdeu a secao `## Procedimento`')
+  for (const marca of ['.gitignore', 'git_decidido_por']) {
+    assert.ok(
+      procedimento.includes(marca),
+      `o passo que cria o cache nao menciona \`${marca}\``,
+    )
+  }
+
+  // E o que ela manda gravar precisa existir no manifesto: a escolha ACRESCENTA
+  // aos tres campos de procedencia, e nao os substitui.
+  const manifesto = doc.split('### `manifest.yaml`')[1]?.split('\n### ')[0] ?? ''
+  const CAMPOS = ['source:', 'fetched_at:', 'content_hash:', 'git:', 'git_decidido_por:']
+  const ausentes = CAMPOS.filter((c) => !manifesto.includes(c))
+  assert.deepEqual(ausentes, [], 'campos que o exemplo do `manifest.yaml` deixou de declarar')
+
+  // Os dois valores de cada campo escritos por extenso: `git: versionado`
+  // sozinho nao distingue escolha feita de escolha herdada, e e essa diferenca
+  // que decide se a proxima sessao volta a oferecer.
+  const VALORES = ['versionado', 'ignorado', 'default', 'arquiteto']
+  const semValor = VALORES.filter((v) => !manifesto.includes(v))
+  assert.deepEqual(semValor, [], 'valores que os campos da escolha admitem e o manifesto nao mostra')
+})
+
 test('a skill e o contrato citam o endereco unico da documentacao', () => {
   // O agente busca UM arquivo, e nao doze paginas: para saber qual pagina
   // responde a duvida ja era preciso conhecer a resposta, e o modo de falhar era

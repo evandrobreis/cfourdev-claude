@@ -138,7 +138,22 @@ sem interpretar Markdown:
 3. **Busque** — com a ferramenta de acesso web do agente, no endereço acima e em
    nenhum outro.
 4. **Grave** o arquivo e o manifesto (abaixo).
-5. **Responda e registre a fonte** em quem decidiu: `consulted_docs` em
+5. **Se o `docs-cache/` nasceu agora**, anuncie a escolha de versionar — é
+   **neste passo** que ela cabe, e não depois. Uma linha, sem interromper o
+   assunto de quem está modelando:
+
+   > Guardei a documentação em `.claude/cfour/docs-cache/`, e ela **vai para o
+   > git** junto com a memória, para que a fonte de cada decisão viaje no mesmo
+   > commit. Quem preferir cache descartável acrescenta
+   > `.claude/cfour/docs-cache/` ao `.gitignore` — nada quebra, a próxima
+   > consulta reconstrói.
+
+   E grave a escolha no `manifest.yaml`: `git: versionado`, com
+   `git_decidido_por: default`. Se o arquiteto pedir o contrário, `git: ignorado`
+   e `git_decidido_por: arquiteto` — e aí a linha no `.gitignore` é sua, não
+   dele. O porquê do default está em
+   [Versionar no git, ou não](#versionar-no-git-ou-não).
+6. **Responda e registre a fonte** em quem decidiu: `consulted_docs` em
    `$MEM/session.yaml`, e a seção `Fontes` da `MD-NNN` quando a decisão dependeu
    do que a doc diz.
 
@@ -186,6 +201,8 @@ fetched_at: 2026-08-06T14:02:00Z
 content_hash: sha256:52ffde...    # o `conteudo-sha256` do cabecalho do proprio arquivo
 versao_cli: 0.5.0                 # a versao a que aquele contrato pertence
 status: ok                        # ok | stale | failed
+git: versionado                   # versionado | ignorado — o destino deste cache
+git_decidido_por: default         # default | arquiteto — se a escolha foi feita ou herdada
 failures:
   - url: https://cfourdev.com.br/llms-full.txt
     attempted_at: 2026-08-06T14:03:00Z
@@ -206,6 +223,14 @@ novo".
 
 `failures` fica registrado de propósito: uma busca que falhou e sumiu vira, na
 sessão seguinte, uma lacuna que ninguém sabe que existe.
+
+`git` e `git_decidido_por` são o **endereço da escolha** de versionar ou não o
+cache. Eles **acrescentam** — não substituem `source`, `fetched_at` nem
+`content_hash`, que continuam sendo a procedência do conteúdo. Os dois campos
+existem porque um só não responde a pergunta da sessão seguinte: `git:
+versionado` sozinho não distingue "o arquiteto quis assim" de "ninguém foi
+perguntado", e é justamente essa diferença que decide se você volta a oferecer a
+alternativa. Com `git_decidido_por: arquiteto`, não ofereça de novo.
 
 ### Política de atualização
 
@@ -243,9 +268,24 @@ Quem preferir cache reconstruível **e descartável** acrescenta uma linha ao
 .claude/cfour/docs-cache/
 ```
 
-Nada quebra: a próxima consulta reconstrói. Ofereça a alternativa ao criar o
-cache pela primeira vez, e registre a escolha — não decida em silêncio nem uma
-coisa nem outra.
+Nada quebra: a próxima consulta reconstrói.
+
+**É default declarado, e não pergunta bloqueante.** Versionar é o que acontece
+quando ninguém disse nada, você diz em uma linha que foi isso que aconteceu, e
+diz junto qual é a alternativa — no passo 5 do [Procedimento](#procedimento),
+que é onde o diretório nasce. Uma pergunta sobre `.gitignore` no meio de uma
+descoberta arquitetural custa mais atenção do que vale; o silêncio total, por
+outro lado, é o defeito que esta seção existe para evitar: quem não conhece a
+skill não fica sabendo que havia escolha.
+
+A escolha fica gravada **no `manifest.yaml` do cache**, em `git` e
+`git_decidido_por` — o mesmo arquivo que já carrega origem, data e hash, e o
+único que sobrevive à sessão. Sem esse registro, a sessão seguinte não consegue
+distinguir uma escolha feita de uma escolha herdada, e ou reabre um assunto
+resolvido, ou trata como decidido o que ninguém decidiu.
+
+Anunciar por engano o que já foi anunciado é barato; decidir em silêncio, não. Na
+dúvida — manifesto sem os dois campos, cache de `version` anterior —, anuncie.
 
 ## Segurança
 
@@ -261,7 +301,7 @@ coisa nem outra.
   `cfour:operar` manda: confirmação antes.
 - **Nada de credencial, cookie ou token** no cache — nem em `manifest.yaml`, nem
   no payload, nem em URL com parâmetro.
-- **Nada de fonte privada no cache**, que é público e versionado.
+- **Nada de fonte privada no cache**, que é público e, por default, versionado.
 
 ## Como a fonte fica registrada
 
@@ -290,4 +330,10 @@ seis meses depois — que é exatamente quando alguém vai contestá-la.
 - Buscar o `/llms.txt` para descobrir onde está o conteúdo. Ele é o índice para
   quem chega de fora; o endereço do conteúdo está escrito nesta skill.
 - Guardar o payload sem `url`, `fetched_at` e `source`.
+- Criar o `docs-cache/` sem dizer, na mesma resposta, que ele vai para o git e
+  que uma linha no `.gitignore` é a alternativa — e sem gravar `git` e
+  `git_decidido_por` no manifesto. Decisão que não some por ser pequena: some
+  por ninguém ter sido consultado.
+- Transformar isso numa pergunta que trava a conversa. É uma linha, não um
+  passo.
 - Procurar repositório privado para responder o que a doc pública responde.
