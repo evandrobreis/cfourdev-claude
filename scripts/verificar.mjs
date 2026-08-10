@@ -44,6 +44,24 @@ function textos(dir = SKILLS) {
   return achados
 }
 
+/**
+ * Todo arquivo do repositorio, e nao so a prosa das skills: residuo de endereco
+ * tambem mora em README, workflow e script, que `textos()` nao alcanca.
+ */
+function arquivos(dir = RAIZ) {
+  const achados = []
+  for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+    // `.git` e dependencia nao sao o repositorio, e `.claude/` seria o cache de
+    // quem testou o plugin AQUI dentro — traz o payload inteiro junto, e ele nao
+    // e texto deste projeto.
+    if (e.name === '.git' || e.name === 'node_modules' || e.name === '.claude') continue
+    const p = path.join(dir, e.name)
+    if (e.isDirectory()) achados.push(...arquivos(p))
+    else achados.push(p)
+  }
+  return achados
+}
+
 const rel = (p) => path.relative(RAIZ, p).split(path.sep).join('/')
 
 // ---------------------------------------------------------------------------
@@ -480,6 +498,72 @@ test('a skill e o contrato citam o endereco unico da documentacao', () => {
   ]
   const ausentes = onde.filter((f) => !fs.readFileSync(f, 'utf8').includes(ENDERECO))
   assert.deepEqual(ausentes.map(rel), [], 'arquivos que nao citam o endereco unico')
+})
+
+test('toda origem nomeia o arquivo unico, e o nome antigo nao sobrou', () => {
+  // O teste acima afirma que o endereco APARECE. Nada impedia que aparecesse ao
+  // lado de outro, e o outro existe: ha um `/llms.txt` de verdade no ar — o
+  // indice do padrao llmstxt.org, um link por pagina — a uma letra de distancia
+  // do nome do payload. Buscar o indice gasta uma requisicao para descobrir um
+  // endereco que ja esta escrito na skill, e o modo de falhar e silencioso: o
+  // agente le a pagina errada e conclui que o campo nao existe.
+  //
+  // A skill de documentacao fala do indice DE PROPOSITO, em duas passagens: a
+  // que explica que ele existe e nao e ele, e o item da lista do que nunca se
+  // faz. Proibir a string proibiria a explicacao. O que se proibe aqui e outra
+  // coisa — que uma ORIGEM, a linha que registra de onde o conteudo cacheado
+  // veio, nomeie qualquer endereco que nao seja o arquivo unico.
+  const PAYLOAD = 'https://cfourdev.com.br/llms-full.txt'
+
+  // `source:`, `origem:` e o `url:` de dentro de `failures:`: os tres campos com
+  // que a skill manda registrar a procedencia. A ancora no comeco da linha e o
+  // que deixa a prosa passar — o paragrafo do indice comeca em `**Existe
+  // tambem`, e o item da lista, em `- Buscar o`.
+  const ORIGEM = /^\s*(?:[-*#]\s*)?(?:source|origem|url)\s*:\s*(\S+)/i
+
+  // O cenario 19 planta um cache no formato que a `0.5.0` aposentou, e a origem
+  // dele aponta para o payload antigo de proposito: e o fixture do teste de
+  // formato, e o proprio cenario avisa que troca-lo apaga metade do teste. E a
+  // mesma razao pela qual `for-agents.md` ja tem entrada em `DO_USUARIO`.
+  const FIXTURE = path.join(SKILLS, 'avaliar', 'scenarios', '19-cache-antigo.md')
+  const APOSENTADO = 'https://cfourdev.com.br/docs/for-agents.md'
+
+  const erradas = []
+  for (const f of textos()) {
+    const linhas = fs.readFileSync(f, 'utf8').split('\n')
+    linhas.forEach((linha, i) => {
+      const alvo = linha
+        .match(ORIGEM)?.[1]
+        ?.replace(/^[`<]+/, '')
+        .replace(/[`>.,;)]+$/, '')
+      if (!alvo || !alvo.includes('cfourdev.com.br')) return
+      if (f === FIXTURE && alvo === APOSENTADO) return
+      if (alvo !== PAYLOAD) erradas.push(`${rel(f)}:${i + 1}: ${alvo}`)
+    })
+  }
+  assert.deepEqual(erradas, [], 'origens que nao nomeiam o arquivo unico')
+
+  // Uma excecao que sobrevive ao fixture que ela protege vira permissao geral,
+  // e ninguem lembra de tira-la.
+  assert.ok(
+    fs.readFileSync(FIXTURE, 'utf8').includes(APOSENTADO),
+    'a excecao do cenario 19 ficou sem uso',
+  )
+
+  // E o nome no singular, que e endereco de ninguem: foi o primeiro, saiu do ar
+  // junto com o `/docs/`, e responde 404 hoje. Ele nao aparece escrito por
+  // extenso em comentario nenhum daqui porque a varredura inclui ESTE arquivo —
+  // o padrao, com a barra invertida do regex, nao casa consigo mesmo; a string
+  // nua casaria, e o teste reprovaria a si proprio.
+  const SINGULAR = /llm\.txt/i
+  const restos = []
+  for (const f of arquivos()) {
+    const linhas = fs.readFileSync(f, 'utf8').split('\n')
+    linhas.forEach((linha, i) => {
+      if (SINGULAR.test(linha)) restos.push(`${rel(f)}:${i + 1}`)
+    })
+  }
+  assert.deepEqual(restos, [], 'o endereco no singular, que nao existe mais')
 })
 
 test('a skill reconhece o payload de hoje, e o cache que ela mesma escreve', () => {
