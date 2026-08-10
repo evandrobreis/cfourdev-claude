@@ -25,13 +25,13 @@ pronto, vale mais que cinco perguntas em sequência.
 cfour version
 ```
 
-Falhou? Tente `npx --no-install cfourdev version`, que acha uma instalação local
+Falhou? Tente `npx --no-install cfour-cli version`, que acha uma instalação local
 do projeto.
 
 | resultado | o que dizer |
 |---|---|
 | imprime uma versão | pronto; siga |
-| não encontrado | ofereça `npm i -g cfourdev`, e diga que `npx cfourdev …` serve sem instalar |
+| não encontrado | ofereça `npm i -g cfour-cli`, e diga que `npx cfour-cli …` serve sem instalar |
 
 **Diga também o que se perde sem ele**, porque a resposta honesta muda a
 decisão: sem o `cfour` você ainda descobre propósito, decide estratégia,
@@ -140,7 +140,7 @@ cache da doc     nao ha (nasce na primeira consulta)
 Sem o CLI voce ainda modela: o que some e a validacao e o viewer
 local. Posso:
 
-  1. instalar o cfour  npm i -g cfourdev
+  1. instalar o cfour  npm i -g cfour-cli
 
 Instalo? Depois disso o proximo passo e descobrir o que a modelagem
 precisa apoiar — o id e o registro nascem de la, ja com nome.
