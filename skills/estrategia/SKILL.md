@@ -173,6 +173,21 @@ são padrão do plugin**: só existem se o projeto responder "sim" à pergunta 1
 O que sobrar das oito vai para `classification.keys`, e é de lá que
 `cfour:editor` lê em vez de redescobrir.
 
+**E o que não sobrou vai para `classification.rejected`** — a chave que você
+considerou e deixou de fora, com o `motivo` e o `revise_se` que a ressuscitaria.
+Não é registro de completude: a chave recusada é a que mais volta, e sem endereço
+a próxima sessão a repropõe do zero, ou responde "por que não temos cor por
+criticidade?" redescobrindo a conversa. Mesma razão pela qual hipótese refutada
+permanece marcada `refuted` em vez de sumir do arquivo.
+
+```yaml
+rejected:
+  - { chave: criticality, tipo: meta, motivo: "sem valores acordados: todo mundo diz 'critico'", revise_se: "a conversa de priorizacao definir os niveis" }
+```
+
+Chave que ninguém chegou a considerar **não** entra aqui — a lista é do que a
+conversa tocou, e não um catálogo do que existe no mundo.
+
 ## Visões
 
 Para cada visão candidata, preencha o `viewProposal` de
@@ -237,6 +252,9 @@ estrutural como as outras, e some se ficar de fora:
 > existir a conversa de priorização que ela responderia. Alguma convenção de
 > vocês que atrapalhe?
 
+O `CONSIDEREI` dessa fala tem endereço: ele vira uma linha em
+`classification.rejected`, e não some com a conversa que o produziu.
+
 E as respostas vão para lugares diferentes:
 
 | ele disse | a decisão nasce |
@@ -278,6 +296,10 @@ preenchido, o destino de cada `viewProposal` dito no fecho, e o `session.yaml`.
 - `classification.keys` fica preenchido, ou `classification.status` diz por que
   não — e isso se diz em voz alta, como as áreas técnicas desconhecidas. Uma
   modelagem sem cor nenhuma é uma escolha; ela só é escolha se alguém a fez.
+- **Toda chave que você considerou e recusou está em `classification.rejected`**,
+  com o motivo e o `revise_se`. Este campo **nasce quando houver uma** e fica
+  ausente quando não houver — como os outros, ele é o mapa do que existe para
+  gravar, e não uma linha a datilografar em perfil `leve`.
 - **Cada `viewProposal` preenchido foi para algum lugar** — nota `info` presa ao
   diagrama, ou uma linha na decisão de modelagem correspondente
   (`${CLAUDE_PLUGIN_ROOT}/skills/modelagem/references/view-or-flow.md`, passo 5).

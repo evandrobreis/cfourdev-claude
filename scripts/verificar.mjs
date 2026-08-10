@@ -671,3 +671,45 @@ test('o template de memoria tem onde gravar a classificacao', () => {
     'campos que o template nao declara',
   )
 })
+
+test('a chave que a taxonomia recusou tem onde ficar, e os dois lados a citam', () => {
+  // Meia dúzia de linhas do teste do estado persistido, um nivel abaixo: la o
+  // contrato e o BLOCO que a skill escreve, aqui e o CAMPO. A estrategia manda
+  // dizer o que ficou fora da taxonomia — e o criterio 20 da rubrica cobra isso
+  // —, mas `classification` so tinha `keys`, que guarda o que entrou. O cenario
+  // 13 resolveu inventando um `fora:` na hora, e formato inventado e exatamente
+  // o que o teste do estado persistido existe para impedir do outro lado.
+  const contexto = fs.readFileSync(tpl('project-context.yaml'), 'utf8')
+  const bloco = contexto.split(/^classification:$/m)[1]?.split(/\n# ---/)[0] ?? ''
+  assert.ok(bloco, 'o template perdeu o bloco `classification`')
+  assert.match(bloco, /^ {2}rejected:/m, 'o template nao tem onde gravar a chave recusada')
+
+  // Os tres campos, e cada um tem servico: sem `motivo` a recusa nao impede a
+  // repropositura, que e o unico trabalho dela; sem `revise_se` ela vira sentenca
+  // perpetua, e ninguem sabe quando vale reabrir.
+  const FORMA = ['chave', 'motivo', 'revise_se']
+  assert.deepEqual(
+    FORMA.filter((c) => !bloco.includes(c)),
+    [],
+    'campos da chave recusada que o template nao mostra',
+  )
+
+  // E os dois lados do contrato, que e o defeito que este campo conserta: quem
+  // manda preencher, e quem precisa saber ler. Meio contrato reproduz a lacuna
+  // num endereco novo.
+  const LADOS = [
+    ['estrategia', 'manda preencher'],
+    ['reconciliar', 'precisa saber ler'],
+  ]
+  const mudos = LADOS.filter(
+    ([skill]) =>
+      !fs
+        .readFileSync(path.join(SKILLS, skill, 'SKILL.md'), 'utf8')
+        .includes('classification.rejected'),
+  )
+  assert.deepEqual(
+    mudos.map(([skill, papel]) => `${skill} (${papel})`),
+    [],
+    'skills que nao citam `classification.rejected`',
+  )
+})

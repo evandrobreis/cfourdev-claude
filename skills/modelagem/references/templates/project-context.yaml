@@ -161,18 +161,31 @@ strategy:
 # ver por cor, e sair da caixa para o documento que a explica.
 #
 # `axes` e `artifacts` sao fato do arquiteto, e a descoberta pergunta; `keys` e
-# a traducao para o formato, e a estrategia recomenda. Ver o reference
-# `skills/modelagem/references/classificacao.md`.
+# `rejected` sao a traducao para o formato, e a estrategia recomenda. Ver o
+# reference `skills/modelagem/references/classificacao.md`.
 #
 # Os mesmos quatro `status` da cobertura tecnica, pela mesma razao: ausencia nao
 # distingue "nao perguntei" de "nao importa". Um desenho cinza de proposito e uma
 # escolha, e so e escolha se alguem a fez.
+#
+# `keys` guarda o que entrou; `rejected`, o que foi considerado e ficou de fora.
+# A chave recusada e a que mais volta: sem endereco, a resposta a "por que nao
+# temos cor por criticidade?" e redescobrir a conversa — ou criar a chave. E o
+# mesmo motivo pelo qual hipotese refutada PERMANECE marcada `refuted` em vez de
+# sumir do arquivo.
 # ---------------------------------------------------------------------------
 classification:
   status: unknown        # relevant | not_applicable | unknown | deferred
   axes: []               # por quais eixos a organizacao ja fala: dominio, squad...
   artifacts: []          # { tipo: adr|runbook|painel|repo, escopo: ..., note: ... }
   keys: []               # { chave, tipo: meta|tag, responde, usada_para: [...], color }
+  rejected: []           # { chave, tipo: meta|tag, motivo, revise_se }
+                         # o `revise_se` e o que a ressuscitaria — sem ele a recusa
+                         # vira sentenca perpetua, e ninguem sabe quando reabrir.
+                         # NASCE quando houver chave recusada, e fica AUSENTE
+                         # quando nao houver: campo que existe nao e campo
+                         # obrigatorio, e o portao de saida em perfil `leve` vale
+                         # aqui igual.
 
 # ---------------------------------------------------------------------------
 # Hipoteses — o que voce inferiu, e nao o que te contaram

@@ -102,7 +102,8 @@ sua.
 ## Onde isso fica gravado
 
 Em `$MEM/project-context.yaml`, o bloco `classification`. A **descoberta**
-preenche `axes`, `artifacts` e `status`; a **estratégia** preenche `keys`:
+preenche `axes`, `artifacts` e `status`; a **estratégia** preenche `keys` e
+`rejected`:
 
 ```yaml
 classification:
@@ -116,11 +117,34 @@ classification:
     - { chave: owner,  tipo: meta, responde: "quem conserta quando quebra?", usada_para: [filtro] }
     - { chave: legado, tipo: tag,  responde: "ainda depende do legado?", usada_para: [filtro, exclude] }
     - { chave: adr,    tipo: meta, responde: "onde esta a decisao?", usada_para: [link] }
+  rejected:                   # o que foi considerado e ficou de fora, e o que o desfaz
+    - { chave: criticality, tipo: meta, motivo: "sem valores acordados: todo mundo diz 'critico'", revise_se: "a conversa de priorizacao definir os niveis" }
 ```
 
 Os mesmos quatro `status` da cobertura técnica, pela mesma razão: **`unknown`
 explícito vale mais que campo ausente**, porque ausência não distingue "não
 perguntei" de "não importa".
+
+## A chave recusada tem endereço
+
+`keys` guarda o que **entrou**. A metade que costuma evaporar é a outra —
+*"considerei `criticality`, e deixei fora até existir a conversa de priorização
+que ela responderia"* —, e ela vai para `rejected`, com três campos: a `chave`, o
+`motivo`, e o `revise_se` que a ressuscitaria.
+
+É o mesmo desenho da hipótese refutada, que **permanece** marcada `refuted` em
+vez de sumir do arquivo. Sem esse registro, daqui a três meses alguém pergunta
+"por que não temos cor por criticidade?" e a resposta é redescobrir a conversa —
+ou, pior, criar a chave que já foi recusada uma vez.
+
+Os três campos têm serviço cada um: sem `motivo` a rejeição não impede a
+repropositura, e sem `revise_se` ela vira sentença perpétua — ninguém sabe quando
+vale reabrir. O `revise_se` é o `REVISE SE` do formato da recomendação, escrito
+para a chave que não entrou.
+
+**`rejected` nasce quando houver uma, e fica ausente quando não houver.** Campo
+que existe no template não é campo obrigatório — o portão de saída em perfil
+`leve` vale aqui igual ao resto.
 
 ## O portão
 
