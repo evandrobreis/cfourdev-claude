@@ -224,7 +224,7 @@ arquiteto consegue conferir.
 Roda o **mesmo loader do viewer**. Correção técnica nunca é inferida por leitura:
 é o que este comando disser. Sai com código 1 quando há erro.
 
-**Se `cfour` não estiver instalado**, `npx cfourdev check …` serve para uma vez,
+**Se `cfour` não estiver instalado**, `npx cfour-cli check …` serve para uma vez,
 e `cfour:setup` resolve de vez. Não invente uma validação sua no lugar dele: um
 modelo que "parece certo" lido por você é exatamente a inferência que este
 comando existe para não aceitar. Sem o comando, diga que não validou.

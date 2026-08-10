@@ -7,7 +7,7 @@ e centralizado.
 O funcionamento é simples:
 
 1. O modelo é escrito em YAML no seu repositório git em um formato aberto e [documentado](https://cfourdev.com.br/docs/);
-2. Utilize a [CLI](https://www.npmjs.com/package/cfourdev) para validar, visualizar e publicar a documentação;
+2. Utilize a [CLI](https://www.npmjs.com/package/cfour-cli) para validar, visualizar e publicar a documentação;
 3. Utilize o [portal](https://app.cfourdev.com.br) para visualizar a arquitetura de forma centralizada.
 
 ## O que este plugin faz
@@ -63,5 +63,5 @@ plugin escreve a seu pedido é seu.** Veja `LICENSE` — são doze linhas.
 
 - Plataforma — [cfourdev.com.br](https://cfourdev.com.br)
 - Documentação — [cfourdev.com.br/docs](https://cfourdev.com.br/docs/)
-- CLI no npm — [npmjs.com/package/cfourdev](https://www.npmjs.com/package/cfourdev)
+- CLI no npm — [npmjs.com/package/cfour-cli](https://www.npmjs.com/package/cfour-cli)
 - Este repositório — [github.com/evandrobreis/cfourdev-claude](https://github.com/evandrobreis/cfourdev-claude)
