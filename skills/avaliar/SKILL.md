@@ -14,7 +14,7 @@ dele, o problema é a regra, não o cenário.
 
 ## O que existe
 
-- `${CLAUDE_PLUGIN_ROOT}/skills/avaliar/rubric.md` — os dezenove critérios comuns e os
+- `${CLAUDE_PLUGIN_ROOT}/skills/avaliar/rubric.md` — os vinte critérios comuns e os
   testes transversais.
 - `${CLAUDE_PLUGIN_ROOT}/skills/avaliar/scenarios/NN-*.md` — briefing, respostas
   preparadas, armadilhas e critérios específicos de cada caso. Alguns trazem uma
@@ -121,7 +121,7 @@ Nenhum cenário sozinho detecta isto:
   segue rótulo.
 
 Se a estratégia — ou o peso do processo — acompanhou o rótulo em vez das
-necessidades, o plugin falhou, mesmo com todos os dezenove critérios passando em
+necessidades, o plugin falhou, mesmo com todos os vinte critérios passando em
 cada cenário isolado.
 
 ### O placar
@@ -160,6 +160,8 @@ Falha aponta para **uma skill**, não para um cenário:
 | 16 (recomenda) | `${CLAUDE_PLUGIN_ROOT}/skills/modelagem/references/decisoes-de-quem.md`, guarda-corpo 4, `cfour:setup`, `cfour:estrategia` |
 | 17 (cobertura técnica) | `${CLAUDE_PLUGIN_ROOT}/skills/modelagem/references/cobertura-tecnica.md`, `cfour:entrevista` |
 | 18 (documentação) | `cfour:documentacao`, `${CLAUDE_PLUGIN_ROOT}/skills/modelagem/references/viewer-contract.md` |
+| 19 (classificação — a pergunta) | `cfour:descoberta`, `${CLAUDE_PLUGIN_ROOT}/skills/modelagem/references/classificacao.md` |
+| 20 (classificação — a recomendação) | `cfour:estrategia`, `${CLAUDE_PLUGIN_ROOT}/skills/modelagem/references/classificacao.md` |
 
 Corrija a skill e rode **de novo o cenário que falhou**, mais os dois
 transversais — uma correção que resolve um caso costuma quebrar outro.
