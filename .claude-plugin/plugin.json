@@ -1,6 +1,6 @@
 {
   "name": "cfour",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "description": "Modelagem C4 conduzida por conversa: descobre o proposito antes de propor estrutura, recomenda a organizacao em vez de devolver a decisao, calibra o processo pelo tamanho da iniciativa, escreve o YAML pelo contrato do viewer e guarda a memoria do trabalho no repositorio.",
   "author": { "name": "Evandro Barbosa dos Reis" },
   "homepage": "https://cfourdev.com.br",
