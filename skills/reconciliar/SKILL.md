@@ -29,7 +29,7 @@ Mais: `$MEM/project-context.yaml`, `$MEM/session.yaml`,
 `$MEM/decisions/*.md`, `$MEM/sessions/*.md`,
 `$M/model/MODELING-CONVENTIONS.md`.
 
-## 2. Procurar as quinze divergências
+## 2. Procurar as dezesseis divergências
 
 | # | procurar | como se reconhece |
 |---|---|---|
@@ -48,6 +48,7 @@ Mais: `$MEM/project-context.yaml`, `$MEM/session.yaml`,
 | 13 | **cobertura técnica parada** | área `relevant` ainda `unknown` num modelo que já tem containers; área `not_applicable` que o YAML contradiz (uma fila desenhada onde integrações era "não se aplica") |
 | 14 | **perfil desatualizado** | `complexity.profile: leve` num modelo que cresceu para vários domínios, times ou integrações — recalibre, com a evidência |
 | 15 | **cache da doc vencido** | `manifest.yaml` além do prazo de revalidação, com `version:` menor que 3, ou com `failures` que ninguém retomou |
+| 16 | **chave recusada que voltou** | chave listada em `classification.rejected` que o modelo já usa como `meta` ou `tag` — ou cujo `revise_se` já aconteceu, e a recusa segue de pé |
 
 Use o `facets` do inventário para o item 6: chaves e valores próximos aparecem
 lado a lado ali, com a contagem de cada um.
@@ -56,6 +57,15 @@ Os itens 10, 11 e 15 são os únicos que olham **acima** da modelagem. Rode-os u
 vez por reconciliação, não uma vez por modelagem — e ao encontrar 11, ofereça
 `cfour:modelagens` para registrar, nunca registre por conta própria: uma pasta fora
 do registry pode ser rascunho deliberado. Para o 15, `cfour:documentacao` revalida.
+
+O item 16 tem duas direções, e as duas são reais: a chave voltou ao modelo sem
+que ninguém revisitasse a recusa — e aí ou a recusa caducou, ou a chave entrou
+por distração —, **ou** a condição escrita em `revise_se` já se cumpriu e ninguém
+percebeu. O `facets` responde à primeira; a segunda é ler o `revise_se` de
+`classification.rejected` contra o que a memória já registra. **Recusa que
+continua de pé não é divergência**: é exatamente o que aquele campo existe para
+preservar, e listá-la sem motivo desfaz o registro que impede a chave de ser
+reproposta a cada sessão.
 
 ## 3. Apresentar
 
