@@ -1,37 +1,29 @@
 # Sessão AAAA-MM-DD — assunto em três palavras
 
 Resumo estruturado, **não transcrição**. Se um detalhe merece sobreviver, ele
-pertence ao modelo, a uma decisão ou ao `project-context.yaml` — não a este
-arquivo.
+pertence ao modelo, a uma decisão ou ao `project-context.yaml`.
 
 Este resumo mora na modelagem em que a sessão aconteceu, e todos os caminhos
 abaixo são relativos a ela.
 
-## O que foi decidido
+## O que o arquiteto decidiu
 
-- `MD-00X` — decisão, em uma linha (link para o arquivo).
+- `MD-00X` — a decisão, em uma linha.
 
-## O que virou fato
+## O que foi operado
 
-O que deixou de ser hipótese e passou a existir no modelo:
+- `cfour element add loja-api --parent loja --shape api` — criou a caixa
+- `cfour check --modelagem loja` — sem erros, 2 avisos preexistentes
 
-- `loja/loja-api` — container, dono `squad-checkout` → `model/loja/elements/containers.yaml`
+## O que se aprendeu sobre o software
 
-## Hipóteses
+- fato novo, e de onde ele veio (arquiteto ou repositório)
 
-- **novas:** `H-00X` — enunciado (o que a refutaria)
-- **confirmadas:** `H-00X` → virou fato em `<arquivo>`
-- **refutadas:** `H-00X` — por quê
+## Dúvidas abertas
 
-## Perguntas abertas
-
-- `Q-00X` — pergunta (o que ela bloqueia)
-
-## Arquivos alterados
-
-- `model/...` — o que mudou, em poucas palavras
+- `Q-00X` — pergunta (o que ela trava)
 
 ## Próximo foco
 
-O que a próxima sessão deve fazer primeiro, e por quê. Precisa bater com
-`next_step` em `session.yaml`.
+O que a próxima sessão deve fazer primeiro. Precisa bater com `next_step` em
+`session.yaml`.

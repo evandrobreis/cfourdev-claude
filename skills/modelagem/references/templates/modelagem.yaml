@@ -17,8 +17,8 @@ id: <slug>
 name: <Nome legivel>
 
 description: |
-  Uma ou duas frases: que realidade e esta. Nao repita o proposito — isso e
-  purpose.problem no project-context.yaml.
+  Uma ou duas frases: que realidade e esta. Nao repita o objetivo da
+  documentacao — isso e `objetivo` no project-context.yaml.
 
 # active   | em trabalho
 # paused   | parada, mas viva

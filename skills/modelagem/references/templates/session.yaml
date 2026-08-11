@@ -1,56 +1,32 @@
 # Onde o trabalho parou. Curto e descartavel: o que merece sobreviver a semana
 # pertence ao modelo, a uma decisao ou ao project-context.yaml.
-version: 1
+version: 2
 updated: AAAA-MM-DD
 
-# Em que etapa da jornada o trabalho esta, e em qual onda de escrita.
-# Ver: ${CLAUDE_PLUGIN_ROOT}/skills/modelagem/references/jornada.md
-#
-# Bloco OPCIONAL: sessao gravada por uma versao anterior nao o tem. Quem retomar
-# sem ele INFERE a etapa pelo que a memoria mostra, diz que inferiu, e grava —
-# nunca recomeca a jornada por causa de um campo ausente.
-#
-# etapas: enquadramento | calibragem | descoberta | estrategia | confirmacao
-#         | escrita | encerramento
-workflow:
-  current_stage: enquadramento
-  completed_stages: []
-  next_stage: calibragem
-  modeling_wave: 0       # 0 = ainda nao entrou na escrita
-
-# Em que assunto a modelagem estava trabalhando.
+# Em que assunto o trabalho estava.
 focus: |
   ...
 
-# O ultimo passo concluido — util para nao refazer o que ja foi feito.
-last_step: |
-  ...
+# A ultima operacao: o comando que rodou e o que ele fez. E o que permite
+# retomar sem reconstruir a conversa.
+last_operation: |
+  cfour element add loja-api --parent loja --shape api  ->  criou a caixa; check ok
 
-# O proximo passo registrado. E o que /cfour:retomar vai propor.
+# O proximo passo, acionavel. "Continuar a modelagem" nao e proximo passo.
 next_step: |
   ...
 
-# Coisas que voce propos e o arquiteto ainda nao confirmou. NAO escreva no modelo
-# o que estiver aqui.
-pending_confirmations:
+# O que voce propos e o arquiteto ainda nao confirmou. NAO escreva no modelo o
+# que estiver aqui.
+pending:
   - ...
 
 # Arquivos tocados nesta sessao, para a proxima saber onde olhar.
 touched_files:
   - ...
 
-# Assuntos abertos que nao viraram pergunta formal ainda.
-open_threads:
-  - ...
-
-# O que da documentacao oficial sustentou decisao ou escrita nesta sessao.
-# Uma afirmacao sobre o formato sem fonte registrada e indistinguivel de palpite
-# seis meses depois. Ver: cfour:documentacao
-consulted_docs:
-  - doc:referencia#fluxo    # AAAA-MM-DD — o que ele confirmou
-
-# Contagens de `cfour check --inventory --json` quando a sessao fechou.
-# Se ao retomar elas nao baterem, alguem editou o modelo fora do plugin.
+# Contagens de `cfour check --modelagem <id> --inventory --json` quando a sessao
+# fechou. Se ao retomar elas nao baterem, alguem editou o modelo fora do plugin.
 model_fingerprint:
   elements: 0
   relations: 0
