@@ -5,9 +5,10 @@
 # batem, e se não sobrou resíduo da substituição mecânica — que é exatamente o
 # que `scripts/verificar.mjs` faz.
 #
-# O que ele NÃO alcança é o comportamento, e isso é deliberado: quem mede
-# comportamento é `/cfour:avaliar`, que precisa de um modelo de linguagem e de
-# onze subagentes. Roda à mão, antes de subir a versão.
+# O que ele NÃO alcança é o comportamento: se o plugin realmente pergunta em vez
+# de decidir, isso só se mede conversando com ele. O que dá para afirmar aqui é
+# que nenhuma regra prescritiva voltou por escrito, que a CLI continua sendo a
+# fonte, e que a prosa se refere a arquivos que existem.
 name: verificação
 
 on:

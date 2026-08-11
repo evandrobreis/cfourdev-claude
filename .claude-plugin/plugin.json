@@ -1,10 +1,18 @@
 {
   "name": "cfour",
-  "version": "0.5.6",
-  "description": "Modelagem C4 conduzida por conversa: descobre o proposito antes de propor estrutura, recomenda a organizacao em vez de devolver a decisao, calibra o processo pelo tamanho da iniciativa, escreve o YAML pelo contrato do viewer e guarda a memoria do trabalho no repositorio.",
-  "author": { "name": "Evandro Barbosa dos Reis" },
+  "version": "0.6.0",
+  "description": "Operador contextual de modelagem C4Dev: entende o software e o objetivo da documentacao, traduz o que o arquiteto pede em linguagem natural para comandos da CLI cfour, executa e valida. Nao decide arquitetura nem semantica de modelagem — quando falta informacao, pergunta.",
+  "author": {
+    "name": "Evandro Barbosa dos Reis"
+  },
   "homepage": "https://cfourdev.com.br",
   "repository": "https://github.com/evandrobreis/cfourdev-claude",
   "license": "SEE LICENSE IN LICENSE",
-  "keywords": ["c4", "arquitetura", "diagramas", "modelagem", "cfourdev"]
+  "keywords": [
+    "c4",
+    "arquitetura",
+    "diagramas",
+    "modelagem",
+    "cfourdev"
+  ]
 }

@@ -1,218 +1,110 @@
-# Por que este modelo existe.
+# O que se sabe sobre o software e sobre a documentacao.
 #
-# Este arquivo responde ao que o YAML do modelo nao consegue responder: para que
-# ele serve, para quem, e o que ainda nao se sabe. Uma sessao nova le isto antes
-# de qualquer outra coisa.
+# Este arquivo existe para que uma sessao nova consiga interpretar corretamente
+# os pedidos do arquiteto: o que esta sendo documentado, para que, para quem, com
+# que vocabulario, e o que ainda nao se sabe.
 #
-# A regra: todo item que a conversa tocou carrega `status`. `unknown` explicito
-# vale mais que campo ausente — ausencia nao distingue "nao perguntei" de "nao
-# importa".
+# Ele guarda FATOS E DECISOES DELE. Nao guarda raciocinio seu: nao ha estrategia
+# recomendada, alternativas, trade-offs, perfil de processo nem plano de ondas.
 #
-# A ressalva: em perfil `leve` grava-se o que foi dito, e o que nao foi
-# conversado fica ausente mesmo. Este arquivo continua listando tudo porque ele e
-# o mapa do que existe para gravar, e nao a lista do que precisa ser
-# datilografado hoje: preencher vinte e cinco campos com `unknown` depois de uma
-# conversa de tres perguntas produz um documento que PARECE completo. O portao de
-# saida de `cfour:descoberta` traz a regra inteira, perfil a perfil.
-version: 1
+# Grave o que a conversa TOCOU. Campo que ninguem conversou fica ausente —
+# preencher tudo com `unknown` produz um documento que parece completo e nao e.
+#
+# status, em todo item:
+#   fact      o arquiteto afirmou
+#   evidence  voce leu no repositorio, e ele ainda nao confirmou
+#   unknown   perguntou-se, e nao se sabe (divida declarada)
+version: 2
 updated: AAAA-MM-DD
 
 # ---------------------------------------------------------------------------
-# Proposito — a pergunta que abre tudo: que decisao ou conversa esta modelagem
-# precisa apoiar?
+# Objetivo da documentacao — por que estes diagramas existem
 # ---------------------------------------------------------------------------
-purpose:
-  problem: |
-    O que motivou modelar. Em uma frase, na voz de quem pediu.
-  decision: |
-    A decisao ou conversa concreta que os desenhos precisam apoiar.
-  risk_to_expose: |
-    O que precisa ficar visivel para quem ler. Vazio e uma resposta valida.
-  status: unknown        # fact | hypothesis | unknown
-
-# ---------------------------------------------------------------------------
-# Complexidade — quanto processo esta iniciativa merece. Sai das
-# CARACTERISTICAS descobertas, nunca de uma palavra do briefing.
-# Ver: ${CLAUDE_PLUGIN_ROOT}/skills/modelagem/references/calibragem.md
-#
-# Bloco OPCIONAL: memoria escrita por uma versao anterior nao o tem. Quem ler
-# uma memoria sem ele classifica agora, diz que classificou, e grava.
-# ---------------------------------------------------------------------------
-complexity:
-  profile: leve          # leve | intermediario | profundo
-  rationale: |
-    As tres ou quatro evidencias que decidiram. Nao produza nota numerica.
-  evidence: []           # aplicacoes, dominios, times, integracoes, assincronia,
-                         # dados, legado, implantacao, tenancy, seguranca,
-                         # federacao, audiencias, decisoes, incerteza, longevidade
-  previous: null         # o perfil anterior, quando houve recalibragem
-  reviewed_at: AAAA-MM-DD
-  status: hypothesis     # fact | hypothesis | unknown
-
-# ---------------------------------------------------------------------------
-# Audiencias — quem le, e o que e ruido para essa pessoa
-# ---------------------------------------------------------------------------
-audiences:
-  - id: A-001
-    who: quem e
-    technical_depth: alta | media | baixa
-    questions:           # o que essa pessoa precisa responder olhando o desenho
-      - ...
-    noise:               # o que atrapalha essa pessoa
-      - ...
-    status: hypothesis
-
-# ---------------------------------------------------------------------------
-# Escopo — e, principalmente, o que fica de fora
-# ---------------------------------------------------------------------------
-scope:
-  inside: []             # o que esta sendo modelado
-  outside: []            # o que deliberadamente nao esta
-  context_only: []       # aparece so como vizinho, para dar contexto
-  undecided: []          # ainda em discussao: NAO modele como se estivesse decidido
-
-# ---------------------------------------------------------------------------
-# Perspectivas — o aspecto que a modelagem trata. Atravessa niveis C4: uma
-# perspectiva de dados ou de seguranca aparece em contexto, container e
-# componente ao mesmo tempo.
-# ---------------------------------------------------------------------------
-perspectives:
-  - name: estrutura      # estrutura | comportamento | dados | seguranca | ownership
-                         # | integracao | dependencia | implantacao | operacao
-                         # | evolucao | risco | jornada | transformacao
-    why: por que ela importa aqui
-    status: fact
-
-# ---------------------------------------------------------------------------
-# Tempo — so preencha se houver mais de um horizonte, E se eles apoiarem
-# decisoes DIFERENTES. Visões temporais que ninguem compara custam manutencao
-# dobrada.
-# ---------------------------------------------------------------------------
-time:
-  horizons: []           # ex.: atual, transicao, alvo
-  why_separate: |
-    Que decisao distinta cada horizonte apoia. Sem resposta aqui, nao separe.
+objetivo:
+  porque: |
+    Por que a documentacao esta sendo feita, na voz de quem pediu.
+  explicar: |
+    O que o arquiteto quer que o desenho explique.
+  estado: null         # atual | transicao | alvo | outro — so quando houver mais de um
   status: unknown
 
 # ---------------------------------------------------------------------------
-# Granularidade — o nivel de detalhe que responde a pergunta, e nada alem
+# Audiencias — quem consome os diagramas
 # ---------------------------------------------------------------------------
-granularity:
-  current: contexto | container | componente | codigo
-  rationale: |
-    Por que este nivel. Decompor porque da para decompor e ruido; parar cedo
-    demais esconde a responsabilidade de que a decisao depende.
-  status: hypothesis
+audiences:
+  - who: quem e
+    precisa_responder:
+      - ...
+    status: fact
 
 # ---------------------------------------------------------------------------
-# Fronteiras
+# Escopo — o que o arquiteto disse que esta dentro, fora, ou so como contexto
 # ---------------------------------------------------------------------------
-boundaries:
-  known: []              # fronteiras que ninguem discute
-  under_discussion:      # as que ainda estao em aberto
-    - what: ...
-      positions: []      # as leituras possiveis, sem escolher uma
-      blocks: ...        # o que nao anda enquanto isso nao se decide
+scope:
+  inside: []
+  outside: []
+  context_only: []
+  status: unknown
 
 # ---------------------------------------------------------------------------
-# Cobertura tecnica — as sete areas, e o que se sabe de cada uma. Existe para
-# que nada importante fique de fora EM SILENCIO: `unknown` explicito e divida
-# declarada; area ausente e area esquecida.
+# O sistema — o que esta sendo documentado, em prosa curta
+# ---------------------------------------------------------------------------
+sistema:
+  o_que_e: |
+    Produto, plataforma, sistema ou conjunto de sistemas.
+  problema_de_negocio: |
+    Que problema ele resolve.
+  atores: []           # usuarios e papeis, nas palavras da organizacao
+  capacidades: []
+  sistemas_externos: []
+  status: unknown
+
+# ---------------------------------------------------------------------------
+# Tecnologias e infraestrutura relatadas ou observadas
+# ---------------------------------------------------------------------------
+tecnologias:
+  - nome: ...
+    onde: ...          # em que aplicacao ou integracao aparece
+    status: evidence
+    fonte: repo        # arquiteto | repo
+
+# ---------------------------------------------------------------------------
+# Elementos conhecidos — o que se sabe que EXISTE.
 #
-# Em perfil `leve`, a pergunta agrupada nao toca as sete, e a area que ninguem
-# conversou fica ausente. O que nao muda em perfil nenhum: area marcada
-# `relevant` nao fica em `unknown` sem que isso tenha sido dito em voz alta.
-# Ver: ${CLAUDE_PLUGIN_ROOT}/skills/modelagem/references/cobertura-tecnica.md
-#
-# status: relevant | not_applicable | unknown | deferred
-# source: repo | architect | inference | null
+# Saber que existe NAO diz como sera representado: abstracao C4, `parent` e
+# nivel sao decisao do arquiteto. Enquanto ele nao disser, a linha fica aqui e
+# NAO vira caixa.
 # ---------------------------------------------------------------------------
-technical_coverage:
-  estrutura-funcional: { status: unknown, source: null }
-  aplicacoes:          { status: unknown, source: null }
-  dados:               { status: unknown, source: null }
-  integracoes:         { status: unknown, source: null }
-  infraestrutura:      { status: unknown, source: null }
-  seguranca:           { status: unknown, source: null }
-  operacao:            { status: unknown, source: null }
+elementos_conhecidos:
+  - nome: ...
+    o_que_se_sabe: |
+      O que foi dito sobre ele: como roda, o que faz, com quem fala.
+    representacao: null    # o id no modelo, quando o arquiteto ja tiver decidido
+    status: fact
 
 # ---------------------------------------------------------------------------
-# Estrategia — a organizacao recomendada e o estado dela. E daqui que o
-# cfour:editor le o que ja foi decidido, em vez de redescobrir na hora de
-# escrever. A decisao formal continua sendo o MD-NNN; isto e o atalho.
+# Fontes consultadas — o que foi lido para chegar aqui
 # ---------------------------------------------------------------------------
-strategy:
-  recommended_structure: |
-    Em uma ou duas frases: quantas modelagens, quantos projetos, por qual
-    criterio, e o que fica em shared/.
-  alternatives: []       # as que foram consideradas, com o que cada uma cobrava
-  rationale: |
-    Por que esta e nao a outra, ligado ao proposito.
-  user_constraints: []   # convencoes e restricoes que o arquiteto trouxe
-  waves:                 # o plano de ondas da escrita
-    - id: 1
-      goal: ...
-      done_when: ...
-  decision_ref: null     # MD-NNN, quando houver
-  status: proposed       # proposed | validated | superseded
+fontes:
+  - o_que: README do repositorio
+    quando: AAAA-MM-DD
+    o_que_respondeu: |
+      ...
 
 # ---------------------------------------------------------------------------
-# Classificacao — o que o leitor consegue FAZER com o desenho: isolar, agrupar,
-# ver por cor, e sair da caixa para o documento que a explica.
-#
-# `axes` e `artifacts` sao fato do arquiteto, e a descoberta pergunta; `keys` e
-# `rejected` sao a traducao para o formato, e a estrategia recomenda. Ver o
-# reference `skills/modelagem/references/classificacao.md`.
-#
-# Os mesmos quatro `status` da cobertura tecnica, pela mesma razao: ausencia nao
-# distingue "nao perguntei" de "nao importa". Um desenho cinza de proposito e uma
-# escolha, e so e escolha se alguem a fez.
-#
-# `keys` guarda o que entrou; `rejected`, o que foi considerado e ficou de fora.
-# A chave recusada e a que mais volta: sem endereco, a resposta a "por que nao
-# temos cor por criticidade?" e redescobrir a conversa — ou criar a chave. E o
-# mesmo motivo pelo qual hipotese refutada PERMANECE marcada `refuted` em vez de
-# sumir do arquivo.
-# ---------------------------------------------------------------------------
-classification:
-  status: unknown        # relevant | not_applicable | unknown | deferred
-  axes: []               # por quais eixos a organizacao ja fala: dominio, squad...
-  artifacts: []          # { tipo: adr|runbook|painel|repo, escopo: ..., note: ... }
-  keys: []               # { chave, tipo: meta|tag, responde, usada_para: [...], color }
-  rejected: []           # { chave, tipo: meta|tag, motivo, revise_se }
-                         # o `revise_se` e o que a ressuscitaria — sem ele a recusa
-                         # vira sentenca perpetua, e ninguem sabe quando reabrir.
-                         # NASCE quando houver chave recusada, e fica AUSENTE
-                         # quando nao houver: campo que existe nao e campo
-                         # obrigatorio, e o portao de saida em perfil `leve` vale
-                         # aqui igual.
-
-# ---------------------------------------------------------------------------
-# Hipoteses — o que voce inferiu, e nao o que te contaram
-# ---------------------------------------------------------------------------
-hypotheses:
-  - id: H-001
-    statement: ...
-    basis: em que se apoia
-    refuted_by: o que a derrubaria    # sem isto, a hipotese nunca morre
-    status: open                       # open | confirmed | refuted
-    # confirmada -> vira YAML do modelo e SAI daqui
-    # refutada   -> permanece marcada como refuted, para nao ser redescoberta
-
-# ---------------------------------------------------------------------------
-# Perguntas abertas sem alvo no modelo. Pergunta sobre uma caixa especifica NAO
-# vem para ca: vira uma nota `question` presa aquela caixa.
-# ---------------------------------------------------------------------------
-questions:
-  - id: Q-001
-    question: ...
-    blocks: o que nao anda enquanto isso estiver aberto
-    asked_on: AAAA-MM-DD
-    status: open                       # open | answered
-    answer: null
-
-# ---------------------------------------------------------------------------
-# Glossario — obrigatorio assim que um termo aparecer com dois sentidos
+# Glossario — nasce assim que um termo aparecer com mais de um sentido
 # ---------------------------------------------------------------------------
 glossary:
   termo: o que ele significa NESTA iniciativa
+
+# ---------------------------------------------------------------------------
+# Duvidas abertas — sem alvo no modelo. Duvida sobre uma caixa que ja existe
+# nao vem para ca: vira uma nota `question` presa aquela caixa.
+# ---------------------------------------------------------------------------
+questions:
+  - id: Q-001
+    pergunta: ...
+    trava: o que nao anda enquanto isso estiver aberto
+    perguntada_em: AAAA-MM-DD
+    status: open       # open | answered
+    resposta: null

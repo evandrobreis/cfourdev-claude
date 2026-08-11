@@ -3,56 +3,40 @@
 O que vale para quem escrever ou revisar YAML aqui. Este arquivo mora em
 `model/` porque acompanha o modelo, não o plugin.
 
-Regra de ouro: **uma convenção só entra aqui depois que uma decisão a criou**
-(`$MEM/decisions/`). Convenção sem decisão vira preferência disfarçada de
-regra.
+**Regra de ouro: só entra aqui o que o arquiteto declarou.** Convenção que
+ninguém decidiu é preferência disfarçada de regra — e, num plugin que não decide
+modelagem, ela não teria de onde vir.
+
+Um arquivo que só repete o padrão do formato não é convenção registrada: é ruído
+com nome de contrato. Se não houver convenção própria, este arquivo não precisa
+existir.
 
 ## Organização
 
-- O que é um projeto aqui (por sistema, por produto, por time — e por quê).
-- O que vive em `shared/`.
-- Quando criar um projeto novo em vez de uma caixa nova.
+- o que é um projeto aqui, e por quê;
+- o que vive em `shared/`.
 
 ## Identificação
 
-- Formato de `id`: minúsculas, `-` como separador, sem prefixo de projeto.
-- O `id` usa o vocabulário estável; o `name` usa o vocabulário da audiência.
-- Ids não são renomeados de leve: `parent`, `to`, `from`, `scope`, `target` e os
-  arquivos de layout apontam para eles.
+- formato de `id` (o padrão é minúsculas com `-`), e o que o `name` carrega;
+- ids não são renomeados de leve: `parent`, `to`, `from`, `scope`, `target` e os
+  arquivos de layout apontam para eles. `cfour element mv` conserta as
+  referências desta modelagem — não as de outra que aponte para cá por `bind`.
 
-## Granularidade
+## Taxonomia
 
-- Até onde decompor, e o critério para parar.
-- Onde a assimetria é deliberada (um sistema detalhado ao lado de um fechado) e
-  por quê — senão o próximo leitor "corrige".
+As chaves de `tags` e `meta` que o arquiteto adotou, e a pergunta que cada uma
+responde:
 
-## Taxonomia ativa
-
-Só entra aqui o que **responde a uma pergunta**. Antes de criar uma tag ou uma
-chave de `meta`, responda: que pergunta ela permite responder? é acumulável
-(`tag`) ou tem valor (`meta`)? vai ser usada para filtrar, agrupar ou colorir? é
-estável ou temporária? já existe outra equivalente?
-
-| chave | tipo | pergunta que responde | usada para |
+| chave | tipo | responde | usada para |
 |---|---|---|---|
 | `owner` | meta | quem responde por isto? | filtro |
 | `domain` | meta | de que domínio é? | filtro, cor, `groupBy` |
-| `legado` | tag | ainda depende do legado? | filtro, `exclude` |
 
-Chaves declaradas em `$M/model/workspace.yaml` (`label`, `color: true`) aparecem com
-nome legível; as demais funcionam com a chave crua.
+Chave de `meta` filtra sozinha. Para ela **colorir**, precisa de `color: true`
+declarado — `cfour config set metadata <chave> --label … --color …`.
 
 ## Extensões declaradas
 
 O que foi acrescentado em `$M/model/workspace.yaml` e por quê: `shapes`,
-`relationKinds`, `noteKinds`, `flowOutcomes` e `metadata`.
-
-`metadata` é o que dá nome legível a uma chave e a libera em "Colorir por"
-(`color: true`). Sem ele a chave da tabela acima continua filtrando — só não
-colore, e aparece com o nome cru.
-
-## Visões
-
-- Toda visão registra a pergunta que responde e para quem.
-- Fluxo para "o que acontece", diagrama para "o que existe".
-- Fluxo sem caminho triste precisa de justificativa.
+`relationKinds`, `noteKinds`, `flowOutcomes`, `metadata`.

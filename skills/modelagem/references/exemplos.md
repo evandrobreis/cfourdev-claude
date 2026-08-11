@@ -1,16 +1,16 @@
-# Exemplos canônicos — a forma inteira, um trecho por vez
+# Exemplos — a forma inteira, um trecho por vez
 
-O `viewer-contract.md` diz **quais campos existem**. Este arquivo mostra **como
-eles ficam juntos**, que é o que uma tabela de campos não consegue mostrar.
+O `formato.md` diz **quais campos existem**. Este arquivo mostra **como eles ficam
+juntos**, que é o que uma tabela de campos não consegue mostrar.
 
-Está aqui dentro, e não numa URL, de propósito: você escreve YAML durante a
-conversa, e nesse momento não deve depender de rede nem de o arquiteto ter algo
-instalado. As duas modelagens completas, com todos os arquivos, estão no fim do
-`llms-full.txt` que `cfour:documentacao` busca — vá lá quando precisar ver uma
-modelagem inteira, e não um trecho.
+Ele serve para **ler** um modelo e reconhecer o que está lá. Para escrever, o
+caminho é o comando (`cfour:operar`): `cfour element add`, `cfour relation add`,
+`cfour diagram add` e os demais montam este mesmo YAML, e o `--dry-run` mostra o
+trecho antes de gravar.
 
 Os exemplos usam o vocabulário de uma loja com estoque: os projetos `loja`,
-`estoque` e `shared`. Nada aqui descreve sistema real nenhum.
+`estoque` e `shared`. Nada aqui descreve sistema real nenhum, e nada aqui é
+modelo a imitar — é forma a reconhecer.
 
 ---
 
@@ -126,9 +126,9 @@ relations:
 
 ## Visão de topo curada — sem `scope`
 
-Sem `scope` é a raiz: subir de qualquer lugar termina aqui. Os membros são
-nomeados um a um, porque um diagrama de contexto é um conjunto **curado**, e não
-mecânico.
+Sem `scope` é a raiz: subir de qualquer lugar termina aqui. Aqui os membros
+foram nomeados um a um — é o que acontece quando o arquiteto quis um conjunto
+fechado, em vez de um seletor que aceita caixas novas.
 
 ```yaml
 # model/loja/diagrams/contexto.yaml
@@ -209,7 +209,8 @@ notes:
 ## Fluxo completo — as três exceções, o caminho triste e o `reply`
 
 Um fluxo **não cria caixa nenhuma**: cada passo percorre uma seta que já existe.
-Escreva no nível mais fino que o modelo tem; a projeção sobe as pontas sozinha.
+Os passos citam o nível mais fino que o modelo tem; a projeção sobe as pontas
+sozinha.
 
 ```yaml
 # model/loja/flows/checkout.yaml
@@ -320,8 +321,10 @@ aquele id vira erro. O espelho é uma caixa `external` local.
 ```
 
 Lida sozinha é uma caixa comum. Lidas juntas, o espelho se dissolve no elemento
-real e a seta chega nele. Espelho não tem filhos, e um punhado deles é normal —
-uma dúzia significa que era uma modelagem só, com dois projetos.
+real e a seta chega nele. Espelho não tem filhos e é declaração manual, uma por
+vizinho: o custo de manter cresce com o número deles, e `cfour check --all` é o
+único lugar em que as duas pontas são conferidas. O número é informação para o
+arquiteto decidir, não critério seu.
 
 ## Configuração e vocabulário da modelagem
 
