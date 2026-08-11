@@ -12,7 +12,8 @@ nem digitar comando nenhum.
 Leia primeiro `${CLAUDE_PLUGIN_ROOT}/skills/modelagem/SKILL.md`.
 
 > **A CLI é a API.** Havendo comando oficial equivalente, é o comando que se usa.
-> Editar YAML à mão é exceção, e se diz em voz alta.
+> **Não havendo, a operação não acontece**: você nomeia o comando que falta e
+> para. Não existe caminho manual.
 
 ## O ciclo, para qualquer pedido
 
@@ -22,7 +23,9 @@ Leia primeiro `${CLAUDE_PLUGIN_ROOT}/skills/modelagem/SKILL.md`.
    `${CLAUDE_PLUGIN_ROOT}/skills/modelagem/references/c4.md` e, se houver, relate
    objetivamente e peça confirmação — sem trocar a classificação por conta própria.
 3. **Qual é o comando?** As capacidades reais estão em `cfour:cli`. Não invente
-   flag; confira quando não tiver certeza.
+   flag — e, principalmente, **não conclua de memória que um comando não
+   existe**: é essa afirmação que produz edição manual. Confira em
+   `cfour help <família>` ou `cfour <comando> --help` antes de dizer que não dá.
 4. **Mostre o efeito** com `--dry-run`, em toda operação que escreve e não é
    trivial — e sempre nas que removem ou renomeiam.
 5. **Execute.**
@@ -80,6 +83,7 @@ A família de comandos, com a forma canônica. **As opções de cada um vêm de
 | uma seta | `cfour relation add <origem> <destino> --kind … --label …` |
 | tirar uma seta | `cfour relation rm <origem> <destino>` |
 | um recado numa caixa | `cfour note add <alvo> "<texto>" --kind risk\|question\|blocker\|warning\|info\|tip` |
+| tirar um recado | `cfour note rm <alvo> --texto "<trecho>"` — o `--texto` desempata quando a caixa tem mais de um |
 | uma visão estrutural | `cfour diagram add <id> --scope <ref> --title …` |
 | um caso de uso em sequência | `cfour flow add <id> <origem> <destino> --title …`, depois `cfour flow step <fluxo> <destino> --label …` |
 | uma pasta que agrupa | `cfour project add <id> --name …` |
@@ -94,8 +98,9 @@ O que vale saber ao montar:
 - **`--dry-run` mostra o patch e não grava nada**, em qualquer comando que
   escreve. Use antes de remover, renomear e de qualquer operação em lote.
 - **A CLI não reserializa o arquivo**: ela acha o ponto e emenda, então
-  comentários e formatação de quem escreveu à mão continuam onde estavam. E ela
-  **não grava nada que não carregue** — erro novo desfaz a gravação.
+  comentários e formatação do que o arquiteto escreveu à mão continuam onde
+  estavam. E ela **não grava nada que não carregue** — erro novo desfaz a
+  gravação.
 - **Um diagrama seleciona, e não lista.** `--scope X` sem `--include` mostra os
   filhos de X, e uma caixa nova entra sozinha. Listar membro a membro produz um
   desenho que congela — se o arquiteto quiser o conjunto fechado, ele pede.
@@ -179,9 +184,11 @@ Trocar a ativa: `active:` no `cfour.yaml` muda de vez (vai para o git);
 registra nada. **Ao trocar, anuncie** e recarregue a memória da nova — contexto,
 convenções e decisões da anterior deixam de valer inteiramente.
 
-Registrar uma modelagem que já existe é uma linha no `cfour.yaml`, desde que ela
-tenha `model/` e `modelagem.yaml`. A memória **não vem junto**: ela nasce vazia
-aqui. Diga isso ao registrar.
+Registrar uma modelagem que já existe — uma pasta com `model/` e
+`modelagem.yaml` que não está no registro — **não tem comando**: o `cfour init`
+cria uma modelagem nova, e não registra a que existe. É uma linha no
+`cfour.yaml`, e quem a escreve é o arquiteto. Diga qual é a linha, diga que a
+memória **não vem junto** — ela nasce vazia aqui —, e pare.
 
 Tirar do registro **não apaga nada**, e é assim que deve ser. Apagar arquivo é ato
 do arquiteto, nunca seu.
@@ -250,22 +257,49 @@ Nunca invente um resultado que você não viu: se o comando não rodou, diga que
 rodou. Sem acento na saída de terminal — o CLI já escreve assim, e o terminal do
 Windows nem sempre está em UTF-8.
 
-## Editar YAML à mão
+## Quando não existe comando
 
-Só quando **não houver comando equivalente**. Nesse caso: diga em voz alta que vai
-editar direto e por quê, preserve comentários e a ordem dos campos do arquivo,
-mexa em um assunto por vez, e rode `cfour check` depois.
+Acontece: o formato do C4Dev aceita coisas que esta versão da CLI ainda não
+escreve. **Isso não abre exceção** — abre um relato.
 
-Confira o campo em
-`${CLAUDE_PLUGIN_ROOT}/skills/modelagem/references/formato.md` antes — e, na
-dúvida, em `cfour help formato`. **Campo inventado não falha: ele desaparece.**
+1. **Confirme que o comando não existe**, no help da CLI instalada e nunca de
+   memória: `cfour help <família>`, `cfour <comando> --help`, ou o cache em
+   `cfour:cli`. A maior parte das edições manuais nasce aqui, num comando que
+   existia e ninguém procurou.
+2. **Tente dizer a mesma coisa com o que existe**, e diga o que isso custa
+   quando custa: refazer uma nota é `cfour note rm` seguido de `cfour note add`,
+   e o texto anterior não volta sozinho. Mostre o `--dry-run` antes.
+3. **Não havendo caminho, relate e pare** — sempre nesta forma, para a lacuna
+   virar item de backlog da CLI sem ninguém precisar reconstruir o caso:
+
+   ```
+   nao existe comando para isto no cfour <versao>:
+     <o comando ou a flag que faltou>
+
+   a operacao pedida   <o que foi pedido, em uma linha>
+   o campo do formato  <o que seria escrito>
+   o arquivo           <onde ele moraria>
+
+   nao vou editar o arquivo. voce decide o que fazer.
+   ```
+
+4. **Não abra o arquivo para escrever** — nem para "só um campo", nem depois de
+   o arquiteto dizer que tudo bem. Quem decide o que fazer com a lacuna é ele,
+   inclusive editar com as próprias mãos, que é direito dele e não seu.
+
+Para descrever o campo no relato, confira em
+`${CLAUDE_PLUGIN_ROOT}/skills/modelagem/references/formato.md` e, na dúvida, em
+`cfour help formato`. **Campo inventado não falha: ele desaparece** — e num
+relato ele manda o arquiteto escrever algo que o carregador vai ignorar.
 
 ## O que nunca fazer aqui
 
 - Criar, alterar ou remover qualquer coisa cuja abstração, `parent` ou existência
   o arquiteto não tenha decidido.
 - Trocar a classificação de um elemento por achar que ela está errada.
-- Escrever YAML à mão existindo comando.
+- Escrever no modelo, na identidade da modelagem ou no registro por fora da CLI
+  — existindo comando ou não.
+- Concluir que não existe comando sem ter conferido no help da CLI instalada.
 - Apagar um aviso mudando o desenho em vez da causa.
 - Rodar `push` ou `login` sem confirmação.
 - Relatar que validou sem ter rodado o `check`.

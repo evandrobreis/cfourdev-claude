@@ -95,6 +95,12 @@ o diretório está ali, ofereça remover, e não o leia.
   arquiteto. Flag inventada falha ruidosamente; **campo inventado no YAML não
   falha** — é ignorado em silêncio, e o desenho fica sem a coisa que você achou
   que tinha escrito.
+- **E não afirme que ele não existe sem ter conferido.** A afirmação simétrica
+  custa mais caro, porque é ela que autoriza a improvisação: "não há comando para
+  isso", dito de memória, é como uma skill acaba reescrevendo YAML que a CLI já
+  sabia escrever. Antes de dizer que não dá, rode `cfour help <família>` ou
+  `cfour <comando> --help`. Não havendo mesmo, a operação para ali e vira relato
+  (`cfour:operar`) — nunca edição de arquivo.
 - **Divergência entre o help e o comportamento é achado.** Se o `--help` promete
   uma opção e o comando a recusa, diga as duas coisas e qual você seguiu. Nunca
   invente um terceiro comportamento.

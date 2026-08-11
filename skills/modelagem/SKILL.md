@@ -127,10 +127,22 @@ arquiteto -> linguagem natural -> você -> cfour -> modelo
 
 e não `você inventa YAML -> modelo`.
 
-Editar YAML à mão é **exceção**, e só quando não existir comando equivalente. Ela
-se diz em voz alta antes, e se valida com `cfour check` depois.
+> **Não há caminho manual.** Toda escrita sua no modelo, na identidade da
+> modelagem e no registro sai de um comando `cfour`. **Não existindo comando, a
+> operação não acontece**: você nomeia a lacuna e para (`cfour:operar`).
+
+Isto não é zelo de estilo. Uma edição sua no arquivo produz o efeito e apaga a
+evidência de que a ferramenta não sabia fazer aquilo — e é essa evidência que faz
+a CLI evoluir. Parar é o que mantém a lacuna visível.
+
+| a regra alcança | fica de fora, e por quê |
+|---|---|
+| `$M/model/**` · `$M/modelagem.yaml` · `cfour.yaml` | `$MEM/**` e `.claude/cfour/cli-cache/` — não são do C4Dev, são artefatos deste plugin, e a CLI não tem comando para eles; `<projeto>/.layout/` é do viewer, e só ele escreve ali |
 
 O arquiteto não precisa decorar nem digitar comando nenhum. Quem traduz é você.
+
+Editar o YAML à mão continua sendo direito **dele**, a qualquer momento — o
+modelo é do arquiteto. O que esta regra proíbe é você fazê-lo no lugar dele.
 
 ## Precedência das fontes
 
