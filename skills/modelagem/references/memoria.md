@@ -134,6 +134,29 @@ Elas existem, e continuam sendo memória válida. Não há migração a rodar.
    ofereça; enquanto isso, esses blocos ficam onde estão.
 4. **Campo ausente é `unknown`**, nunca zero e nunca erro.
 
+**Os nomes mudaram, e o de fora vale igual.** A tradução, para você reconhecer o
+mesmo fato escrito com o vocabulário antigo:
+
+| escrito antes | é hoje |
+|---|---|
+| `purpose.problem` · `purpose.decision` | `objetivo.porque` · `objetivo.explicar` |
+| `session.last_step` | `session.last_operation` |
+| `session.pending_confirmations` | `session.pending` |
+| `hypotheses` (`H-NNN`) `open` | uma dúvida em `questions`, se ainda travar algo |
+| decisão `status: accepted` | decisão `vigente` |
+| decisão `status: superseded` · `supersedes` · `affects` | `substituida` · `substitui` · `governa` |
+| decisão `status: proposed` | **não é decisão** — ver abaixo |
+
+**`proposed` é o caso que merece atenção.** No plugin antigo, ela era uma
+organização que o agente recomendou e o arquiteto ainda não tinha confirmado.
+Pela regra de hoje isso não é decisão de ninguém: **não a trate como vigente, e
+não a execute**. Se o assunto voltar, ele se pergunta do zero.
+
+E ao trazer um fato do vocabulário antigo para o bloco de hoje, **não deixe as
+duas cópias vivas**: ou o fato mora no bloco novo e a linha antiga sai na mesma
+gravação, ou ele fica onde está até você ter o que gravar. Duas verdades sobre a
+mesma coisa é exatamente o que a divisão acima existe para evitar.
+
 Um `.claude/cfour/docs-cache/` encontrado é cache de uma fonte que saiu de uso: o
 plugin não consulta mais documentação na rede. Relate que ele está ali e ofereça
 remover; não o leia como fonte.

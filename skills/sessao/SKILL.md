@@ -47,8 +47,10 @@ Todo o resto vale para **uma** modelagem, e `$M` é a dela.
 Na ordem de precedência da verdade sobre esta modelagem:
 
 1. `$M/model/MODELING-CONVENTIONS.md`, se existir
-2. `$MEM/decisions/*.md` — as `vigente`; as `substituida` interessam como
-   história, não como regra
+2. `$MEM/decisions/*.md` — as `vigente` (ou `accepted`, na memória antiga); as
+   `substituida`/`superseded` interessam como história, não como regra. Uma
+   decisão `proposed` **não é decisão**: era uma recomendação do plugin antigo
+   que ninguém confirmou, e não vale como regra nem se executa
 3. `$MEM/project-context.yaml`
 4. `$MEM/session.yaml`
 5. o resumo mais recente em `$MEM/sessions/`
