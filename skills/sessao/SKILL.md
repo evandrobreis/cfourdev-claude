@@ -92,7 +92,8 @@ pode estar certo e a memória velha, ou o contrário. Quem sabe qual é o arquit
 
 Se a maior parte for do tipo 1, diga em voz alta o que isso implica: a memória
 descreve uma modelagem que já não é a atual. Editar o YAML fora do plugin é
-legítimo — o modelo é do arquiteto.
+legítimo **para o arquiteto** — o modelo é dele. Para você não é: o que você
+escreve, escreve por comando (`cfour:operar`).
 
 ## 5. Apresentar
 

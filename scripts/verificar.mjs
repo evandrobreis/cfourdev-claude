@@ -336,6 +336,58 @@ test('a operacao passa pela CLI antes do YAML', () => {
   assert.match(operar, /cfour check/, 'a operacao nao valida depois de escrever')
 })
 
+test('a edicao manual do modelo nao e caminho', () => {
+  // O defeito concreto: numa sessao de modelagem o agente reescreveu cinco
+  // arquivos do modelo para operacoes de nota que `cfour note add` e
+  // `cfour note rm` ja faziam. O texto da epoca permitia — dizia que editar YAML
+  // a mao era "excecao", e a excecao dependia de um juizo do PROPRIO agente
+  // sobre existir ou nao comando. Permissao condicionada a juizo proprio e
+  // permissao: basta concluir de memoria que nao ha comando.
+  //
+  // Isto ja tinha sido corrigido uma vez, e o que sobreviveu foi a valvula.
+  const REAUTORIZA = [
+    [/editar\s+(o\s+)?YAML\s+à\s+mão\s+é\s+\W*exce[çc][ãa]o/i, 'a excecao era a valvula de escape'],
+    [/quando\s+\*{0,2}n[ãa]o\s+(houver|existir)\s+comando/i, 'a condicao ficava a cargo do proprio agente'],
+    [/à\s+mão\s+existindo\s+comando/i, 'proibir so "existindo comando" autoriza todo o resto'],
+    [/(edite|editar|escreva|escrever)\s+(o\s+)?(YAML\s+)?direto/i, 'nao ha caminho direto para o arquivo'],
+  ]
+
+  const sobras = []
+  for (const f of [...textos(), path.join(RAIZ, 'README.md')]) {
+    linhasDe(f).forEach((linha, i) => {
+      if (linha.includes('❌')) return
+      for (const [re, porque] of REAUTORIZA) {
+        if (re.test(linha)) sobras.push(`${rel(f)}:${i + 1}: ${porque} — ${linha.trim().slice(0, 70)}`)
+      }
+    })
+  }
+  assert.deepEqual(sobras, [])
+
+  // A metade positiva. Proibir sem dizer o que fazer no lugar produz um agente
+  // que trava sem relatar — e uma lacuna que ninguem fica sabendo e uma lacuna
+  // que a CLI nunca corrige.
+  const nucleo = fs.readFileSync(path.join(SKILLS, 'modelagem', 'SKILL.md'), 'utf8')
+  const operar = fs.readFileSync(path.join(SKILLS, 'operar', 'SKILL.md'), 'utf8')
+  const cli = fs.readFileSync(path.join(SKILLS, 'cli', 'SKILL.md'), 'utf8')
+  const readme = fs.readFileSync(path.join(RAIZ, 'README.md'), 'utf8')
+
+  const DECLARA = [
+    [nucleo, /não há caminho manual/i, 'o nucleo nao fecha a edicao manual'],
+    [nucleo, /operação não acontece/i, 'o nucleo nao diz o que acontece sem comando'],
+    // O alcance precisa estar escrito: sem ele a regra e lida como proibicao de
+    // escrever qualquer arquivo, e a memoria do plugin — que nao tem comando
+    // nenhum, e nunca vai ter — para de ser gravada.
+    [nucleo, /\$MEM/, 'o nucleo nao diz o que fica de fora da regra'],
+    [operar, /## Quando não existe comando/, 'a operacao nao tem procedimento para a lacuna'],
+    [operar, /relate e pare/i, 'a operacao nao manda parar'],
+    [operar, /nao vou editar o arquivo/i, 'a operacao nao tem a forma fixa do relato'],
+    [cli, /não existe sem ter conferido/i, 'a skill da CLI nao proibe afirmar a ausencia de memoria'],
+    [readme, /não escreve o YAML do modelo na mão/i, 'o README nao declara a regra a quem instala'],
+  ]
+  const ausentes = DECLARA.filter(([texto, re]) => !re.test(texto)).map(([, , porque]) => porque)
+  assert.deepEqual(ausentes, [])
+})
+
 // ---------------------------------------------------------------------------
 // O estado persistido
 // ---------------------------------------------------------------------------

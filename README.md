@@ -41,6 +41,11 @@ como Container algo que, pelo que já foi dito, não parece um Container, ele ap
 conflito e pede confirmação. E aí a decisão continua sendo sua — inclusive a de seguir
 assim mesmo.
 
+Ele também não escreve o YAML do modelo na mão. Tudo o que ele grava passa por um
+comando da CLI `cfour`: o que a ferramenta ainda não sabe fazer, ele relata — dizendo
+qual comando falta — em vez de improvisar no arquivo. Você continua livre para editar
+o modelo à mão quando quiser; o plugin é que não faz isso no seu lugar.
+
 ## Instalar
 
 Adicione este repositório como marketplace no seu Claude Code.
