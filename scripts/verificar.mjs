@@ -1,22 +1,14 @@
 // Os acordos que nenhum compilador reconcilia, num repositorio que nao compila
 // nada: aqui tudo e prosa, e prosa que se refere a arquivos.
 //
-// Cada verificacao existe contra um defeito concreto, e os tres primeiros sao a
-// razao de este arquivo ter sido escrito no dia em que as skills sairam do
-// monorepo do cfourdev:
+// Cada verificacao existe contra um defeito concreto. As tres primeiras nasceram
+// no dia em que as skills sairam do monorepo do cfourdev; as ultimas, no dia em
+// que o plugin deixou de recomendar estrategia de modelagem — porque prescricao
+// removida de uma skill volta pela outra, e nada reclama.
 //
-//   1. la elas se citavam por `.claude/skills/c4-harness/...`, caminho que nao
-//      existe dentro do cache do plugin. Um `${CLAUDE_PLUGIN_ROOT}` errado nao
-//      falha: a skill simplesmente nao le a referencia e segue sem ela;
-//   2. a substituicao mecanica de onze nomes deixa residuo, e residuo de
-//      substituicao ja foi achado duas vezes neste projeto — pelo lint, que aqui
-//      nao existe;
-//   3. `npm run check` so existia no monorepo. No repositorio de quem instala o
-//      plugin ele nao existe, e o comando certo e `cfour check`.
-//
-// Sem framework e sem dependencia: `node --test`, como no cfourdev. Todo teste
-// acumula uma lista e falha UMA vez com a lista inteira — a mensagem mostra
-// todos os defeitos de uma vez, em vez do primeiro.
+// Sem framework e sem dependencia: `node --test`. Todo teste acumula uma lista e
+// falha UMA vez com a lista inteira — a mensagem mostra todos os defeitos de uma
+// vez, em vez do primeiro.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import fs from 'node:fs'
@@ -51,9 +43,6 @@ function textos(dir = SKILLS) {
 function arquivos(dir = RAIZ) {
   const achados = []
   for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
-    // `.git` e dependencia nao sao o repositorio, e `.claude/` seria o cache de
-    // quem testou o plugin AQUI dentro — traz o payload inteiro junto, e ele nao
-    // e texto deste projeto.
     if (e.name === '.git' || e.name === 'node_modules' || e.name === '.claude') continue
     const p = path.join(dir, e.name)
     if (e.isDirectory()) achados.push(...arquivos(p))
@@ -64,12 +53,17 @@ function arquivos(dir = RAIZ) {
 
 const rel = (p) => path.relative(RAIZ, p).split(path.sep).join('/')
 
+/** As linhas de um arquivo, com o numero — para apontar o defeito onde ele mora. */
+const linhasDe = (f) => fs.readFileSync(f, 'utf8').split('\n')
+
+// ---------------------------------------------------------------------------
+// O que existe, e se refere ao que existe
 // ---------------------------------------------------------------------------
 
 test('toda skill tem frontmatter, e o name e o nome do diretorio', () => {
   // O `name` do frontmatter VENCE o nome do diretorio como ultimo segmento do
-  // comando. Divergindo, `/cfour:editor` chama uma skill e o texto que manda
-  // usar `cfour:editor` aponta para outra — e nada reclama.
+  // comando. Divergindo, `/cfour:operar` chama uma skill e o texto que manda
+  // usar `cfour:operar` aponta para outra — e nada reclama.
   const problemas = []
   for (const nome of nomes) {
     const f = path.join(SKILLS, nome, 'SKILL.md')
@@ -94,17 +88,18 @@ test('toda skill tem frontmatter, e o name e o nome do diretorio', () => {
   assert.deepEqual(problemas, [])
 })
 
-/** Nomenclatura, e nao arquivo: `decisions/MD-NNN-slug.md`, `scenarios/NN-*.md`. */
+/** Nomenclatura, e nao arquivo: `decisions/MD-NNN-slug.md`, `<projeto>/...`. */
 const EH_PADRAO = (alvo) => /NN|YYYY|AAAA|<[a-z]|\bslug\b|\bid\b|\bprojeto\b/.test(alvo)
 
 test('todo ${CLAUDE_PLUGIN_ROOT} citado aponta para um arquivo que existe', () => {
+  // Um `${CLAUDE_PLUGIN_ROOT}` errado nao falha: a skill simplesmente nao le a
+  // referencia e segue sem ela.
   const quebrados = []
   for (const f of textos()) {
     const texto = fs.readFileSync(f, 'utf8')
     for (const [, alvo] of texto.matchAll(/\$\{CLAUDE_PLUGIN_ROOT\}\/([\w./-]+)/g)) {
       const limpo = alvo.replace(/[.,;)]+$/, '')
       if (EH_PADRAO(limpo)) continue
-      // Um diretorio citado com barra no fim e referencia a pasta, nao a arquivo.
       if (!fs.existsSync(path.join(RAIZ, limpo))) quebrados.push(`${rel(f)}: ${limpo}`)
     }
   }
@@ -112,29 +107,16 @@ test('todo ${CLAUDE_PLUGIN_ROOT} citado aponta para um arquivo que existe', () =
 })
 
 /**
- * O unico prefixo que resolve FORA do plugin.
- *
- * `model/…` e caminho dentro de uma modelagem, relativo ao `model/` dela: quem
- * resolve e o repositorio de quem esta modelando, que so existe em tempo de
- * conversa.
- *
- * `docs/…` estava aqui e saiu: a documentacao do cfourdev virou publica, e as
- * marcas viraram `doc:<slug>` — conferiveis pelo teste dos slugs, abaixo.
+ * O unico prefixo que resolve FORA do plugin: `model/…` e caminho dentro de uma
+ * modelagem, e `.claude/cfour/…` e a memoria e o cache no repositorio de quem
+ * documenta. Os dois so existem em tempo de conversa.
  */
-const FORA_DO_PLUGIN = [
-  /^model\//,
-  // A memoria e o cache da documentacao moram no repositorio de quem modela.
-  // O contrato deles e conferido pelos testes de estado e de cache, abaixo.
-  /^\.claude\/cfour\//,
-]
+const FORA_DO_PLUGIN = [/^model\//, /^\.claude\/cfour\//, /^\.claude\/c4-harness\//]
 
 /**
- * Nomes que sao arquivos DO USUARIO, e nao deste repositorio.
- *
- * O registro, a identidade, a configuracao e os quatro arquivos de memoria
- * nascem no repositorio de quem esta modelando; `view.yaml` vem dentro do
- * `cfour`. Citar qualquer um deles pelo nome nu e o certo — e eles sao a razao
- * de a checagem de nome nu precisar de uma lista, em vez de proibir a forma.
+ * Nomes que sao arquivos DO USUARIO, e nao deste repositorio. O registro, a
+ * identidade, a configuracao, os arquivos de memoria e o cache da CLI nascem no
+ * repositorio de quem documenta; `view.yaml` vem dentro do `cfour`.
  */
 const DO_USUARIO = new Set([
   'cfour.yaml',
@@ -145,30 +127,19 @@ const DO_USUARIO = new Set([
   'project-context.yaml',
   'session.yaml',
   'MODELING-CONVENTIONS.md',
-  // O manifesto do cache da documentacao nasce em `.claude/cfour/docs-cache/`
-  // do repositorio de quem modela — nao existe aqui, e citar pelo nome nu e o
-  // certo, como os quatro arquivos de memoria acima.
   'manifest.yaml',
-  // O nome ANTIGO do payload, que a `0.5.0` aposentou. Continua citado de
-  // proposito: o cenario `19` planta um cache nesse formato, e a skill de
-  // documentacao explica o que fazer ao encontrar um. O nome de hoje —
-  // `llms-full.txt` — nao precisa de entrada nenhuma, porque os dois regexes
-  // abaixo so casam `md|yaml|yml|json|mjs`.
-  'for-agents.md',
-  // Arquivos que a cobertura tecnica manda LER no repositorio do arquiteto
-  // antes de perguntar. Sao dele, e nenhum deles mora aqui.
+  'help.json',
+  // Arquivos que a contextualizacao manda LER no repositorio do arquiteto antes
+  // de perguntar. Sao dele, e nenhum deles mora aqui.
   'docker-compose.yml',
+  'package.json',
 ])
 
 test('todo caminho de arquivo citado entre crases existe', () => {
-  // Dois formatos, e o segundo foi acrescentado depois de uma skill citar cinco
-  // arquivos pelo nome nu — arquivos que nem moravam no diretorio dela. A versao
-  // antiga exigia uma barra, entao `view-or-flow.md` passava batido.
-  //
-  // Resolve contra a raiz e contra o proprio diretorio, que e como as
-  // referencias do nucleo sao escritas.
+  // Dois formatos: com barra, e o nome nu — que foi acrescentado depois de uma
+  // skill citar cinco arquivos que nem moravam no diretorio dela.
   const COM_BARRA = /`([\w./-]+\/[\w.-]+\.(?:md|yaml|yml|json|mjs))`/g
-  const NOME_NU = /`([\w-]+\.(?:md|yaml|yml|mjs))`/g
+  const NOME_NU = /`([\w-]+\.(?:md|yaml|yml|json|mjs))`/g
 
   const quebrados = []
   for (const f of textos()) {
@@ -186,62 +157,12 @@ test('todo caminho de arquivo citado entre crases existe', () => {
   assert.deepEqual(quebrados, [])
 })
 
-/**
- * Os slugs da documentacao publica.
- *
- * A MESMA lista esta congelada em `tests/contracts/documentacao-publica.test.ts`
- * do cfourdev. Duas copias em dois repositorios e exatamente o desenho: nenhum
- * dos dois pode importar o outro, e um acordo assim ou e afirmado dos dois lados
- * ou nao e afirmado em lugar nenhum.
- *
- * Conferir por HTTP seria mais forte e nao vale: poria rede num teste que roda
- * em todo push, para pegar um erro que so acontece quando alguem renomeia um
- * documento — e quem renomeia ve o dourado do outro lado falhar primeiro.
- */
-const SLUGS = [
-  'conceitos',
-  'primeiros-passos',
-  'modelagem',
-  'diagramas',
-  'fluxos',
-  'usando-o-viewer',
-  'configuracao',
-  'referencia',
-  'perguntas-frequentes',
-  'modelagens',
-  'publicando',
-]
-
-test('toda marca doc: aponta para um documento que existe', () => {
-  const invalidas = []
-  for (const f of textos()) {
-    const linhas = fs.readFileSync(f, 'utf8').split('\n')
-    linhas.forEach((linha, i) => {
-      for (const [, slug] of linha.matchAll(/\bdoc:([a-z][a-z-]*)/g)) {
-        if (!SLUGS.includes(slug)) invalidas.push(`${rel(f)}:${i + 1}: doc:${slug}`)
-      }
-    })
-  }
-  assert.deepEqual(invalidas, [])
-})
-
-test('a tabela de slugs do contrato lista todos, e so eles', () => {
-  // O contrato traz a lista para o leitor, e ela e o que ensina a resolver
-  // `doc:<slug>`. Uma lista incompleta manda o modelo adivinhar o endereco.
-  const contrato = fs.readFileSync(
-    path.join(SKILLS, 'modelagem', 'references', 'viewer-contract.md'),
-    'utf8',
-  )
-  const ausentes = SLUGS.filter((s) => !contrato.includes(`| \`${s}\` |`))
-  assert.deepEqual(ausentes, [], 'slugs que a tabela do contrato nao lista')
-})
-
 test('toda skill citada como cfour:<nome> existe', () => {
   // O roteamento do nucleo e uma tabela de nomes. Renomear uma skill e esquecer
   // a tabela produz um encaminhamento para o nada, que o modelo resolve
   // improvisando — o pior modo de falhar, porque parece que funcionou.
   const inexistentes = []
-  for (const f of textos()) {
+  for (const f of [...textos(), path.join(RAIZ, 'README.md')]) {
     const texto = fs.readFileSync(f, 'utf8')
     for (const [, alvo] of texto.matchAll(/\bcfour:([a-z][a-z-]*)/g)) {
       if (alvo === '*' || nomes.includes(alvo)) continue
@@ -251,57 +172,130 @@ test('toda skill citada como cfour:<nome> existe', () => {
   assert.deepEqual(inexistentes, [])
 })
 
-test('nao sobrou nada do monorepo', () => {
-  // A substituicao mecanica de onze nomes, dois caminhos e um comando. O que
-  // sobra aqui nao quebra ruidosamente: manda ler um arquivo que nao existe, ou
-  // rodar um script que so existia no repositorio de origem.
-  const PROIBIDO = [
-    [/c4-harness/, 'o harness virou plugin: nao ha mais `c4-harness`'],
-    [/\.claude\/skills\//, 'skills de plugin ficam em ${CLAUDE_PLUGIN_ROOT}/skills/'],
-    [/npm run check/, 'no repositorio do usuario o comando e `cfour check`'],
-    [/npm run dev/, 'no repositorio do usuario o comando e `cfour serve`'],
-    [/\bc4-(model|modeling|resume|close|reconcile|modelagens|architecture)/, 'nome de skill antigo'],
-    [/(?<!\/)\bexamples\/<(?:id|slug)>/, '`examples/` era pasta do monorepo; o modelo vem do `path:` do registro'],
-    // `docs/NN` apontava para a documentacao dentro do repositorio PRIVADO do
-    // cfourdev. Ela e publica agora, e a marca e `doc:<slug>` — que o teste dos
-    // slugs confere. Escrever `docs/08` de novo seria voltar a citar um endereco
-    // que o leitor deste plugin nao pode abrir.
-    [/\bdocs\/\d\d\b/, 'a marca agora e `doc:<slug>`, e resolve em cfourdev.com.br/docs'],
-    // Enquanto as skills moravam num diretorio do monorepo, "harness" era o nome
-    // certo. Hoje isto e um plugin, e o README ja diz isso em toda parte.
-    [/\bharness\b/i, 'isto e um plugin, e nao um harness'],
-    // A modelagem de exemplo do cfourdev nao esta no repositorio de ninguem.
-    [/\bexemplos-c4\b/, 'os exemplos moram em `references/exemplos.md` e em doc:exemplos'],
-    // O setup mandava, com todas as letras, "pergunte o slug em vez de
-    // inventa-lo". Era a estrategia sendo terceirizada para quem pediu ajuda
-    // com ela, e voltar a escrever isso desfaz `decisoes-de-quem.md` inteiro.
-    // Contraexemplo marcado com ❌ passa: e assim que a regra se ensina.
-    [/\b(qual|que)\s+slug\b/i, 'identificador derivavel se propoe, nao se pergunta', 'eval-ok'],
-    [/em vez de invent[áa]-lo/i, 'identificador derivavel se propoe, nao se pergunta', 'eval-ok'],
-  ]
-  // `cfour:setup` e a UNICA skill que pode falar do endereco antigo e da palavra
-  // antiga: o trabalho dela e achar a memoria que ficou la e oferecer a
-  // migracao, e explicar POR QUE o nome mudou. Proibir as strings nela seria
-  // proibir a migracao — e quem tem a pasta antiga e exatamente quem nao percebe
-  // que a perdeu.
-  const MIGRACAO = path.join(SKILLS, 'setup', 'SKILL.md')
-  const SO_NA_MIGRACAO = /c4-harness|\\bharness\\b/
+test('as skills e o README concordam sobre quais skills existem', () => {
+  // O README e a unica porta de entrada de quem ainda nao instalou. Uma skill
+  // que existe e nao esta la e uma skill que ninguem descobre.
+  const readme = fs.readFileSync(path.join(RAIZ, 'README.md'), 'utf8')
+  const ausentes = nomes.filter((n) => !readme.includes(`cfour:${n}`))
+  assert.deepEqual(ausentes, [], 'skills que o README nao menciona')
+})
 
-  // O eval DESCREVE a falha para poder pontua-la: a rubrica precisa escrever
-  // "que slug quer?" na coluna do que reprova, e um cenario precisa poder
-  // armar a armadilha. Proibir a string ali seria proibir o teste do defeito.
-  const EVAL = path.join(SKILLS, 'avaliar')
+// ---------------------------------------------------------------------------
+// O invariante — a razao de este plugin ter sido reescrito
+// ---------------------------------------------------------------------------
+
+test('o nucleo declara o invariante, e diz o que continua sendo do agente', () => {
+  // Sem esta frase escrita onde o modelo a le antes de tudo, o resto do plugin e
+  // um conjunto de skills educadas — e educacao nao impede uma inferencia.
+  const nucleo = fs.readFileSync(path.join(SKILLS, 'modelagem', 'SKILL.md'), 'utf8')
+  assert.match(nucleo, /PERGUNTE\. N[ÃA]O DECIDA/i, 'o nucleo nao declara o invariante')
+  assert.match(nucleo, /infer[êe]ncia/i, 'o nucleo nao nomeia a inferencia')
+  // A metade que evita o defeito oposto: um plugin que pergunta qual comando
+  // rodar nao entregou nada.
+  assert.match(nucleo, /como executar/i, 'o nucleo nao diz o que continua sendo do agente')
+})
+
+test('o C4 esta escrito como guarda-corpo, e cobre as abstracoes', () => {
+  // O caso que motivou a reescrita: o agente decidiu sozinho que algo era um
+  // Container. Este arquivo existe para que ele saiba o que Container e — e para
+  // que saiba que saber nao autoriza classificar.
+  const f = path.join(SKILLS, 'modelagem', 'references', 'c4.md')
+  assert.ok(fs.existsSync(f), 'o reference do C4 sumiu')
+  const c4 = fs.readFileSync(f, 'utf8')
+
+  const ABSTRACOES = ['Person', 'Software System', 'Container', 'Component', 'Code']
+  assert.deepEqual(
+    ABSTRACOES.filter((a) => !c4.includes(a)),
+    [],
+    'abstracoes que o reference nao cobre',
+  )
+  assert.match(c4, /nunca decide/i, 'o reference nao proibe a classificacao autonoma')
+  // A origem conceitual, para o arquiteto poder conferir o que o plugin afirmou.
+  assert.ok(c4.includes('https://c4model.com/'), 'o reference nao cita a origem das definicoes')
+})
+
+test('nao voltou nenhuma regra prescritiva', () => {
+  // Prescricao removida de uma skill volta pela outra. Cada padrao aqui esteve
+  // escrito neste repositorio, e cada um autorizava o agente a decidir modelagem
+  // ou arquitetura no lugar do arquiteto.
+  const PROIBIDO = [
+    [/\bdescobrir antes de prescrever\b/i, 'o principio antigo pressupunha que o plugin prescreve'],
+    [/\bestrat[ée]gia de modelagem\b/i, 'a estrategia de modelagem e do arquiteto'],
+    [/\bplano de ondas\b|\bonda \d\b/i, 'as ondas eram o plano de escrita que o agente montava'],
+    [/\bperfil\s+`?(leve|intermediario|intermediário|profundo)`?/i, 'a calibragem do processo saiu'],
+    [/\bqual\s+voc[êe]\s+escolheria\b/i, 'recomendar a propria escolha era a regra que saiu'],
+    [/\brecomendo\s+(a|o|uma|um|representar|separar|criar)\b/i, 'recomendacao de modelagem e prescricao'],
+    [/\bdiga qual voc[êe]\b/i, 'idem'],
+    [/\bcheckpoint \d\b/i, 'os cinco checkpoints eram a jornada em sete etapas'],
+    [/\bviewProposal\b/, 'a proposta de visao era o agente decidindo quais desenhos existem'],
+  ]
+
+  // Os tres arquivos cujo TRABALHO e nomear o que saiu: sem poder escrever
+  // `strategy`, `complexity` e `waves`, eles nao conseguem dizer que aqueles
+  // blocos, encontrados numa memoria antiga, nao pautam mais nada — e a
+  // prescricao voltaria pelo unico caminho que uma reescrita de skills nao
+  // fecha, que e o disco de quem ja usou o plugin.
+  const PODEM_NOMEAR_O_QUE_SAIU = new Set([
+    path.join(SKILLS, 'modelagem', 'references', 'memoria.md'),
+    path.join(SKILLS, 'sessao', 'SKILL.md'),
+    path.join(SKILLS, 'modelagem', 'references', 'templates', 'project-context.yaml'),
+  ])
 
   const sobras = []
-  for (const f of textos()) {
-    const linhas = fs.readFileSync(f, 'utf8').split('\n')
-    linhas.forEach((linha, i) => {
+  for (const f of [...textos(), path.join(RAIZ, 'README.md')]) {
+    if (PODEM_NOMEAR_O_QUE_SAIU.has(f)) continue
+    linhasDe(f).forEach((linha, i) => {
       // Linha marcada como contraexemplo mostra a forma errada de proposito. Um
       // plugin que ensina pelo par ✅/❌ nao pode ser proibido de escrever o ❌.
       if (linha.includes('❌')) return
-      for (const [re, porque, excecao] of PROIBIDO) {
-        if (f === MIGRACAO && SO_NA_MIGRACAO.test(String(re))) continue
-        if (excecao === 'eval-ok' && f.startsWith(EVAL)) continue
+      for (const [re, porque] of PROIBIDO) {
+        if (re.test(linha)) sobras.push(`${rel(f)}:${i + 1}: ${porque} — ${linha.trim().slice(0, 70)}`)
+      }
+    })
+  }
+  assert.deepEqual(sobras, [])
+
+  // E a excecao nao pode virar permissao geral: os tres arquivos so podem
+  // nomear o vocabulario antigo para REBAIXA-LO, e cada um diz isso com todas
+  // as letras.
+  for (const f of PODEM_NOMEAR_O_QUE_SAIU) {
+    assert.match(
+      fs.readFileSync(f, 'utf8'),
+      /nunca instru[çc][ãa]o|n[ãa]o (pautam|guarda|existe)|hist[óo]ria do que/i,
+      `${rel(f)} nomeia o que saiu sem dizer que aquilo nao vale mais`,
+    )
+  }
+})
+
+// ---------------------------------------------------------------------------
+// A CLI e a fonte — e a rede nao e
+// ---------------------------------------------------------------------------
+
+test('nada busca documentacao na rede', () => {
+  // A decisao: quem descreve a ferramenta e a propria ferramenta. As paginas de
+  // `/docs/` sairam do ar, o payload para agentes descreve uma versao anterior a
+  // instalada, e um endereco sobrevivente manda o agente ler o contrato errado —
+  // ou concluir que um campo nao existe.
+  const PROIBIDO = [
+    [/llms(-full)?\.txt/i, 'o plugin nao busca mais o payload de documentacao'],
+    [/cfourdev\.com\.br\/docs/i, 'as paginas de documentacao nao respondem mais'],
+    [/\bdoc:[a-z]/, 'a marca `doc:<slug>` apontava para paginas que sairam do ar'],
+    [/\bdocs-cache\b(?!\/`? *—| e resquicio)/i, 'o cache da documentacao virou cache da CLI'],
+  ]
+  // As duas skills que precisam FALAR do cache antigo para oferecer a limpeza.
+  const PODEM_CITAR_O_CACHE_ANTIGO = new Set([
+    path.join(SKILLS, 'cli', 'SKILL.md'),
+    path.join(SKILLS, 'setup', 'SKILL.md'),
+    path.join(SKILLS, 'modelagem', 'references', 'memoria.md'),
+  ])
+
+  const sobras = []
+  for (const f of arquivos()) {
+    if (f === fileURLToPath(import.meta.url)) continue
+    if (!/\.(md|yaml|yml|json|mjs)$/.test(f)) continue
+    linhasDe(f).forEach((linha, i) => {
+      for (const [re, porque] of PROIBIDO) {
+        if (porque.includes('cache da CLI') && PODEM_CITAR_O_CACHE_ANTIGO.has(f)) continue
         if (re.test(linha)) sobras.push(`${rel(f)}:${i + 1}: ${porque} — ${linha.trim().slice(0, 70)}`)
       }
     })
@@ -309,107 +303,60 @@ test('nao sobrou nada do monorepo', () => {
   assert.deepEqual(sobras, [])
 })
 
+test('a skill da CLI declara o comando, o cache e a invalidacao', () => {
+  // Sem estes tres, a skill vira uma recomendacao vaga de "consulte a CLI" — e o
+  // modo de falhar e o mesmo de antes: o plugin decora comandos que envelhecem.
+  const cli = fs.readFileSync(path.join(SKILLS, 'cli', 'SKILL.md'), 'utf8')
+  const CONTRATO = [
+    ['cfour help --output json', 'o comando que descreve a arvore inteira'],
+    ['.claude/cfour/cli-cache/', 'onde o cache mora'],
+    ['cfour_version', 'o campo que decide se o cache vale'],
+    ['cfour config show', 'o que responde pelos valores desta modelagem'],
+    ['cfour help formato', 'as regras que o --help de comando nao cabe'],
+  ]
+  const ausentes = CONTRATO.filter(([marca]) => !cli.includes(marca))
+  assert.deepEqual(
+    ausentes.map(([m, porque]) => `${m} (${porque})`),
+    [],
+    'o que a skill da CLI deixou de declarar',
+  )
+})
+
+test('a operacao passa pela CLI antes do YAML', () => {
+  // O defeito que a versao anterior tinha por desenho: escrever YAML a mao
+  // enquanto a CLI ja sabia criar tudo. Um plugin que reimplementa as regras do
+  // formato mantem uma segunda verdade, que envelhece sozinha.
+  const operar = fs.readFileSync(path.join(SKILLS, 'operar', 'SKILL.md'), 'utf8')
+  const nucleo = fs.readFileSync(path.join(SKILLS, 'modelagem', 'SKILL.md'), 'utf8')
+  assert.match(nucleo, /A CLI é a API/i, 'o nucleo nao declara a CLI como API')
+  for (const cmd of ['cfour element add', 'cfour relation add', 'cfour diagram add', 'cfour flow add']) {
+    assert.ok(operar.includes(cmd), `a operacao nao conhece \`${cmd}\``)
+  }
+  assert.match(operar, /--dry-run/, 'a operacao nao mostra o efeito antes de gravar')
+  assert.match(operar, /cfour check/, 'a operacao nao valida depois de escrever')
+})
+
 // ---------------------------------------------------------------------------
-// A jornada, os perfis e a cobertura: tres vocabularios fechados que varias
-// skills escrevem na memoria de outra pessoa. Um nome divergente nao falha em
-// lugar nenhum — ele produz uma sessao que retoma na etapa errada, ou um perfil
-// que ninguem reconhece na sessao seguinte.
+// O estado persistido
 // ---------------------------------------------------------------------------
 
-const ETAPAS = [
-  'enquadramento',
-  'calibragem',
-  'descoberta',
-  'estrategia',
-  'confirmacao',
-  'escrita',
-  'encerramento',
-]
-
-const PERFIS = ['leve', 'intermediario', 'profundo']
-
-const AREAS = [
-  'estrutura-funcional',
-  'aplicacoes',
-  'dados',
-  'integracoes',
-  'infraestrutura',
-  'seguranca',
-  'operacao',
-]
-
-const ref = (nome) => path.join(SKILLS, 'modelagem', 'references', nome)
 const tpl = (nome) => path.join(SKILLS, 'modelagem', 'references', 'templates', nome)
 
-test('a jornada declara as sete etapas, e ninguem cita etapa fora delas', () => {
-  const jornada = fs.readFileSync(ref('jornada.md'), 'utf8')
-  const naoDeclaradas = ETAPAS.filter((e) => !jornada.includes(`\`${e}\``))
-  assert.deepEqual(naoDeclaradas, [], 'etapas que `jornada.md` nao declara')
-
-  // `current_stage: escrit`, `next_stage: revisao` e afins: nomes que uma skill
-  // manda gravar e a retomada nao sabe interpretar.
-  const invalidas = []
-  for (const f of textos()) {
-    const texto = fs.readFileSync(f, 'utf8')
-    for (const [, campo, valor] of texto.matchAll(
-      /\b(current_stage|next_stage):\s*([a-z][a-z-]*)/g,
-    )) {
-      if (!ETAPAS.includes(valor)) invalidas.push(`${rel(f)}: ${campo}: ${valor}`)
-    }
-    for (const [, lista] of texto.matchAll(/\bcompleted_stages:\s*\[([^\]]+)\]/g)) {
-      for (const item of lista.split(',').map((s) => s.trim()).filter(Boolean)) {
-        if (!ETAPAS.includes(item)) invalidas.push(`${rel(f)}: completed_stages: ${item}`)
-      }
-    }
-  }
-  assert.deepEqual(invalidas, [])
-})
-
-test('os tres perfis sao os mesmos na calibragem, no template e nas skills', () => {
-  const calibragem = fs.readFileSync(ref('calibragem.md'), 'utf8')
-  const contexto = fs.readFileSync(tpl('project-context.yaml'), 'utf8')
-
-  const semSecao = PERFIS.filter((p) => !calibragem.includes(`### \`${p}\``))
-  assert.deepEqual(semSecao, [], 'perfis sem secao propria em `calibragem.md`')
-
-  const comentario = contexto.match(/profile:.*#\s*(.+)$/m)?.[1] ?? ''
-  const doTemplate = comentario.split('|').map((s) => s.trim())
-  assert.deepEqual(doTemplate, PERFIS, 'o template oferece perfis diferentes dos da calibragem')
-
-  const invalidos = []
-  for (const f of textos()) {
-    const texto = fs.readFileSync(f, 'utf8')
-    for (const [, valor] of texto.matchAll(/\bprofile:\s*([a-z][a-z-]*)/g)) {
-      if (!PERFIS.includes(valor)) invalidos.push(`${rel(f)}: profile: ${valor}`)
-    }
-  }
-  assert.deepEqual(invalidos, [])
-})
-
-test('as sete areas de cobertura tecnica batem com as do template', () => {
-  const cobertura = fs.readFileSync(ref('cobertura-tecnica.md'), 'utf8')
-  const semSecao = AREAS.filter((a) => !cobertura.includes(`### \`${a}\``))
-  assert.deepEqual(semSecao, [], 'areas sem secao em `cobertura-tecnica.md`')
-
-  const contexto = fs.readFileSync(tpl('project-context.yaml'), 'utf8')
-  const bloco = contexto.split('technical_coverage:')[1]?.split(/\n# ---/)[0] ?? ''
-  const doTemplate = [...bloco.matchAll(/^ {2}([a-z][a-z-]*):/gm)].map((m) => m[1])
-  assert.deepEqual(doTemplate, AREAS, 'o template cobre areas diferentes da referencia')
-})
-
-test('o estado persistido que as skills citam existe nos templates', () => {
-  // Uma skill que manda gravar `strategy.status` num template que nao tem
-  // `strategy` produz memoria com formato inventado, e cada sessao inventa o
-  // seu. O contrato do estado e o template.
+test('o estado que as skills citam existe nos templates, e vice-versa', () => {
+  // Uma skill que manda gravar um bloco que o template nao tem produz memoria com
+  // formato inventado, e cada sessao inventa o seu. O contrato do estado e o
+  // template — e bloco que nenhuma skill preenche e contrato morto.
   const contexto = fs.readFileSync(tpl('project-context.yaml'), 'utf8')
   const sessao = fs.readFileSync(tpl('session.yaml'), 'utf8')
 
   const BLOCOS = [
-    ['complexity', contexto],
-    ['technical_coverage', contexto],
-    ['strategy', contexto],
-    ['workflow', sessao],
-    ['consulted_docs', sessao],
+    ['objetivo', contexto],
+    ['elementos_conhecidos', contexto],
+    ['tecnologias', contexto],
+    ['fontes', contexto],
+    ['questions', contexto],
+    ['last_operation', sessao],
+    ['model_fingerprint', sessao],
   ]
   const ausentes = BLOCOS.filter(([chave, arq]) => !new RegExp(`^${chave}:`, 'm').test(arq))
   assert.deepEqual(
@@ -418,222 +365,99 @@ test('o estado persistido que as skills citam existe nos templates', () => {
     'blocos que as skills escrevem e o template nao declara',
   )
 
-  // E o inverso: bloco no template que nenhuma skill sabe preencher e contrato
-  // morto, que envelhece sem ninguem perceber.
   const todas = textos()
-    .filter((f) => f.endsWith('SKILL.md'))
+    .filter((f) => f.endsWith('SKILL.md') || f.endsWith('memoria.md'))
     .map((f) => fs.readFileSync(f, 'utf8'))
     .join('\n')
   const orfaos = BLOCOS.map(([c]) => c).filter((c) => !todas.includes(c))
   assert.deepEqual(orfaos, [], 'blocos de estado que nenhuma skill menciona')
 })
 
-test('a documentacao oficial e a unica fonte, e o cache tem contrato', () => {
-  const doc = fs.readFileSync(path.join(SKILLS, 'documentacao', 'SKILL.md'), 'utf8')
-
-  assert.ok(
-    doc.includes('https://cfourdev.com.br/docs/'),
-    'a skill de documentacao nao declara a origem oficial',
-  )
-  assert.ok(
-    doc.includes('.claude/cfour/docs-cache/'),
-    'a skill de documentacao nao declara onde o cache mora',
-  )
-  // Sem estes campos o cache e uma copia sem procedencia: no dia em que ele
-  // contradisser o site, ninguem sabe qual das duas envelheceu.
-  const METADADOS = ['source:', 'url:', 'fetched_at:', 'content_hash:', 'status:', 'failures:']
-  const semMetadado = METADADOS.filter((m) => !doc.includes(m))
-  assert.deepEqual(semMetadado, [], 'campos que o manifesto do cache precisa declarar')
-})
-
-test('a escolha de versionar o cache e oferecida onde o cache nasce, e tem endereco', () => {
-  // Tres execucoes independentes criaram o `docs-cache/` versionado sem dizer
-  // que havia escolha ali. Nenhuma delas foi descuidada: a instrucao morava no
-  // FIM da secao de politica de atualizacao, longe do passo que cria o
-  // diretorio — quem le a skill de cima para baixo ja gravou o cache quando
-  // chega a frase que manda oferecer.
-  //
-  // O contrato aqui e fraco de proposito, no espirito do teste do estado
-  // persistido: nao da para afirmar que o agente vai anunciar, mas da para
-  // afirmar que a oferta esta no passo certo e que o que a skill manda gravar
-  // tem endereco.
-  const doc = fs.readFileSync(path.join(SKILLS, 'documentacao', 'SKILL.md'), 'utf8')
-
-  const procedimento = doc.split('\n## Procedimento')[1]?.split('\n## ')[0] ?? ''
-  assert.ok(procedimento, 'a skill de documentacao perdeu a secao `## Procedimento`')
-  for (const marca of ['.gitignore', 'git_decidido_por']) {
-    assert.ok(
-      procedimento.includes(marca),
-      `o passo que cria o cache nao menciona \`${marca}\``,
-    )
+test('os blocos da versao anterior estao marcados como historia, nao como pauta', () => {
+  // Memoria antiga continua no disco de quem ja usou o plugin. Se `strategy` e
+  // `complexity` forem lidos como instrucao, a prescricao volta pela memoria —
+  // que e o unico caminho que uma reescrita de skills nao fecha sozinha.
+  const memoria = fs.readFileSync(path.join(SKILLS, 'modelagem', 'references', 'memoria.md'), 'utf8')
+  const sessao = fs.readFileSync(path.join(SKILLS, 'sessao', 'SKILL.md'), 'utf8')
+  for (const bloco of ['strategy', 'complexity', 'workflow']) {
+    assert.ok(memoria.includes(bloco), `\`memoria.md\` nao diz o que fazer com \`${bloco}\``)
+    assert.ok(sessao.includes(bloco), `a retomada nao diz o que fazer com \`${bloco}\``)
   }
-
-  // E o que ela manda gravar precisa existir no manifesto: a escolha ACRESCENTA
-  // aos tres campos de procedencia, e nao os substitui.
-  const manifesto = doc.split('### `manifest.yaml`')[1]?.split('\n### ')[0] ?? ''
-  const CAMPOS = ['source:', 'fetched_at:', 'content_hash:', 'git:', 'git_decidido_por:']
-  const ausentes = CAMPOS.filter((c) => !manifesto.includes(c))
-  assert.deepEqual(ausentes, [], 'campos que o exemplo do `manifest.yaml` deixou de declarar')
-
-  // Os dois valores de cada campo escritos por extenso: `git: versionado`
-  // sozinho nao distingue escolha feita de escolha herdada, e e essa diferenca
-  // que decide se a proxima sessao volta a oferecer.
-  const VALORES = ['versionado', 'ignorado', 'default', 'arquiteto']
-  const semValor = VALORES.filter((v) => !manifesto.includes(v))
-  assert.deepEqual(semValor, [], 'valores que os campos da escolha admitem e o manifesto nao mostra')
+  assert.match(memoria, /nunca instru[çc][ãa]o/i, '`memoria.md` nao rebaixa os blocos antigos')
 })
 
-test('a skill e o contrato citam o endereco unico da documentacao', () => {
-  // O agente busca UM arquivo, e nao doze paginas: para saber qual pagina
-  // responde a duvida ja era preciso conhecer a resposta, e o modo de falhar era
-  // concluir que o campo nao existe.
-  //
-  // Nao ha teste possivel do outro lado — o gerador da doc mora noutro
-  // repositorio, e este roda sem rede de proposito. O que da para afirmar aqui e
-  // que o endereco esta escrito onde o modelo vai le-lo.
-  const ENDERECO = 'https://cfourdev.com.br/llms-full.txt'
-  const onde = [
-    path.join(SKILLS, 'documentacao', 'SKILL.md'),
-    path.join(SKILLS, 'modelagem', 'references', 'viewer-contract.md'),
+// ---------------------------------------------------------------------------
+// O que sai do repositorio
+// ---------------------------------------------------------------------------
+
+test('nao sobrou nada das versoes anteriores', () => {
+  const PROIBIDO = [
+    [/c4-harness(?!\/modelagens)/, 'o harness virou plugin ha muitas versoes'],
+    [/\.claude\/skills\//, 'skills de plugin ficam em ${CLAUDE_PLUGIN_ROOT}/skills/'],
+    [/npm run check/, 'no repositorio do usuario o comando e `cfour check`'],
+    [/npm run dev/, 'no repositorio do usuario o comando e `cfour serve`'],
+    [/\bc4-(model|modeling|resume|close|reconcile|modelagens|architecture)/, 'nome de skill antigo'],
+    [/\bexemplos-c4\b/, 'os exemplos moram em `references/exemplos.md`'],
+    [/\b(qual|que)\s+slug\b/i, 'identificador derivavel se propoe, nao se pergunta'],
   ]
-  const ausentes = onde.filter((f) => !fs.readFileSync(f, 'utf8').includes(ENDERECO))
-  assert.deepEqual(ausentes.map(rel), [], 'arquivos que nao citam o endereco unico')
-})
+  // A migracao precisa nomear o endereco antigo para poder oferecer o `git mv`.
+  const MIGRACAO = path.join(SKILLS, 'setup', 'SKILL.md')
 
-test('toda origem nomeia o arquivo unico, e o nome antigo nao sobrou', () => {
-  // O teste acima afirma que o endereco APARECE. Nada impedia que aparecesse ao
-  // lado de outro, e o outro existe: ha um `/llms.txt` de verdade no ar — o
-  // indice do padrao llmstxt.org, um link por pagina — a uma letra de distancia
-  // do nome do payload. Buscar o indice gasta uma requisicao para descobrir um
-  // endereco que ja esta escrito na skill, e o modo de falhar e silencioso: o
-  // agente le a pagina errada e conclui que o campo nao existe.
-  //
-  // A skill de documentacao fala do indice DE PROPOSITO, em duas passagens: a
-  // que explica que ele existe e nao e ele, e o item da lista do que nunca se
-  // faz. Proibir a string proibiria a explicacao. O que se proibe aqui e outra
-  // coisa — que uma ORIGEM, a linha que registra de onde o conteudo cacheado
-  // veio, nomeie qualquer endereco que nao seja o arquivo unico.
-  const PAYLOAD = 'https://cfourdev.com.br/llms-full.txt'
-
-  // `source:`, `origem:` e o `url:` de dentro de `failures:`: os tres campos com
-  // que a skill manda registrar a procedencia. A ancora no comeco da linha e o
-  // que deixa a prosa passar — o paragrafo do indice comeca em `**Existe
-  // tambem`, e o item da lista, em `- Buscar o`.
-  const ORIGEM = /^\s*(?:[-*#]\s*)?(?:source|origem|url)\s*:\s*(\S+)/i
-
-  // O cenario 19 planta um cache no formato que a `0.5.0` aposentou, e a origem
-  // dele aponta para o payload antigo de proposito: e o fixture do teste de
-  // formato, e o proprio cenario avisa que troca-lo apaga metade do teste. E a
-  // mesma razao pela qual `for-agents.md` ja tem entrada em `DO_USUARIO`.
-  const FIXTURE = path.join(SKILLS, 'avaliar', 'scenarios', '19-cache-antigo.md')
-  const APOSENTADO = 'https://cfourdev.com.br/docs/for-agents.md'
-
-  const erradas = []
+  const sobras = []
   for (const f of textos()) {
-    const linhas = fs.readFileSync(f, 'utf8').split('\n')
-    linhas.forEach((linha, i) => {
-      const alvo = linha
-        .match(ORIGEM)?.[1]
-        ?.replace(/^[`<]+/, '')
-        .replace(/[`>.,;)]+$/, '')
-      if (!alvo || !alvo.includes('cfourdev.com.br')) return
-      if (f === FIXTURE && alvo === APOSENTADO) return
-      if (alvo !== PAYLOAD) erradas.push(`${rel(f)}:${i + 1}: ${alvo}`)
+    linhasDe(f).forEach((linha, i) => {
+      if (linha.includes('❌')) return
+      for (const [re, porque] of PROIBIDO) {
+        if (f === MIGRACAO && /c4-harness/.test(String(re))) continue
+        if (re.test(linha)) sobras.push(`${rel(f)}:${i + 1}: ${porque} — ${linha.trim().slice(0, 70)}`)
+      }
     })
   }
-  assert.deepEqual(erradas, [], 'origens que nao nomeiam o arquivo unico')
-
-  // Uma excecao que sobrevive ao fixture que ela protege vira permissao geral,
-  // e ninguem lembra de tira-la.
-  assert.ok(
-    fs.readFileSync(FIXTURE, 'utf8').includes(APOSENTADO),
-    'a excecao do cenario 19 ficou sem uso',
-  )
-
-  // E o nome no singular, que e endereco de ninguem: foi o primeiro, saiu do ar
-  // junto com o `/docs/`, e responde 404 hoje. Ele nao aparece escrito por
-  // extenso em comentario nenhum daqui porque a varredura inclui ESTE arquivo —
-  // o padrao, com a barra invertida do regex, nao casa consigo mesmo; a string
-  // nua casaria, e o teste reprovaria a si proprio.
-  const SINGULAR = /llm\.txt/i
-  const restos = []
-  for (const f of arquivos()) {
-    const linhas = fs.readFileSync(f, 'utf8').split('\n')
-    linhas.forEach((linha, i) => {
-      if (SINGULAR.test(linha)) restos.push(`${rel(f)}:${i + 1}`)
-    })
-  }
-  assert.deepEqual(restos, [], 'o endereco no singular, que nao existe mais')
+  assert.deepEqual(sobras, [])
 })
 
-test('a skill reconhece o payload de hoje, e o cache que ela mesma escreve', () => {
-  // Tres strings que so o outro repositorio conhece, e que este nao tem como
-  // conferir por HTTP: o marcador da primeira linha do payload, as marcas que
-  // separam os blocos dentro dele, e a versao do manifesto do cache.
-  //
-  // Congelar aqui nao prova que o gerador emite isso — prova que, no dia em que
-  // alguem mexer num dos tres, o outro lado nao muda sozinho e em silencio.
-  const doc = fs.readFileSync(path.join(SKILLS, 'documentacao', 'SKILL.md'), 'utf8')
-
-  const CONTRATO = [
-    'cfourdev-llms: v1', // o marcador da primeira linha; o `v1` e do FORMATO
-    '<!-- cli -->', // o `cfour --help` embutido no payload
-    '<!-- exemplos -->', // as duas modelagens completas
-    'version: 3', // o formato do manifesto que a skill grava
-  ]
-  const ausentes = CONTRATO.filter((c) => !doc.includes(c))
-  assert.deepEqual(ausentes, [], 'o que a skill de documentacao deixou de declarar')
-})
-
-test('nada manda buscar a pagina de exemplos, que deixou de existir', () => {
-  // Os trinta YAMLs viraram um bloco do `llms-full.txt`. Um `doc:exemplos`
-  // sobrevivente manda o agente a uma URL que responde 404 — e o resultado e uma
-  // linha em `failures:`, que e falha silenciosa do tipo que a skill de
-  // documentacao existe para evitar.
-  const restos = []
-  for (const f of textos()) {
-    const linhas = fs.readFileSync(f, 'utf8').split('\n')
-    linhas.forEach((linha, i) => {
-      if (/doc:exemplos|\/docs\/exemplos/.test(linha)) restos.push(`${rel(f)}:${i + 1}`)
-    })
-  }
-  assert.deepEqual(restos, [])
-})
-
-test('nenhuma URL de documentacao aponta para fora do dominio oficial', () => {
-  // Uma doc privada fixada no texto vira fonte primaria sem que ninguem tenha
-  // decidido isso — e da 404 na cara de quem instalou o plugin.
+test('nenhuma URL aponta para fora dos dominios previstos', () => {
+  // Um endereco fixado no texto vira fonte sem que ninguem tenha decidido isso —
+  // e da 404 na cara de quem instalou, meses depois.
   const HOSTS = new Set([
     'cfourdev.com.br',
     'app.cfourdev.com.br',
+    'c4model.com',
     'github.com',
     'www.npmjs.com',
     'exemplo.interno',
   ])
   const problemas = []
   for (const f of [...textos(), path.join(RAIZ, 'README.md')]) {
-    const linhas = fs.readFileSync(f, 'utf8').split('\n')
-    linhas.forEach((linha, i) => {
-      for (const [url, host] of linha.matchAll(/https?:\/\/([a-zA-Z0-9.-]+)(\/\S*)?/g)) {
+    linhasDe(f).forEach((linha, i) => {
+      for (const [, host] of linha.matchAll(/https?:\/\/([a-zA-Z0-9.-]+)(\/\S*)?/g)) {
         if (!HOSTS.has(host)) problemas.push(`${rel(f)}:${i + 1}: host ${host}`)
-        // `/docs` pega a pagina para citar; `/llms*.txt` pega o payload, que mora
-        // na RAIZ do site — a guarda antiga so olhava o caminho `/docs` e deixava
-        // passar um `https://app.cfourdev.com.br/llms-full.txt`, que e host
-        // permitido e documentacao errada.
-        if (/\/docs?\b|\/llms(-full)?\.txt\b/.test(url) && host !== 'cfourdev.com.br') {
-          problemas.push(`${rel(f)}:${i + 1}: documentacao fora do dominio oficial — ${url}`)
-        }
       }
     })
   }
   assert.deepEqual(problemas, [])
 })
 
+test('nada aponta para um repositorio que o leitor nao pode abrir', () => {
+  // Este plugin e publico; o repositorio do cfourdev nao e. Um link para la nao
+  // falha em lugar nenhum: da 404 na cara de quem instalou, meses depois.
+  const proibidas = []
+  for (const f of [...textos(), path.join(RAIZ, 'README.md')]) {
+    linhasDe(f).forEach((linha, i) => {
+      if (/github\.com\/evandrobreis\/cfourdev(?!-claude)/.test(linha)) {
+        proibidas.push(`${rel(f)}:${i + 1}: o repositorio do cfourdev e privado`)
+      }
+      if (/github\.com\/[\w-]+\/[\w-]+\/blob\/v\d/.test(linha)) {
+        proibidas.push(`${rel(f)}:${i + 1}: URL fixada numa tag que pode nao existir`)
+      }
+    })
+  }
+  assert.deepEqual(proibidas, [])
+})
+
 test('os manifestos parseiam, e o marketplace aponta para um plugin de verdade', () => {
-  const pluginFile = path.join(RAIZ, '.claude-plugin', 'plugin.json')
-  const marketFile = path.join(RAIZ, '.claude-plugin', 'marketplace.json')
-  const plugin = JSON.parse(fs.readFileSync(pluginFile, 'utf8'))
-  const market = JSON.parse(fs.readFileSync(marketFile, 'utf8'))
+  const plugin = JSON.parse(fs.readFileSync(path.join(RAIZ, '.claude-plugin', 'plugin.json'), 'utf8'))
+  const market = JSON.parse(fs.readFileSync(path.join(RAIZ, '.claude-plugin', 'marketplace.json'), 'utf8'))
 
   assert.equal(plugin.name, 'cfour', 'o nome do plugin e o namespace de toda skill')
   // Sem `version`, todo commit vira uma versao nova para quem instalou.
@@ -650,150 +474,5 @@ test('os manifestos parseiam, e o marketplace aponta para um plugin de verdade',
   assert.ok(
     market.plugins.some((p) => p.name === plugin.name),
     'o marketplace nao lista o plugin deste repositorio',
-  )
-})
-
-test('nada aponta para um repositorio que o leitor nao pode abrir', () => {
-  // Este plugin e publico; o repositorio do cfourdev nao e. Um link para la nao
-  // falha em lugar nenhum: da 404 na cara de quem instalou, meses depois, e o
-  // texto em volta continua parecendo certo.
-  //
-  // O mesmo vale para URL com tag: `blob/v0.3.0/` so resolve depois de a tag
-  // existir, e uma tag prometida no texto e uma tag que ninguem lembra de criar.
-  const proibidas = []
-  for (const f of [...textos(), path.join(RAIZ, 'README.md')]) {
-    const linhas = fs.readFileSync(f, 'utf8').split('\n')
-    linhas.forEach((linha, i) => {
-      if (/github\.com\/evandrobreis\/cfourdev(?!-claude)/.test(linha)) {
-        proibidas.push(`${rel(f)}:${i + 1}: o repositorio do cfourdev e privado`)
-      }
-      if (/github\.com\/[\w-]+\/[\w-]+\/blob\/v\d/.test(linha)) {
-        proibidas.push(`${rel(f)}:${i + 1}: URL fixada numa tag que pode nao existir`)
-      }
-    })
-  }
-  assert.deepEqual(proibidas, [])
-})
-
-test('as skills e o README concordam sobre quais skills existem', () => {
-  // O README e a unica porta de entrada de quem ainda nao instalou. Uma skill
-  // que existe e nao esta la e uma skill que ninguem descobre.
-  const readme = fs.readFileSync(path.join(RAIZ, 'README.md'), 'utf8')
-  const ausentes = nomes.filter((n) => !readme.includes(`cfour:${n}`))
-  assert.deepEqual(ausentes, [], 'skills que o README nao menciona')
-})
-
-test('o eval nao manda escrever no repositorio sob teste', () => {
-  // A versao antiga criava as modelagens de avaliacao dentro do repositorio e
-  // mandava apagar "ao final", em prosa. Com N subagentes em paralelo, uma
-  // rodada que falhe no meio deixa o registro de alguem cheio de lixo de teste.
-  const texto = fs.readFileSync(path.join(SKILLS, 'avaliar', 'SKILL.md'), 'utf8')
-  assert.match(texto, /diret[óo]rio tempor[áa]rio/i)
-  assert.ok(
-    !/entradas do registry/.test(texto),
-    'o eval ainda fala em apagar entradas do registro do repositorio',
-  )
-})
-
-test('a descoberta pergunta o que o leitor vai querer isolar, colorir e abrir', () => {
-  // O silencio de que ninguem reclama. Um modelo sai correto e cinza, sem filtro
-  // util, sem cor e sem link — e o arquiteto nao diz "voce nao perguntou da cor",
-  // porque quem nunca abriu o viewer nao sabe que ela existe. Diferente da
-  // cobertura tecnica, que ele lembra sozinho ("voce nao perguntou do Kafka").
-  const REF = path.join(SKILLS, 'modelagem', 'references', 'classificacao.md')
-  assert.ok(fs.existsSync(REF), 'o reference da classificacao sumiu')
-
-  const ref = fs.readFileSync(REF, 'utf8')
-  const eixos = ['localizar', 'filtrar', 'colorir', 'linkar']
-  assert.deepEqual(
-    eixos.filter((e) => !ref.includes(`### \`${e}\``)),
-    [],
-    'eixos que o reference nao cobre',
-  )
-
-  const descoberta = fs.readFileSync(path.join(SKILLS, 'descoberta', 'SKILL.md'), 'utf8')
-  assert.ok(
-    descoberta.includes('references/classificacao.md'),
-    'a descoberta nao chama o reference da classificacao',
-  )
-  // O portao: sem isto o eixo vira uma secao que se pula quando a conversa
-  // aperta, e e exatamente quando ela aperta que ele e esquecido.
-  assert.match(descoberta, /classification/, 'a descoberta nao grava o que ouviu')
-})
-
-test('a estrategia recomenda a taxonomia, e diz o que a cor exige', () => {
-  const estrategia = fs.readFileSync(path.join(SKILLS, 'estrategia', 'SKILL.md'), 'utf8')
-  // Responder "sim, essa chave e colorivel" nao produzia efeito nenhum no modelo
-  // escrito: sem `color: true` no workspace.yaml a chave filtra e nao colore, e
-  // nao ha aviso nenhum.
-  assert.ok(estrategia.includes('color: true'), 'a estrategia nao diz o que a cor exige')
-  assert.ok(
-    estrategia.includes('classification'),
-    'a estrategia nao le nem preenche o bloco da memoria',
-  )
-})
-
-test('o editor sabe que `metadata` tambem se declara', () => {
-  // A lista dizia `shape`, `kind` e `outcome`. `metadata` faltava — e falha de
-  // outro jeito, mais calado: a chave continua filtrando, so nao colore, e o
-  // modelo esta certo.
-  const editor = fs.readFileSync(path.join(SKILLS, 'editor', 'SKILL.md'), 'utf8')
-  assert.ok(editor.includes('metadata'), 'o editor nao manda declarar metadata')
-})
-
-test('o template de memoria tem onde gravar a classificacao', () => {
-  // Sem endereco na memoria, a taxonomia decidida nao e lida pelo editor nem
-  // comparada pelo reconciliar: ela vive so na conversa que a decidiu.
-  const template = fs.readFileSync(
-    path.join(SKILLS, 'modelagem', 'references', 'templates', 'project-context.yaml'),
-    'utf8',
-  )
-  const campos = ['classification:', 'axes:', 'artifacts:', 'keys:']
-  assert.deepEqual(
-    campos.filter((c) => !template.includes(c)),
-    [],
-    'campos que o template nao declara',
-  )
-})
-
-test('a chave que a taxonomia recusou tem onde ficar, e os dois lados a citam', () => {
-  // Meia dúzia de linhas do teste do estado persistido, um nivel abaixo: la o
-  // contrato e o BLOCO que a skill escreve, aqui e o CAMPO. A estrategia manda
-  // dizer o que ficou fora da taxonomia — e o criterio 20 da rubrica cobra isso
-  // —, mas `classification` so tinha `keys`, que guarda o que entrou. O cenario
-  // 13 resolveu inventando um `fora:` na hora, e formato inventado e exatamente
-  // o que o teste do estado persistido existe para impedir do outro lado.
-  const contexto = fs.readFileSync(tpl('project-context.yaml'), 'utf8')
-  const bloco = contexto.split(/^classification:$/m)[1]?.split(/\n# ---/)[0] ?? ''
-  assert.ok(bloco, 'o template perdeu o bloco `classification`')
-  assert.match(bloco, /^ {2}rejected:/m, 'o template nao tem onde gravar a chave recusada')
-
-  // Os tres campos, e cada um tem servico: sem `motivo` a recusa nao impede a
-  // repropositura, que e o unico trabalho dela; sem `revise_se` ela vira sentenca
-  // perpetua, e ninguem sabe quando vale reabrir.
-  const FORMA = ['chave', 'motivo', 'revise_se']
-  assert.deepEqual(
-    FORMA.filter((c) => !bloco.includes(c)),
-    [],
-    'campos da chave recusada que o template nao mostra',
-  )
-
-  // E os dois lados do contrato, que e o defeito que este campo conserta: quem
-  // manda preencher, e quem precisa saber ler. Meio contrato reproduz a lacuna
-  // num endereco novo.
-  const LADOS = [
-    ['estrategia', 'manda preencher'],
-    ['reconciliar', 'precisa saber ler'],
-  ]
-  const mudos = LADOS.filter(
-    ([skill]) =>
-      !fs
-        .readFileSync(path.join(SKILLS, skill, 'SKILL.md'), 'utf8')
-        .includes('classification.rejected'),
-  )
-  assert.deepEqual(
-    mudos.map(([skill, papel]) => `${skill} (${papel})`),
-    [],
-    'skills que nao citam `classification.rejected`',
   )
 })
