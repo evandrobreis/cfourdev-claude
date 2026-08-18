@@ -1,154 +1,136 @@
 ---
 name: setup
-description: Prepara um repositório para documentar arquitetura com o cfourdev — confere se o CLI `cfour` está instalado, se existe um `cfour.yaml`, se o modelo atual está válido e se há memória de uma versão anterior a migrar; explica o que falta e oferece cada passo, sem instalar nem criar nada sozinho. Use na primeira vez que alguém for documentar num repositório, quando `cfour check` não for encontrado, quando não houver `cfour.yaml`, ou quando pedirem /cfour:setup.
+description: Prepares a repository to document architecture with cfourdev — checks and installs the cfour CLI, refreshes the plugin's knowledge of the tool and its documentation, creates the workspace, and gets the MCP connection authorised. Use on the first run in a repository, when the cfour command is missing, when there is no cfour.yaml, when the MCP server is not answering, or when someone asks to set cfourdev up.
 ---
 
-# Preparar o repositório
+# Getting the environment ready
 
-Este plugin conversa e opera; quem valida, desenha e publica é o CLI `cfour`, que
-é outro pacote. Sem ele **não há operação nenhuma**: o plugin não tem uma segunda
-implementação das regras do formato, e não vai improvisar uma.
+This is an installer, not a report. Anything that can be done safely without
+asking, do — then say what you did. Ask only where a decision is genuinely
+theirs: naming things, installing software globally, and anything that reaches
+their account on the platform.
 
-Esta skill descobre o que falta, explica por que importa, e **oferece**. Ela não
-instala nada, não cria arquivo e não move pasta sem um sim explícito: instalar
-pacote global e escrever na raiz do repositório de alguém são atos dessa pessoa,
-não seus.
-
-## Os cinco diagnósticos, nesta ordem
-
-Rode os cinco antes de falar. Um relatório só, com o que falta e o que já está
-pronto, vale mais que cinco perguntas em sequência.
-
-### 1. O CLI existe?
+There is not much to it, and that is the point: cfourdev has one structural
+file, one workspace per repository, and nothing to register. Work through the
+state, not through a script. Start here:
 
 ```bash
-cfour version
+node "${CLAUDE_PLUGIN_ROOT}/scripts/knowledge.mjs" status --data "${CLAUDE_PLUGIN_DATA}"
 ```
 
-Falhou? Tente `npx --no-install cfour-cli version`, que acha uma instalação local
-do projeto.
+Everything below is keyed to what that reports.
 
-| resultado | o que dizer |
-|---|---|
-| imprime uma versão | pronto; siga |
-| não encontrado | ofereça `npm i -g cfour-cli`, e diga que `npx cfour-cli …` serve sem instalar |
+## The CLI — `cli-missing`
 
-**Diga também o que se perde sem ele**, porque a resposta honesta muda a decisão:
-sem o `cfour` você ainda conversa sobre o software e guarda o contexto. O que some
-é **tudo o que escreve e valida** — criar caixas, setas, visões e fluxos, rodar o
-portão com o mesmo carregador do viewer, e o `cfour serve`, que é onde o modelo
-vira desenho.
+Nothing works without it: the CLI is the only way this plugin writes a model,
+and it is also where the plugin learns what the tool can do.
 
-Anote a versão. Ela decide o que existe (`cfour:cli`).
-
-### 2. Há um registro?
+Offer to install it, in one sentence, and then do it:
 
 ```bash
-cfour modelagem list
+npm i -g cfour-cli
 ```
 
-Sem `cfour.yaml` em lugar nenhum acima do diretório atual, **relate a ausência e
-não ofereça nada**. Uma linha:
+It needs a recent Node; if the install refuses on the Node version, on npm
+permissions, or on a global prefix, say what happened and what would fix it — a
+Node version manager, or a different prefix — and read
+`doc comecando/instalacao` for the current requirements rather than guessing at
+them. Do not attempt to work around a failed install by writing YAML directly;
+without the CLI there is no validation, and an unvalidated model is worse than
+none.
 
-```
-cfour.yaml       nao existe (nasce quando o arquiteto decidir o que documentar)
-```
+## The knowledge cache — `cli-cache-stale`, `doc-missing`
 
-A alternativa óbvia era oferecer aqui o `cfour init --id <slug>`, com o slug
-derivado do nome do repositório. Ela perde por dois motivos objetivos. O `init`
-não escreve só um registro: escreve uma modelagem mínima — um usuário, um sistema,
-uma seta e um diagrama —, e **criar elementos é decisão do arquiteto**, mesmo
-quando o que se cria é um esqueleto. E o `id` vai para a URL do viewer, para todo
-comando e para o nome da pasta da memória: renomear depois quebra link que alguém
-já compartilhou, e fixá-lo aqui é decidir no ponto de menor informação, derivando
-de um nome — o do diretório — que erra justamente nos casos caros.
-
-Se já houver registro, diga quantas modelagens ele lista e qual está `active`. Não
-proponha criar mais uma: quantas realidades existem é decisão dele
-(`cfour:operar`).
-
-### 3. Há memória de uma versão anterior?
+Run it without asking. It is local, quick, and reversible:
 
 ```bash
-ls .claude/c4-harness/modelagens/ 2>/dev/null
+node "${CLAUDE_PLUGIN_ROOT}/scripts/knowledge.mjs" sync --data "${CLAUDE_PLUGIN_DATA}"
 ```
 
-Existe? Então este repositório foi usado antes de as skills virarem plugin, e a
-memória está no endereço antigo. Ofereça a migração:
+This reads the installed CLI's own command tree and downloads the official
+documentation, then slices both so that later work can pull one command or one
+page at a time. `cli-cache-stale` after an upgrade means exactly this: the CLI
+moved and the stored knowledge did not. Re-syncing is the whole fix.
+
+Two failures are worth reporting rather than retrying:
+
+- `origin-unknown` or a network error — the documentation could not be reached.
+  Not fatal: the CLI still answers everything about commands. Say that the
+  format documentation is unavailable and carry on.
+- `unexpected-content` — something answered, but it was not the documentation.
+  Usually a captive portal or a proxy. Worth mentioning; do not store it.
+
+## The workspace — `workspace-missing`
+
+`cfour.yaml` is the only structural file, and the only path the CLI resolves by
+walking up from the working directory. Its directory is the workspace root, and
+there is one workspace per repository. Without that file, nothing can be written.
+
+`cfour init` creates it, along with the smallest model that already draws
+something. It takes an id and a display name, and those are the person's to
+choose — but propose defaults from the repository name rather than asking cold:
 
 ```bash
-mkdir -p .claude/cfour && git mv .claude/c4-harness/modelagens .claude/cfour/history
-rmdir .claude/c4-harness
+cfour init --id <id> --nome "<name>"
 ```
 
-O conteúdo é o mesmo e o `id` continua sendo o laço. Sem a migração nada quebra
-visivelmente — o que é o problema: a memória antiga fica onde ninguém lê, e a
-próxima sessão começa como se o trabalho fosse novo. Use `git mv` quando estiver
-versionado, **confira o resultado** e diga o que foi movido.
+The id is worth one sentence of care before running: it is declared rather than
+derived from the folder name precisely so that renaming the directory does not
+break the published address. Confirm the proposal in one line and run it.
 
-Memória escrita por qualquer versão anterior continua legível. Blocos que não
-existem mais são lidos como história, nunca como instrução
-(`${CLAUDE_PLUGIN_ROOT}/skills/modelagem/references/memoria.md`).
+Then look at what it made: `cfour check --inventory --json` shows the starter
+model, which is a real model and not a placeholder — its elements and its view
+can be renamed or removed once real content exists.
 
-### 4. O que já existe está válido?
+If `cfour init` refuses because a workspace already governs this directory, that
+is the answer, not an obstacle: there is one, and it is the one. Read it rather
+than creating a second.
 
-Havendo registro, rode o portão e relate o resultado real:
+## The MCP connection
+
+The plugin ships the server declaration, so there is nothing to configure. What
+remains is authorisation, which only the person can give.
+
+Check whether you already have tools from the `cfourdev` server available to you
+in this session — they are named `mcp__cfourdev__*` or
+`mcp__plugin_cfour_cfourdev__*` depending on the Claude Code version.
+
+- **You have them** — nothing to do. Say that queries about published models
+  will work.
+- **You do not** — they need to authorise it once, in a browser, with `/mcp` in
+  Claude Code (or `claude mcp login cfourdev` from a shell). Explain what it
+  buys them: reading workspaces that have been published to the platform,
+  including workspaces from other repositories. It is read-only access.
+
+This is not required to work locally. A repository with a workspace in its
+working tree is fully usable through the CLI alone, and if someone only wants to
+document *this* repository, MCP is optional. Say so rather than making it look
+like a blocked step.
+
+## Publishing — only if they raise it
+
+Publishing needs an account key, which is generated on the platform and which
+you cannot create for them. Bring it up only if they ask about publishing, about
+sharing the model, or about the portal:
 
 ```bash
-cfour check --all
+cfour login --key c4_<...>    # stores the key and binds it to this repository
+cfour push --dry-run          # shows what would be published
 ```
 
-Erro aqui não é motivo para consertar nada agora — é informação que a próxima
-skill precisa. Diga o que apareceu e siga.
+`cfour keys` shows which stored key applies here. A workspace is published only
+when its own `status` is `active`, which is what `cfour init` sets; `reference`
+and `archived` workspaces stay local. If the platform refuses a push because the
+CLI is too old, upgrading it is the fix — and re-sync the cache afterwards.
 
-### 5. Há cache das capacidades da CLI?
+## Finish by proving it works
+
+Do not report success from exit codes alone:
 
 ```bash
-ls .claude/cfour/cli-cache/manifest.yaml 2>/dev/null
+cfour check --json
 ```
 
-Uma linha no relatório: o cache **nasce na primeira consulta**, não no setup
-(`cfour:cli`). Se existir, compare o `cfour_version` dele com o do passo 1 e diga
-se bate.
-
-Se encontrar um `.claude/cfour/docs-cache/`, diga que ele é resquício de uma
-versão que buscava documentação na internet — o plugin não faz mais isso — e
-ofereça remover. Não o leia como fonte.
-
-## O relatório
-
-Um bloco, com as cinco respostas e **uma** proposta de próximo passo:
-
-```
-cfour            nao encontrado no PATH
-cfour.yaml       nao existe (nasce quando o arquiteto decidir o que documentar)
-memoria antiga   nao ha
-modelagens       nenhuma
-cache da cli     nao ha (nasce na primeira consulta)
-
-Sem o CLI nada e escrito nem validado. Posso:
-
-  1. instalar o cfour  npm i -g cfour-cli
-
-Instalo? Depois disso o proximo passo e entender o que voce quer
-documentar — o registro e o id nascem de la.
-```
-
-Em repositório sem registro, o setup faz **no máximo uma** oferta, e ela é
-instalar o CLI. Com o `cfour` já no PATH, o relatório fica **sem oferta nenhuma**
-— e isso é o certo: o próximo passo dali é uma pergunta, não um comando.
-
-Sem acento na saída de terminal — o CLI já escreve assim, e o terminal do Windows
-nem sempre está em UTF-8.
-
-## Onde isto termina
-
-| a situação é… | vá para |
-|---|---|
-| sem registro, nada documentado ainda | `cfour:contexto` |
-| repositório pronto, com modelagem e memória | `cfour:sessao` |
-| só faltava saber rodar o viewer, validar ou publicar | `cfour:operar` |
-| dúvida sobre o que esta versão da CLI faz | `cfour:cli` |
-
-Não comece a documentar aqui. Esta skill responde "dá para trabalhar?", e a
-resposta é sim ou é uma lista do que falta — nunca um diagrama, e nunca um id.
+Then tell them, in two or three lines, what they now have and what they can say
+next — for example, that you can look at the repository and propose how to model
+it. Keep it about their architecture, not about the installation.

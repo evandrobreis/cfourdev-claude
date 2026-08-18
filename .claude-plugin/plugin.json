@@ -1,7 +1,8 @@
 {
   "name": "cfour",
-  "version": "0.6.0",
-  "description": "Operador contextual de modelagem C4Dev: entende o software e o objetivo da documentacao, traduz o que o arquiteto pede em linguagem natural para comandos da CLI cfour, executa e valida. Nao decide arquitetura nem semantica de modelagem — quando falta informacao, pergunta.",
+  "displayName": "cfourdev",
+  "version": "2.0.0",
+  "description": "Assisted C4 modelling with cfourdev: understands the software you are documenting, decides the correct C4 representation, materialises it through the cfour CLI and validates the result. Reads published workspaces through the cfourdev MCP server, and learns the tool's capabilities by asking the tool itself.",
   "author": {
     "name": "Evandro Barbosa dos Reis"
   },
@@ -10,9 +11,9 @@
   "license": "SEE LICENSE IN LICENSE",
   "keywords": [
     "c4",
-    "arquitetura",
-    "diagramas",
-    "modelagem",
+    "architecture",
+    "diagrams",
+    "modelling",
     "cfourdev"
   ]
 }

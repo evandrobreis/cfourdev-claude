@@ -4,13 +4,13 @@
     "name": "Evandro Barbosa dos Reis",
     "url": "https://github.com/evandrobreis"
   },
-  "description": "O plugin de modelagem arquitetural do cfourdev.",
+  "description": "The architecture modelling plugin for cfourdev.",
   "plugins": [
     {
       "name": "cfour",
       "source": "./",
-      "category": "arquitetura",
-      "tags": ["c4", "arquitetura", "diagramas", "modelagem"]
+      "category": "architecture",
+      "tags": ["c4", "architecture", "diagrams", "modelling"]
     }
   ]
 }
