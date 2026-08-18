@@ -8,6 +8,8 @@
       "Bash(cfour refs:*)",
       "Bash(cfour keys:*)",
       "Bash(cfour status:*)",
+      "Bash(cfour workspace show:*)",
+      "Bash(cfour model list:*)",
       "Bash(cfour element list:*)",
       "Bash(cfour element show:*)",
       "Bash(cfour relation list:*)",
@@ -19,11 +21,7 @@
       "Bash(cfour note list:*)",
       "Bash(cfour group list:*)",
       "Bash(cfour path list:*)",
-      "Bash(cfour project list:*)",
-      "Bash(cfour config show:*)",
-      "Bash(cfour modelagem list:*)",
-      "Bash(cfour modelagem show:*)",
-      "Bash(cfour federacao list:*)"
+      "Bash(cfour config show:*)"
     ]
   }
 }

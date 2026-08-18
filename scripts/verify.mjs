@@ -2,8 +2,9 @@
 //
 // Most of the plugin is prose, and prose about files. What a test can establish
 // is that the mechanical parts behave — the slicing, the invalidation, the
-// guard's verdicts — and that the prose refers to things that exist and does
-// not quietly re-embed knowledge the plugin is supposed to discover.
+// guard's verdicts — and that the prose refers to things that exist, does not
+// quietly re-embed knowledge the plugin is supposed to discover, and does not
+// teach a version of cfourdev that no longer exists.
 //
 // What it cannot establish is behaviour: whether the plugin actually refuses a
 // wrong C4 level, or actually asks instead of guessing, is only measurable by
@@ -26,7 +27,9 @@ import {
   normaliseEtag,
   buildIndex,
   renderCommand,
-  findRegistry,
+  findWorkspace,
+  cliCacheState,
+  blockFile,
 } from './knowledge.mjs'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
@@ -57,6 +60,9 @@ const skillFiles = () =>
 // Slicing the documentation
 // ---------------------------------------------------------------------------
 
+// The markers are the ones the published file actually carries: `doc:<slug>`,
+// where the slug is also the path of the page on the documentation site and may
+// therefore have segments.
 const DOC_SAMPLE = `<!-- cfourdev-llms: v1 -->
 conteudo-sha256: abc123
 
@@ -64,47 +70,88 @@ conteudo-sha256: abc123
 
 Index of things.
 
-<!-- doc:modelagem -->
+<!-- doc:inicio -->
 
-# Modelling
-
-## The box
+# Start here
 
 text
 
-## The arrow
+<!-- doc:modelando/anatomia -->
+
+# Anatomy
+
+## Where things live
+
+text
+
+## Three concepts
 
 more text
 
-<!-- cli -->
+<!-- doc:referencia/cli -->
 
-# The CLI
+# Commands
 
 command surface that must not be stored
-
-<!-- exemplos -->
-
-# Examples
-
-sample files
 `
 
 test('slice: splits on the markers the file carries, and keeps the preamble as `index`', () => {
   const blocks = slice(DOC_SAMPLE)
-  assert.deepEqual(Object.keys(blocks).sort(), ['cli', 'exemplos', 'index', 'modelagem'])
+  assert.deepEqual(Object.keys(blocks).sort(), [
+    'index',
+    'inicio',
+    'modelando/anatomia',
+    'referencia/cli',
+  ])
   assert.match(blocks.index, /Index of things/)
-  assert.match(blocks.modelagem, /^# Modelling/)
-  assert.doesNotMatch(blocks.modelagem, /The CLI/, 'a block must stop at the next marker')
+  assert.match(blocks['modelando/anatomia'], /^# Anatomy/)
+  assert.doesNotMatch(
+    blocks['modelando/anatomia'],
+    /command surface/,
+    'a block must stop at the next marker'
+  )
+})
+
+test('slice: a slug with segments survives, because the documentation is a tree', () => {
+  const blocks = slice(DOC_SAMPLE)
+  assert.ok(blocks['modelando/anatomia'], 'a nested slug must not be dropped')
+  assert.ok(
+    !Object.keys(blocks).some((k) => k === 'modelando'),
+    'and must not be truncated to its first segment'
+  )
 })
 
 test('slice: a file with no markers yields no blocks rather than one giant one', () => {
   assert.deepEqual(slice('# just a document\n\nwith no markers'), {})
 })
 
+test('slice: a slug that could climb out of the cache is not a slug', () => {
+  const hostile = '<!-- doc:../../escape -->\n\n# nope\n'
+  assert.deepEqual(slice(hostile), {}, 'the marker must not match at all')
+})
+
 test('titleOf and sectionsOf read the headings a block advertises', () => {
   const blocks = slice(DOC_SAMPLE)
-  assert.equal(titleOf(blocks.modelagem), 'Modelling')
-  assert.deepEqual(sectionsOf(blocks.modelagem), ['The box', 'The arrow'])
+  assert.equal(titleOf(blocks['modelando/anatomia']), 'Anatomy')
+  assert.deepEqual(sectionsOf(blocks['modelando/anatomia']), [
+    'Where things live',
+    'Three concepts',
+  ])
+})
+
+test('blockFile: a segmented slug becomes a path inside the cache, and nothing above it', () => {
+  const data = '/cache'
+  const nested = blockFile(data, 'modelando/anatomia')
+  assert.equal(nested, path.join('/cache', 'knowledge', 'doc', 'modelando', 'anatomia.md'))
+  assert.equal(blockFile(data, 'inicio'), path.join('/cache', 'knowledge', 'doc', 'inicio.md'))
+  assert.ok(nested.startsWith(path.join('/cache', 'knowledge', 'doc') + path.sep))
+})
+
+test('the command reference page is discarded, because the installed CLI outranks it', () => {
+  const source = fs.readFileSync(path.join(ROOT, 'scripts', 'knowledge.mjs'), 'utf8')
+  const discarded = source.match(/const DISCARDED_BLOCKS = new Set\(\[([^\]]*)\]\)/)
+  assert.ok(discarded, 'the discard list must stay declarative')
+  assert.match(discarded[1], /referencia\/cli/)
 })
 
 // ---------------------------------------------------------------------------
@@ -116,6 +163,17 @@ test('normaliseEtag: weak and strong validators of the same body compare equal',
   assert.equal(normaliseEtag('W/"abc"'), 'abc')
   assert.notEqual(normaliseEtag('"abc"'), normaliseEtag('"def"'))
   assert.equal(normaliseEtag(null), null)
+})
+
+test('cliCacheState: knowledge stored for another release counts as no knowledge', () => {
+  const on = (installed, stored, onDisk = true) => cliCacheState({ installed, stored, onDisk })
+  assert.equal(on('1.0.0', '1.0.0'), 'fresh')
+  assert.equal(on('1.1.0', '1.0.0'), 'stale', 'a newer CLI invalidates what was stored')
+  assert.equal(on('1.0.0', '1.1.0'), 'stale', 'so does a downgrade')
+  assert.equal(on('1.0.0-rc2', '1.0.0-rc1'), 'stale', 'pre-releases are versions too')
+  assert.equal(on('1.0.0', null), 'absent')
+  assert.equal(on('1.0.0', '1.0.0', false), 'absent', 'metadata without files is not a cache')
+  assert.equal(on(null, '1.0.0'), 'unknown', 'with no CLI there is nothing to compare against')
 })
 
 // ---------------------------------------------------------------------------
@@ -137,7 +195,7 @@ const TREE_SAMPLE = {
           nome: 'add',
           descricao: 'creates a box',
           argumentos: [
-            { nome: 'id', obrigatorio: true, descricao: 'local id' },
+            { nome: 'id', obrigatorio: true, descricao: 'qualified id' },
             { nome: 'extra', obrigatorio: false, descricao: 'something else' },
           ],
           opcoes: [
@@ -182,17 +240,30 @@ test('renderCommand: repeatable options are marked, and `obrigatoria` is not lea
 })
 
 // ---------------------------------------------------------------------------
-// Finding the registry
+// Finding the workspace
 // ---------------------------------------------------------------------------
 
-test('findRegistry: walks up to cfour.yaml, and reports its absence rather than guessing', () => {
+test('findWorkspace: walks up to cfour.yaml, and reports its absence rather than guessing', () => {
   const base = tmpdir()
-  const deep = path.join(base, 'repo', 'a', 'b', 'c')
+  const deep = path.join(base, 'repo', 'src', 'a', 'b')
   fs.mkdirSync(deep, { recursive: true })
-  assert.equal(findRegistry(deep), null)
-  const registry = path.join(base, 'repo', 'cfour.yaml')
-  fs.writeFileSync(registry, 'version: 1\n')
-  assert.equal(findRegistry(deep), registry)
+  assert.equal(findWorkspace(deep), null)
+  const workspace = path.join(base, 'repo', 'cfour.yaml')
+  fs.writeFileSync(workspace, 'version: 2\nid: repo\n')
+  assert.equal(findWorkspace(deep), workspace)
+  fs.rmSync(base, { recursive: true, force: true })
+})
+
+test('findWorkspace: nothing but cfour.yaml makes a directory a workspace', () => {
+  const base = tmpdir()
+  // The shape of the current structure, minus the one structural file. There is
+  // no index, no registry and no manifest to fall back on, so this is not a
+  // workspace and no amount of models/ and views/ makes it one.
+  fs.mkdirSync(path.join(base, 'models', 'vendas'), { recursive: true })
+  fs.mkdirSync(path.join(base, 'views'), { recursive: true })
+  fs.writeFileSync(path.join(base, 'models', 'vendas', 'elements.yaml'), 'elements: []\n')
+  fs.writeFileSync(path.join(base, 'views', 'contexto.yaml'), 'kind: diagram\n')
+  assert.equal(findWorkspace(base), null)
   fs.rmSync(base, { recursive: true, force: true })
 })
 
@@ -208,25 +279,29 @@ function guard(filePath, toolName = 'Edit') {
   return out.trim() ? JSON.parse(out) : null
 }
 
-function fakeModel() {
+/** A workspace with the shape `cfour init` actually produces. */
+function fakeWorkspace() {
   const base = tmpdir()
-  const modelling = path.join(base, 'arquitetura')
-  fs.mkdirSync(path.join(modelling, 'model', 'loja'), { recursive: true })
-  fs.mkdirSync(path.join(modelling, '.layout', 'loja'), { recursive: true })
-  fs.writeFileSync(path.join(base, 'cfour.yaml'), 'version: 1\n')
-  fs.writeFileSync(path.join(modelling, 'modelagem.yaml'), 'id: arquitetura\n')
-  return { base, modelling }
+  fs.mkdirSync(path.join(base, 'models', 'vendas'), { recursive: true })
+  fs.mkdirSync(path.join(base, 'views'), { recursive: true })
+  fs.mkdirSync(path.join(base, 'layouts'), { recursive: true })
+  fs.mkdirSync(path.join(base, 'src'), { recursive: true })
+  fs.writeFileSync(path.join(base, 'cfour.yaml'), 'version: 2\nid: loja\n')
+  fs.writeFileSync(path.join(base, 'models', 'vendas', 'elements.yaml'), 'elements: []\n')
+  fs.writeFileSync(path.join(base, 'views', 'contexto.yaml'), 'kind: diagram\n')
+  fs.writeFileSync(path.join(base, 'layouts', 'contexto.json'), '{}\n')
+  return base
 }
 
 test('guard: escalates every file the CLI owns, and names the command that owns it', () => {
-  const { base, modelling } = fakeModel()
+  const base = fakeWorkspace()
   const cases = [
-    [path.join(modelling, 'model', 'loja', 'elements.yaml'), /cfour element/],
-    [path.join(modelling, 'model', 'loja', 'project.yaml'), /cfour project/],
-    [path.join(modelling, 'model', 'workspace.yaml'), /cfour config/],
-    [path.join(modelling, 'modelagem.yaml'), /cfour modelagem set/],
-    [path.join(base, 'cfour.yaml'), /cfour init/],
-    [path.join(modelling, '.layout', 'loja', 'contexto.json'), /viewer/],
+    [path.join(base, 'cfour.yaml'), /cfour workspace set|cfour config/],
+    [path.join(base, 'models', 'vendas', 'elements.yaml'), /cfour element/],
+    [path.join(base, 'models', 'vendas', 'relations.yaml'), /cfour relation/],
+    [path.join(base, 'views', 'contexto.yaml'), /cfour diagram/],
+    [path.join(base, 'views', 'checkout.yaml'), /cfour flow/],
+    [path.join(base, 'layouts', 'contexto.json'), /viewer/],
   ]
   for (const [file, expected] of cases) {
     const verdict = guard(file)
@@ -237,19 +312,53 @@ test('guard: escalates every file the CLI owns, and names the command that owns 
   fs.rmSync(base, { recursive: true, force: true })
 })
 
+test('guard: creating the workspace file by hand is escalated too, and points at `cfour init`', () => {
+  const base = tmpdir()
+  const verdict = guard(path.join(base, 'cfour.yaml'))
+  assert.ok(verdict, 'a cfour.yaml that does not exist yet still belongs to the CLI')
+  assert.match(verdict.hookSpecificOutput.permissionDecisionReason, /cfour init/)
+  fs.rmSync(base, { recursive: true, force: true })
+})
+
 test('guard: escalates rather than blocks, because the hand edit has a legitimate exception', () => {
-  const { base, modelling } = fakeModel()
-  const verdict = guard(path.join(modelling, 'model', 'loja', 'elements.yaml'))
+  const base = fakeWorkspace()
+  const verdict = guard(path.join(base, 'models', 'vendas', 'elements.yaml'))
   assert.notEqual(verdict.hookSpecificOutput.permissionDecision, 'deny')
   assert.match(verdict.hookSpecificOutput.permissionDecisionReason, /which capability is missing/)
   fs.rmSync(base, { recursive: true, force: true })
 })
 
 test('guard: stays out of the way of everything else', () => {
-  const { base, modelling } = fakeModel()
-  assert.equal(guard(path.join(modelling, 'README.md')), null, 'prose beside a model is not the model')
-  assert.equal(guard(path.join(base, 'src', 'index.ts')), null, 'the software being documented')
-  assert.equal(guard('/tmp/somewhere/unrelated.yaml'), null, 'a yaml outside any model')
+  const base = fakeWorkspace()
+  const untouched = [
+    [path.join(base, 'README.md'), 'prose beside a workspace is not the workspace'],
+    [path.join(base, 'src', 'index.ts'), 'the software being documented'],
+    [path.join(base, 'package.json'), 'the repository is not the model'],
+    [path.join(base, 'models', 'vendas', 'NOTES.md'), 'only YAML in a model is model data'],
+    [path.join(base, 'views', 'draft', 'sketch.yaml'), 'views/ is flat; a subfolder is not a view'],
+    ['/tmp/somewhere-else/models/x/elements.yaml', 'no cfour.yaml above it: not a workspace'],
+  ]
+  for (const [file, why] of untouched) assert.equal(guard(file), null, why)
+  fs.rmSync(base, { recursive: true, force: true })
+})
+
+test('guard: the structure that no longer exists is no longer protected', () => {
+  // Guarding paths from before the simplification would stop people editing
+  // ordinary files of their own repository that merely share a name.
+  const base = fakeWorkspace()
+  const gone = [
+    path.join(base, 'modelagem.yaml'),
+    path.join(base, 'model', 'loja', 'elements.yaml'),
+    path.join(base, 'model', 'workspace.yaml'),
+    path.join(base, '.layout', 'contexto.json'),
+  ]
+  for (const file of gone) assert.equal(guard(file), null, `${rel(file)} is not cfourdev's any more`)
+
+  // And the names that used to mean something inside a model now mean nothing
+  // in particular: the arrangement of files within a model is free, so this is
+  // guarded as ordinary model data and not as a manifest of its own.
+  const verdict = guard(path.join(base, 'models', 'vendas', 'project.yaml'))
+  assert.match(verdict.hookSpecificOutput.permissionDecisionReason, /the model `vendas`/)
   fs.rmSync(base, { recursive: true, force: true })
 })
 
@@ -367,10 +476,15 @@ test('the CLI surface is not restated in prose', () => {
   // Flags belong to the installed CLI, which the knowledge cache serves one
   // command at a time. A skill listing them goes stale silently on the next
   // release, and the model has no way to tell which copy is true.
+  //
+  // The few allowed here are the ones a skill has to name to teach a rule that
+  // is not about the flag: `--parent` because it is what decides the C4 level,
+  // `--dry-run` and `--json` because when to reach for them is a judgement, and
+  // the knowledge cache's own options.
   const allowed = new Set([
     '--json', '--dry-run', '--inventory', '--resolved', '--parent', '--level',
-    '--meta', '--tag', '--force', '--key', '--id', '--nome', '--data', '--cwd',
-    '--kind', '--scope', '--modelagem',
+    '--meta', '--tag', '--kind', '--force', '--key', '--id', '--nome',
+    '--data', '--cwd',
   ])
   const offenders = []
   for (const { name, file } of skillFiles()) {
@@ -382,8 +496,94 @@ test('the CLI surface is not restated in prose', () => {
   assert.deepEqual(offenders, [], 'ask the knowledge cache for these instead of writing them down')
 })
 
+test('documentation pages are pulled by name, never transcribed', () => {
+  // A skill may say which page answers a subject; it may not paste the page.
+  // The tell is a fenced YAML sample of the model format, which is exactly the
+  // knowledge that belongs to the documentation and changes with it.
+  const offenders = []
+  for (const { name, file } of skillFiles()) {
+    const text = fs.readFileSync(file, 'utf8')
+    for (const m of text.matchAll(/```ya?ml\n([\s\S]*?)```/g)) {
+      offenders.push(`skills/${name}: ${m[1].split('\n')[0]}`)
+    }
+  }
+  assert.deepEqual(offenders, [], 'pull the documentation page instead of copying the format into a skill')
+})
+
 test('the write rule is stated where it binds, and nowhere contradicted', () => {
   const operate = fs.readFileSync(path.join(ROOT, 'skills', 'operate', 'SKILL.md'), 'utf8')
   assert.match(operate, /never (change|write) .*(model|YAML)|never .*parsing YAML/i)
   assert.match(operate, /When the CLI cannot do it/, 'the exception needs a stated procedure')
+})
+
+// ---------------------------------------------------------------------------
+// Nothing from before the simplification survives
+// ---------------------------------------------------------------------------
+
+// cfourdev collapsed to three concepts — workspace, model, view — and dropped
+// the structure that came before. What is checked here is the OPERATIONAL
+// residue: commands that no longer exist, files that are no longer written,
+// states the plugin no longer reports. Bare words are deliberately not matched:
+// "model" and "project" are ordinary English, and a test that banned them would
+// be a test nobody could satisfy honestly.
+const OBSOLETE = [
+  { pattern: /\bcfour\s+modelagem\b/, why: 'the `cfour modelagem` family no longer exists' },
+  { pattern: /\bcfour\s+projects?\b/, why: 'the `cfour project` family no longer exists' },
+  { pattern: /\bcfour\s+federacao\b/, why: 'the `cfour federacao` family no longer exists' },
+  { pattern: /\bmodelagem\.yaml\b/, why: 'a modelling is no longer a directory with its own manifest' },
+  { pattern: /\bregistry-missing\b/, why: 'there is no registry to be missing; the state is workspace-missing' },
+  { pattern: /\bfindRegistry\b/, why: 'the workspace is found by walking up to cfour.yaml' },
+  { pattern: /\.layout\//, why: 'the arrangement is written to layouts/' },
+  { pattern: /\bmodel\/[a-z0-9-]+\/[a-z]/, why: 'models live under models/, plural' },
+  { pattern: /\bproject\.yaml\b/, why: 'a model has no manifest: the folder name is the id' },
+  {
+    pattern: /model registry|the registry\b|a registry of|registered models?\b/i,
+    why: 'there is no registry: one workspace per repository, resolved by walking up',
+  },
+  {
+    pattern: /active mode(l|lling)\b|which mode(l|lling) is active/i,
+    why: 'nothing is selected or activated; the workspace found by walking up is the one',
+  },
+  {
+    pattern: /falls? back to `?shared`?|resolves? .*then in `?shared`?/i,
+    why: 'a reference has no fallback: a bare id resolves only inside its own model',
+  },
+]
+
+test('no concept from the previous structure survives anywhere in the plugin', () => {
+  const offenders = []
+  for (const file of allFiles()) {
+    if (rel(file) === 'scripts/verify.mjs') continue // it is where the patterns live
+    const text = fs.readFileSync(file, 'utf8')
+    for (const { pattern, why } of OBSOLETE) {
+      const hit = text.match(pattern)
+      if (hit) offenders.push(`${rel(file)}: "${hit[0].trim()}" — ${why}`)
+    }
+  }
+  assert.deepEqual(offenders, [], 'residue of the structure cfourdev no longer has')
+})
+
+test('the pre-approved commands are read-only, and all still exist', () => {
+  const settings = JSON.parse(fs.readFileSync(path.join(ROOT, 'settings.json'), 'utf8'))
+  const allow = settings.permissions.allow
+  const writes = /\b(add|set|rm|mv|init|push|login|logout|use|serve|step)\b/
+  const removed = /\b(modelagem|project|federacao)\b/
+  for (const entry of allow) {
+    assert.match(entry, /^Bash\(cfour /, `${entry} is not a cfour command`)
+    assert.doesNotMatch(entry, writes, `${entry} can change something and must not be pre-approved`)
+    assert.doesNotMatch(entry, removed, `${entry} names a command family that no longer exists`)
+  }
+})
+
+test('the three current concepts are taught, and taught as storage', () => {
+  // The routing skill is where someone lands first, so it is where the
+  // distinction has to be legible: these are cfourdev's concepts, not C4's.
+  const modeling = fs.readFileSync(path.join(ROOT, 'skills', 'modeling', 'SKILL.md'), 'utf8')
+  for (const concept of ['workspace', 'model', 'view']) {
+    assert.match(modeling, new RegExp(`\\*\\*${concept}\\*\\*`), `${concept} is not introduced`)
+  }
+  assert.match(modeling, /cfour\.yaml/, 'the one structural file has to be named')
+
+  const c4 = fs.readFileSync(path.join(ROOT, 'skills', 'architecture', 'references', 'c4.md'), 'utf8')
+  assert.match(c4, /filing decisions?, not architectural/i, 'the boundary must be stated explicitly')
 })

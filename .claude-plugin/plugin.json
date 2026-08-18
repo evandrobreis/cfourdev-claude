@@ -1,8 +1,8 @@
 {
   "name": "cfour",
   "displayName": "cfourdev",
-  "version": "1.0.0",
-  "description": "Assisted C4 modelling with cfourdev: understands the software you are documenting, decides the correct C4 representation, materialises it through the cfour CLI and validates the result. Reads published models through the cfourdev MCP server, and learns the tool's capabilities by asking the tool itself.",
+  "version": "2.0.0",
+  "description": "Assisted C4 modelling with cfourdev: understands the software you are documenting, decides the correct C4 representation, materialises it through the cfour CLI and validates the result. Reads published workspaces through the cfourdev MCP server, and learns the tool's capabilities by asking the tool itself.",
   "author": {
     "name": "Evandro Barbosa dos Reis"
   },

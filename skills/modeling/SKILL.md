@@ -1,6 +1,6 @@
 ---
 name: modeling
-description: The entry point for any architecture work with cfourdev — establishes which model is active, what kind of request this is, and which source answers it. Use whenever someone wants to document, query, review or evolve a C4 model with cfourdev, mentions the cfour CLI, or asks how a system should be represented. Load this before any other cfour skill.
+description: The entry point for any architecture work with cfourdev — establishes whether a workspace governs here, what kind of request this is, and which source answers it. Use whenever someone wants to document, query, review or evolve a C4 model with cfourdev, mentions the cfour CLI, or asks how a system should be represented. Load this before any other cfour skill.
 ---
 
 # Working with cfourdev
@@ -19,6 +19,22 @@ The person you are working with owns the decisions; you owe them a clear view of
 what is known and what is guessed.
 
 Answer in whatever language the person is writing in.
+
+## The three things cfourdev stores, and what they are not
+
+Get these straight before touching anything, because each one is routinely
+mistaken for an architectural concept, and none of them is one.
+
+| | What it is | What it is **not** |
+|---|---|---|
+| **workspace** | what gets published, configured and addressed. **One per repository**, declared in `cfour.yaml` at its root | not a System, and not a boundary in the architecture |
+| **model** | a folder under `models/`, owning the identifiers inside it: elements, relations and notes, and nothing else | not a C4 level, not a subsystem, not a container of architecture |
+| **view** | one file under `views/`, holding a diagram or a flow | not an element, and never something a relationship can point at |
+
+Two rules carry the whole tree, and there is no third: **a folder under
+`models/` is a model, and its name is its id**; **a file in `views/` is a view,
+and its name is its id.** There is no index, no registry, no `path:`, and no
+active anything to select.
 
 ## Where facts come from
 
@@ -42,10 +58,9 @@ tree. For a repository whose model is uncommitted or unpublished, MCP will not
 see it and the CLI is your only reader. When someone asks about a system that
 lives in *another* repository, MCP is the right and only answer.
 
-**Never read the model by parsing YAML.** `cfour element list --json`,
-`cfour check --inventory --json`, `cfour find`, `cfour refs`,
-`cfour diagram show --resolved` all answer in structured form, and they answer
-about the *resolved* model — which is not the same as what any single file says.
+**Never read the model by parsing YAML.** The CLI's read commands answer in
+structured form, and they answer about the *resolved* model — which is not the
+same as what any single file says. `cfour:operate` covers which to reach for.
 
 ## First, know where you are
 
@@ -58,14 +73,25 @@ node "${CLAUDE_PLUGIN_ROOT}/scripts/knowledge.mjs" status --data "${CLAUDE_PLUGI
 It reports whether the CLI is installed, whether stored knowledge matches the
 installed version, and whether a `cfour.yaml` governs this directory.
 
-- Anything in `pending` with severity `blocks` or `registry-missing` → go to
-  `cfour:setup`. Do not improvise around a missing environment.
+- `cli-missing`, or anything with severity `blocks` → go to `cfour:setup`. Do
+  not improvise around a missing environment.
+- `workspace-missing` → there is no workspace here yet. For a read, say so
+  plainly. For anything that writes, go to `cfour:setup`.
 - `cli-cache-stale` or `doc-missing` → run `sync` (same script). It is quick and
   needs no permission from anyone.
-- Otherwise, find the active model with `cfour modelagem list --json` and carry
-  on. If several are registered and the request does not say which, ask — this
-  is one question that is always worth asking, because writing into the wrong
-  model is tedious to undo.
+
+When a workspace does govern here, that settles the context completely — there
+is one, it is the one, and no command will ask you which. What is left to know
+is what is *inside* it, which is a question for the model itself: read the
+inventory before you decide anything (`cfour:operate`).
+
+**The one thing that is still a choice: which model.** Models are namespaces,
+not architecture. A new element goes into the model that owns that part of the
+system, and people and third-party systems conventionally go into a model named
+`shared` — a convention only; the tool reserves no name. When only one model
+exists, use it and say nothing. When several do and the request does not say,
+ask, or state the choice you are making and why. Moving elements between models
+later means renaming every reference to them.
 
 ## What kind of request is this?
 
@@ -136,8 +162,8 @@ Say what you are doing and why it matters to them. Do not narrate your tools.
 
 not
 
-> I will call the operate skill, which runs `cfour find --json` and then parses
-> the result.
+> I will call the operate skill, which runs a search command and parses the
+> result.
 
 When something fails, say what could not be done and what comes next — in terms
 of their architecture, not of the plumbing.

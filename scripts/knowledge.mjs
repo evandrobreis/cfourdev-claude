@@ -3,12 +3,13 @@
 //
 // It exists for an architectural reason: both sources of truth about cfourdev
 // are too large for a model's context. The command tree the CLI publishes is
-// ~147 KB; the official documentation is ~164 KB. Neither fits in a prompt, and
-// neither should be memorised inside the plugin — a new CLI release changes the
-// first, and the second changes on its own.
+// over 100 KB; the official documentation is over 250 KB across dozens of
+// pages. Neither fits in a prompt, and neither should be memorised inside the
+// plugin — a new CLI release changes the first, and the second changes on its
+// own.
 //
-// So this script fetches, slices and stores, then serves 1-2 KB at a time: the
-// help for ONE command, or ONE block of documentation.
+// So this script fetches, slices and stores, then serves a few KB at a time:
+// the help for ONE command, or ONE page of documentation.
 //
 // Nothing here decides anything about modelling. It answers three questions:
 //   - what can the installed CLI do          (`cli`)
@@ -26,17 +27,20 @@ import { execFileSync } from 'node:child_process'
 const PLUGIN_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 
 /** Cache layout version. Bumping it invalidates everything already on disk. */
-const CACHE_VERSION = 1
+const CACHE_VERSION = 2
 
 /**
- * The documentation's `cli` block is DISCARDED on purpose.
+ * The documentation's command reference is DISCARDED on purpose.
  *
- * It restates the command surface, and the published documentation may describe
- * a different release than the one actually installed. Two descriptions of the
- * same thing, drifting apart silently, are worse than one. The installed CLI
- * always wins — and it is the CLI that answers `cli`.
+ * It restates the command surface flag by flag, and the published documentation
+ * may describe a different release than the one actually installed. Two
+ * descriptions of the same thing, drifting apart silently, are worse than one.
+ * The installed CLI always wins — and it is the CLI that answers `cli`.
+ *
+ * The narrative pages about the command line are kept: they explain how to
+ * decide which command to reach for, which is knowledge no `--help` carries.
  */
-const DISCARDED_BLOCKS = new Set(['cli'])
+const DISCARDED_BLOCKS = new Set(['referencia/cli'])
 
 // ---------------------------------------------------------------------------
 // Where the cache lives
@@ -252,18 +256,28 @@ async function resolveFullContent(url) {
 }
 
 /**
- * Slices the file on the markers it carries itself — `<!-- doc:x -->`,
- * `<!-- cli -->`, `<!-- exemplos -->`. Whatever precedes the first marker is
- * the preamble, which holds the section index: it is kept as block `index`.
+ * Slices the file on the markers it carries itself: `<!-- doc:<slug> -->`,
+ * where the slug is also the path of the page on the documentation site, and
+ * may therefore have segments — `modelando/anatomia`, `referencia/yaml`.
+ *
+ * Whatever precedes the first marker is the preamble, which holds the index of
+ * every page: it is kept as block `index`.
+ *
+ * The slug shape is constrained here rather than trusted, because it becomes a
+ * path under the cache directory: lowercase, digits, hyphen, and `/` between
+ * segments. Nothing that could climb out of the cache can match.
  */
+const SLUG = String.raw`[a-z0-9]+(?:-[a-z0-9]+)*`
+const MARKER = new RegExp(String.raw`<!--\s*doc:(${SLUG}(?:/${SLUG})*)\s*-->`, 'g')
+
 export function slice(text) {
-  const markers = [...text.matchAll(/<!--\s*(doc:[a-z-]+|cli|exemplos)\s*-->/g)]
+  const markers = [...text.matchAll(MARKER)]
   const blocks = {}
   if (!markers.length) return blocks
   const preamble = text.slice(0, markers[0].index).trim()
   if (preamble) blocks.index = preamble + '\n'
   for (let i = 0; i < markers.length; i++) {
-    const name = markers[i][1].replace(/^doc:/, '')
+    const name = markers[i][1]
     const start = markers[i].index + markers[i][0].length
     const end = i + 1 < markers.length ? markers[i + 1].index : text.length
     blocks[name] = text.slice(start, end).trim() + '\n'
@@ -351,53 +365,76 @@ async function syncDoc(data, meta, { force = false } = {}) {
     return { ok: false, reason: 'unexpected-content', detail: text.slice(0, 80) }
   }
   const sha = (text.match(/^conteudo-sha256:\s*(\S+)/m) || [])[1] || null
-  const docCliVersion = (text.match(/^versao-cli:\s*(\S+)/m) || [])[1] || null
 
   const blocks = slice(text)
   const p = paths(data)
   fs.rmSync(p.doc, { recursive: true, force: true })
   fs.mkdirSync(p.doc, { recursive: true })
-  const registry = {}
+  const stored = {}
   for (const [name, content] of Object.entries(blocks)) {
     if (DISCARDED_BLOCKS.has(name)) continue
-    fs.writeFileSync(path.join(p.doc, `${name}.md`), content)
-    registry[name] = { title: titleOf(content), sections: sectionsOf(content), bytes: content.length }
+    const file = blockFile(data, name)
+    fs.mkdirSync(path.dirname(file), { recursive: true })
+    fs.writeFileSync(file, content)
+    stored[name] = { title: titleOf(content), sections: sectionsOf(content), bytes: content.length }
   }
   meta.doc = {
     url,
     discoveredVia: origin.how,
     etag: etag || r.headers.get('etag') || null,
     sha,
-    cliVersionOfDoc: docCliVersion,
     syncedAt: new Date().toISOString(),
-    blocks: registry,
+    blocks: stored,
   }
-  return { ok: true, url, blocks: Object.keys(registry) }
+  return { ok: true, url, blocks: Object.keys(stored) }
+}
+
+/**
+ * A block's file. The slug's `/` becomes a directory separator, so the cache
+ * mirrors the documentation's own tree and `doc modelando/anatomia` reads the
+ * page of that name.
+ */
+function blockFile(data, name) {
+  const segments = name.split('/')
+  return path.join(paths(data).doc, ...segments.slice(0, -1), `${segments.at(-1)}.md`)
 }
 
 function blocksOnDisk(data) {
-  const p = paths(data)
-  try {
-    return fs
-      .readdirSync(p.doc)
-      .filter((f) => f.endsWith('.md'))
-      .map((f) => f.replace(/\.md$/, ''))
-      .sort()
-  } catch {
-    return []
+  const root = paths(data).doc
+  const found = []
+  const descend = (dir, prefix) => {
+    let entries
+    try {
+      entries = fs.readdirSync(dir, { withFileTypes: true })
+    } catch {
+      return
+    }
+    for (const e of entries) {
+      if (e.isDirectory()) descend(path.join(dir, e.name), `${prefix}${e.name}/`)
+      else if (e.name.endsWith('.md')) found.push(prefix + e.name.replace(/\.md$/, ''))
+    }
   }
+  descend(root, '')
+  return found.sort()
 }
 
 // ---------------------------------------------------------------------------
-// The repository: where the registry is
+// The repository: which workspace governs here
 // ---------------------------------------------------------------------------
 
 /**
- * Walks up until it finds `cfour.yaml`, exactly as the CLI does. It does not
- * interpret the model: that is what the CLI is for, since it reads and
- * validates. All that matters here is whether a registry exists, and where.
+ * Walks up until it finds `cfour.yaml`, exactly as the CLI does.
+ *
+ * That file is the workspace, and it is the only path cfourdev resolves by
+ * walking up from the working directory. There is one per repository, so
+ * finding it settles the whole question of context: there is nothing to select
+ * and nothing to register.
+ *
+ * It does not interpret the file: that is what the CLI is for, since it reads
+ * and validates. All that matters here is whether a workspace governs this
+ * directory, and where its root is.
  */
-export function findRegistry(from) {
+export function findWorkspace(from) {
   let dir = path.resolve(from)
   for (;;) {
     const target = path.join(dir, 'cfour.yaml')
@@ -408,14 +445,33 @@ export function findRegistry(from) {
   }
 }
 
+/**
+ * Whether what is stored still describes the CLI that is installed.
+ *
+ * This is the invalidation rule, and it is pure so that it can be checked
+ * without a CLI on PATH. The rule itself is the load-bearing part: the plugin
+ * would rather admit it knows nothing than serve the surface of a release that
+ * is no longer the one being run.
+ */
+export function cliCacheState({ installed, stored, onDisk }) {
+  if (!installed) return 'unknown'
+  if (!stored || !onDisk) return 'absent'
+  return stored === installed ? 'fresh' : 'stale'
+}
+
 export function status(data, cwd) {
   const meta = readMeta(data)
   const p = paths(data)
   const version = cliVersion()
-  const registry = findRegistry(cwd)
+  const workspace = findWorkspace(cwd)
 
   const cliCached = fs.existsSync(p.tree) && fs.existsSync(p.index)
-  const cliStale = !!(version && meta.cli && meta.cli.version !== version)
+  const state = cliCacheState({
+    installed: version,
+    stored: meta.cli?.version || null,
+    onDisk: cliCached,
+  })
+  const cliStale = state === 'stale'
 
   const pending = []
   if (!version) {
@@ -426,7 +482,7 @@ export function status(data, cwd) {
       fix: 'npm i -g cfour-cli',
     })
   }
-  if (version && (!cliCached || cliStale || !meta.cli)) {
+  if (state === 'stale' || state === 'absent') {
     pending.push({
       id: 'cli-cache-stale',
       severity: 'fixable',
@@ -444,11 +500,11 @@ export function status(data, cwd) {
       fix: 'sync',
     })
   }
-  if (!registry) {
+  if (!workspace) {
     pending.push({
-      id: 'registry-missing',
+      id: 'workspace-missing',
       severity: 'blocks-writing',
-      what: 'no cfour.yaml from this directory upwards: no model governs here',
+      what: 'no cfour.yaml from this directory upwards: no workspace governs here',
       fix: 'cfour init',
     })
   }
@@ -460,18 +516,20 @@ export function status(data, cwd) {
       cli: meta.cli,
       cliOnDisk: cliCached,
       cliStale,
+      // Counts, not listings. `status` runs once per session and forty-six
+      // page names would be forty-six lines saying nothing the caller asked.
+      // `doc` with no argument lists them, when someone actually wants them.
       doc: meta.doc
         ? {
             url: meta.doc.url,
             discoveredVia: meta.doc.discoveredVia,
             syncedAt: meta.doc.syncedAt,
-            cliVersionOfDoc: meta.doc.cliVersionOfDoc,
-            blocks: Object.keys(meta.doc.blocks || {}),
+            pages: Object.keys(meta.doc.blocks || {}).length,
           }
         : null,
-      docOnDisk: blocksOnDisk(data),
+      docOnDisk: blocksOnDisk(data).length,
     },
-    repository: { cwd, registry, root: registry ? path.dirname(registry) : null },
+    repository: { cwd, workspace, root: workspace ? path.dirname(workspace) : null },
     pending,
   }
 }
@@ -500,7 +558,7 @@ export function search(data, term) {
     let inBody = false
     if (!sections.length && !inTitle) {
       try {
-        inBody = fs.readFileSync(path.join(p.doc, `${name}.md`), 'utf8').toLowerCase().includes(needle)
+        inBody = fs.readFileSync(blockFile(data, name), 'utf8').toLowerCase().includes(needle)
       } catch {
         inBody = false
       }
@@ -537,7 +595,7 @@ const HELP = `cfourdev-claude — the plugin's knowledge cache
   status                  what exists, what is missing, and what fixes it
   sync [--force]          refresh knowledge of the CLI and of the documentation
   cli [command...]        help for one command; with no argument, the index
-  doc [block]             one documentation block; with no argument, the list
+  doc [page]              one documentation page; with no argument, the list
   search <term>           where a subject is covered
 
   --data <dir>            where to store it (default: CLAUDE_PLUGIN_DATA)
@@ -598,18 +656,25 @@ async function main() {
         return 1
       }
       if (!rest.length) {
+        // One line per page. The sections stay in the metadata, where `search`
+        // uses them: printing them all would be several hundred lines, which is
+        // the opposite of what this cache is for.
         const meta = readMeta(data)
         for (const name of available) {
           const info = meta.doc?.blocks?.[name] || {}
-          process.stdout.write(`${name.padEnd(14)}${info.title || ''} (${info.bytes || '?'} bytes)\n`)
-          for (const s of info.sections || []) process.stdout.write(`  - ${s}\n`)
+          process.stdout.write(`${name.padEnd(32)}${info.title || ''}\n`)
         }
         return 0
       }
       const name = rest[0].replace(/^doc:/, '')
-      const file = path.join(p.doc, `${name}.md`)
-      if (!fs.existsSync(file)) {
-        process.stderr.write(`no block "${name}". Available: ${available.join(', ')}\n`)
+      const file = blockFile(data, name)
+      if (!available.includes(name) || !fs.existsSync(file)) {
+        const near = available.filter((b) => b.includes(name) || name.includes(b)).slice(0, 8)
+        process.stderr.write(
+          `no page "${name}".` +
+            (near.length ? ` Did you mean: ${near.join(', ')}?` : '') +
+            `\nSee them all with: doc\n`
+        )
         return 1
       }
       process.stdout.write(fs.readFileSync(file, 'utf8'))
@@ -643,4 +708,4 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   )
 }
 
-export { findCommand, paths }
+export { findCommand, paths, blockFile }

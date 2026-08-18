@@ -71,8 +71,8 @@ The shape of the answer is always the same:
 2. Name what they are actually trying to represent.
 3. Propose the representation that is correct in C4.
 4. If the concept is real but is not a box, propose how cfourdev carries it
-   anyway — tags, metadata, relationships, notes, groups, flows, a separate
-   project, or a separate model.
+   anyway — tags, metadata, relations, notes, groups, flows, another model, or
+   another workspace.
 
 Then let them decide. They may have a reason you do not know, and it is their
 model. What you must not do is quietly produce a structurally valid model that
@@ -83,6 +83,29 @@ only what you write: **in cfourdev the C4 level is derived from the containment
 tree, not declared.** An element with no `parent` is a system; a child of a
 system is a container; a child of a container is a component. So `--parent` is
 the modelling decision, and there is no `--level` flag to disagree with it.
+
+## What cfourdev stores is not what C4 means
+
+cfourdev has three concepts — workspace, model, view — and none of them is an
+architectural one. Keeping them out of the architecture is part of this skill's
+job, because the storage shape is exactly what leaks into a proposal when nobody
+is watching:
+
+- a **workspace** is one repository's publishable unit. It is not the system.
+  A workspace routinely holds several systems, and a system is sometimes spread
+  across two workspaces that are read together;
+- a **model** is a namespace that owns identifiers. It is not a level, not a
+  subsystem, and not a boundary. Splitting into two models changes which folder
+  a box lives in and nothing about what the box *is*;
+- a **view** is a drawing. It is not an element, and nothing in the model points
+  at one.
+
+So never answer an architectural question with a storage move. *"Put it in
+another model"* is not a representation for a concept that does not fit C4 — it
+is a filing decision, and it is the right answer only when the reason is
+identifier ownership or team separation. The organisation of the modelling and
+the semantics of the architecture are two questions, and they are decided
+separately.
 
 ## Proposing a structure
 
