@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/guard-model.mjs\"",
+            "timeout": 10,
+            "statusMessage": "checking whether this file belongs to a cfourdev model"
+          }
+        ]
+      }
+    ]
+  }
+}

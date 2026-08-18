@@ -1,0 +1,23 @@
+# The contracts, on every push and every pull request.
+#
+# There is no build and no lint: most of this repository is prose. What can be
+# checked automatically is that the mechanical parts behave, that the prose
+# refers to files that exist, and that no knowledge the plugin is supposed to
+# discover has been quietly written down instead.
+name: verify
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+jobs:
+  contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: contracts
+        run: node --test scripts/verify.mjs

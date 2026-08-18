@@ -1,105 +1,138 @@
-# Sobre
+# cfourdev for Claude Code
 
-O [cfourdev](https://cfourdev.com.br) é uma plataforma criada para ajudar times de tecnologia a
-manter sua arquitetura de software documentada em um modelo versionado, compartilhável, colaborativo
-e centralizado.
+[cfourdev](https://cfourdev.com.br) keeps software architecture documented as a
+C4 model that lives in your repository: YAML in an open format, versioned and
+reviewed alongside the code, with the diagrams as a consequence of the model
+rather than a separate artefact.
 
-O funcionamento é simples:
+This plugin is the modelling partner for it. You describe your system in your
+own words; it works out what the system actually is, decides how that should be
+represented in C4, and materialises the decision through the `cfour` CLI.
 
-1. O modelo é escrito em YAML no seu repositório git, em um formato aberto;
-2. Utilize a [CLI](https://www.npmjs.com/package/cfour-cli) para escrever, validar, visualizar e publicar a documentação;
-3. Utilize o [portal](https://app.cfourdev.com.br) para visualizar a arquitetura de forma centralizada.
+```
+Set cfourdev up in this project.
+Read this repository and propose how we should model it.
+We also have a worker consuming orders from Kafka — add it.
+Does this split into containers make sense?
+Who depends on the pricing container?
+Deepen this container into components.
+```
 
-## O que este plugin faz
+## What it is for
 
-Este plugin é um complemento à ferramenta. Ele é um **operador contextual**: entende
-o software que você está documentando e o objetivo da documentação, interpreta o que
-você pede em português, e traduz isso em comandos da CLI `cfour` — executando,
-validando e relatando o resultado.
+**C4 first, cfourdev second.** The plugin is a C4 modelling tool that happens to
+store its results in cfourdev. If you ask for something to be represented at a
+level where it does not belong — a folder as a container, a team as a boundary,
+an environment as an element — it says so, explains what you are actually trying
+to represent, and proposes the correct form. A model that stores cleanly and
+means the wrong thing is the failure it is built to prevent.
 
-Você não precisa decorar nem digitar comando nenhum:
+**It tells you what it knows and what it guessed.** Facts, inferences,
+hypotheses and recommendations stay visibly apart. *"I did not find enough
+evidence to say whether this is a separate container"* is an answer it is
+willing to give.
 
-> *Adicione o SAP como sistema externo.*
-> *Ligue o portal ao BFF por HTTPS.*
-> *Crie um diagrama de containers do Identity.*
+**Depth follows uncertainty.** Trying cfourdev with a Node API and a PostgreSQL
+gets two stated assumptions and a working model. A logistics platform with forty
+services gets progressive discovery, a system context validated before anything
+below it, and work in increments.
 
-### O que ele não faz
+## How it works
 
-**A arquitetura é sua. A semântica da modelagem também.** O plugin não projeta, não
-melhora, não escolhe arquitetura, não sugere decomposição de serviços, não decide
-domínios, fronteiras, ownership ou granularidade, e não escolhe quais diagramas
-deveriam existir.
+Four sources, each authoritative for one thing:
 
-Ele opera decisões que **você** tomou. A regra que sustenta isso é uma só:
+| | |
+|---|---|
+| **C4** | what an element means |
+| **your repository** | what the software actually is |
+| **the `cfour` CLI** | every change to the model, and reading the working tree |
+| **the cfourdev MCP server** | reading models published to the platform |
 
-> **Nenhuma decisão arquitetural ou semântica de modelagem se toma por inferência do
-> agente. Quando falta uma informação necessária para materializar o modelo, ele
-> pergunta — não decide.**
+Two rules follow, and the plugin holds to both.
 
-O conhecimento de C4 continua lá, como **guarda-corpo**: se você pedir para cadastrar
-como Container algo que, pelo que já foi dito, não parece um Container, ele aponta o
-conflito e pede confirmação. E aí a decisão continua sendo sua — inclusive a de seguir
-assim mesmo.
+**Writes go through the CLI.** Not because YAML is hard, but because the CLI
+validates after writing and rolls back on a new error, and a hand edit does not.
+A hook enforces this: an edit aimed at a model file stops and asks, naming the
+command that owns that file. The exception is real — when the CLI genuinely
+cannot express something, editing by hand is correct — but it stays a decision
+someone makes on purpose, with the reason on screen.
 
-Ele também não escreve o YAML do modelo na mão. Tudo o que ele grava passa por um
-comando da CLI `cfour`: o que a ferramenta ainda não sabe fazer, ele relata — dizendo
-qual comando falta — em vez de improvisar no arquivo. Você continua livre para editar
-o modelo à mão quando quiser; o plugin é que não faz isso no seu lugar.
+**Capabilities are discovered, never memorised.** The plugin does not carry a
+copy of the CLI's manual. It reads the command tree from the CLI you have
+installed, and the format documentation from the official source, and caches
+both — then serves one command or one topic at a time. When the CLI version
+changes, the cache notices and refreshes itself. Even the documentation's
+address is discovered rather than hardcoded, so the docs can move without a
+release here.
 
-## Instalar
-
-Adicione este repositório como marketplace no seu Claude Code.
+## Installing
 
 ```
 /plugin marketplace add evandrobreis/cfourdev-claude
-
 /plugin install cfour@cfourdev
 ```
 
-Você também precisa da CLI:
-
-```
-npm i -g cfour-cli
-```
-
-Depois, no repositório onde você vai documentar:
+Then, in the repository you want to document:
 
 ```
 /cfour:setup
 ```
 
-## Atualizar
+Setup installs the CLI if it is missing, builds the knowledge cache, creates the
+model registry, and tells you what — if anything — is left for you to do. The
+MCP server ships configured; authorising it takes one browser round-trip through
+`/mcp`, and is only needed to read models published to the platform. Working
+locally needs nothing beyond the CLI.
+
+To update:
 
 ```
 /plugin marketplace update cfourdev
-
 /plugin update cfour@cfourdev
 ```
 
-## As skills
+## What is in the box
 
-O núcleo roteia sozinho — você conversa, não escolhe comando.
-
-| Arquivo | Descrição |
+| | |
 |---|---|
-| `cfour:modelagem` | o núcleo: o invariante, as duas fases, a modelagem ativa, a precedência das fontes |
-| `cfour:setup` | confere a CLI, o registro e a memória antiga; oferece o que falta |
-| `cfour:contexto` | entende o software e o objetivo da documentação, em rodadas curtas |
-| `cfour:operar` | traduz o pedido em comando da CLI, executa, confere e publica |
-| `cfour:cli` | descobre e mantém em cache as capacidades reais da CLI instalada |
-| `cfour:sessao` | retoma o trabalho, aponta divergências objetivas e encerra o dia |
+| `skills/modeling` | the entry point: which model is active, what kind of request this is, which source answers it |
+| `skills/setup` | installs and configures until the environment works |
+| `skills/architecture` | understands the software, decides the C4 representation, proposes and reviews |
+| `skills/operate` | reads the model, builds and runs CLI commands, validates the result |
+| `agents/investigator` | sweeps a large repository for evidence, and deliberately does not classify it |
+| `scripts/knowledge.mjs` | the cache: discovers, slices and serves the CLI surface and the documentation |
+| `scripts/guard-model.mjs` | the hook that keeps model files behind the CLI |
+| `.mcp.json` | the cfourdev MCP server, pre-configured |
+| `settings.json` | pre-approves the CLI's **read-only** commands, so discovery and validation do not interrupt you. Every command that writes still goes through the normal permission prompt. |
 
-O plugin **não consulta a internet**: quem descreve a ferramenta é a própria
-ferramenta, por `cfour help`.
+## Requirements
 
-## Licença
+- The CLI: `npm i -g cfour-cli` — setup offers to do this
+- Node 18 or later, for the plugin's own scripts
+- A cfourdev account, only if you want to publish
 
-Uso livre, inclusive comercial; não redistribua fora do marketplace. **O que o
-plugin escreve a seu pedido é seu.** Veja `LICENSE` — são doze linhas.
+## Development
 
-## Referências
+```
+node --test scripts/verify.mjs
+```
 
-- Plataforma — [cfourdev.com.br](https://cfourdev.com.br)
-- CLI no npm — [npmjs.com/package/cfour-cli](https://www.npmjs.com/package/cfour-cli)
-- O modelo C4 — [c4model.com](https://c4model.com/)
-- Este repositório — [github.com/evandrobreis/cfourdev-claude](https://github.com/evandrobreis/cfourdev-claude)
+The tests cover the mechanical parts: slicing the documentation, cache
+invalidation, the guard's verdicts, and the plugin's own shape. They also check
+that the prose has not quietly re-embedded knowledge the plugin is supposed to
+discover — a hardcoded documentation address, or a CLI flag written down where
+it will go stale.
+
+What they cannot cover is behaviour. Whether the plugin actually refuses a wrong
+C4 level, or actually asks instead of guessing, is only measurable by using it.
+
+## Licence
+
+Free to use, including commercially; do not redistribute outside the
+marketplace. **What the plugin writes at your request is yours.** See `LICENSE`.
+
+## References
+
+- Platform — [cfourdev.com.br](https://cfourdev.com.br)
+- CLI on npm — [cfour-cli](https://www.npmjs.com/package/cfour-cli)
+- The C4 model — [c4model.com](https://c4model.com/)

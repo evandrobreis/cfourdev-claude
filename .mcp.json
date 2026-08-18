@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "cfourdev": {
+      "type": "http",
+      "url": "https://api.cfourdev.com.br/mcp",
+      "oauth": {
+        "clientId": "5849jmr7iticd3fc2ikcfrtec8",
+        "callbackPort": 33418,
+        "scopes": "openid https://api.cfourdev.com.br/mcp/mcp.read"
+      }
+    }
+  }
+}

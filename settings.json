@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cfour help:*)",
+      "Bash(cfour version:*)",
+      "Bash(cfour check:*)",
+      "Bash(cfour find:*)",
+      "Bash(cfour refs:*)",
+      "Bash(cfour keys:*)",
+      "Bash(cfour status:*)",
+      "Bash(cfour element list:*)",
+      "Bash(cfour element show:*)",
+      "Bash(cfour relation list:*)",
+      "Bash(cfour relation show:*)",
+      "Bash(cfour diagram list:*)",
+      "Bash(cfour diagram show:*)",
+      "Bash(cfour flow list:*)",
+      "Bash(cfour flow show:*)",
+      "Bash(cfour note list:*)",
+      "Bash(cfour group list:*)",
+      "Bash(cfour path list:*)",
+      "Bash(cfour project list:*)",
+      "Bash(cfour config show:*)",
+      "Bash(cfour modelagem list:*)",
+      "Bash(cfour modelagem show:*)",
+      "Bash(cfour federacao list:*)"
+    ]
+  }
+}
