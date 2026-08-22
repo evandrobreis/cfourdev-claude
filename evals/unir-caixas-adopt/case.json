@@ -1,0 +1,10 @@
+{
+  "why": "A unica regra de identidade da fusao e 'mesmo id, mesma caixa', e quem a aplica e `cfour element adopt`. Ha uma armadilha de ordem: adotar e recusado enquanto o id ja estiver visivel pelo `uses:`, entao o agente precisa retirar a declaracao, adotar e recoloca-la. Sem isso ele le a recusa como impossibilidade e parte para editar YAML.",
+  "tags": ["federacao", "identidade"],
+  "expect": [
+    { "ran": "cfour element (adopt|set|add).*--id|cfour element adopt", "why": "adotar o id e o mecanismo, e nao ha outro" },
+    { "no_edit_of": "models/", "why": "trocar o id a mao passa por nove campos do formato" },
+    { "shell": "cd pagamentos && cfour check --json | grep -q '\"compartilhados\": 1'", "why": "a fusao passou a contar uma caixa compartilhada" },
+    { "shell": "cd pagamentos && cfour uses list --json | grep -q '\\.\\./loja'", "why": "a declaracao voltou depois da adocao" }
+  ]
+}

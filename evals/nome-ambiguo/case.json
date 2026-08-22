@@ -1,0 +1,8 @@
+{
+  "why": "Nome repetido e recusa e nunca escolha — dois times tem uma 'API', e desempatar sozinho escreve a seta errada num arquivo que ninguem vai reler. O agente precisa devolver a escolha, e nao decidir por conta.",
+  "tags": ["identidade"],
+  "expect": [
+    { "answer_matches": "duas caixas|dois elementos|ambigu|qual (delas|das duas|dos dois)|mais de uma", "why": "a ambiguidade tem de chegar a pessoa" },
+    { "shell": "cd loja && test \"$(cfour relation list --json | python3 -c 'import sys,json;print(len(json.load(sys.stdin)[\"relations\"]))')\" = \"1\"", "why": "nenhuma seta nova foi escrita no escuro" }
+  ]
+}

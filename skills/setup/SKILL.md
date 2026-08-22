@@ -1,6 +1,6 @@
 ---
 name: setup
-description: Prepares a repository to document architecture with cfourdev — checks and installs the cfour CLI, refreshes the plugin's knowledge of the tool and its documentation, creates the workspace, and gets the MCP connection authorised. Use on the first run in a repository, when the cfour command is missing, when there is no cfour.yaml, when the MCP server is not answering, or when someone asks to set cfourdev up.
+description: Prepares a repository to document architecture with cfourdev — checks and installs the cfour CLI, refreshes the plugin's knowledge of the tool and its documentation, creates a workspace, and gets the MCP connection authorised. Use on the first run in a repository, when the cfour command is missing, when there is no cfour.yaml, when the MCP server is not answering, or when someone asks to set cfourdev up.
 ---
 
 # Getting the environment ready
@@ -11,8 +11,8 @@ theirs: naming things, installing software globally, and anything that reaches
 their account on the platform.
 
 There is not much to it, and that is the point: cfourdev has one structural
-file, one workspace per repository, and nothing to register. Work through the
-state, not through a script. Start here:
+file, nothing to register, and no index to keep. Work through the state, not
+through a script. Start here:
 
 ```bash
 node "${CLAUDE_PLUGIN_ROOT}/scripts/knowledge.mjs" status --data "${CLAUDE_PLUGIN_DATA}"
@@ -55,20 +55,29 @@ moved and the stored knowledge did not. Re-syncing is the whole fix.
 Two failures are worth reporting rather than retrying:
 
 - `origin-unknown` or a network error — the documentation could not be reached.
-  Not fatal: the CLI still answers everything about commands. Say that the
-  format documentation is unavailable and carry on.
+  Not fatal, and worth being precise about what is lost: the CLI still answers
+  everything about commands, and `cfour help formato` still answers the format's
+  own rules offline. What is missing is the field-by-field detail. Say that and
+  carry on.
 - `unexpected-content` — something answered, but it was not the documentation.
   Usually a captive portal or a proxy. Worth mentioning; do not store it.
 
 ## The workspace — `workspace-missing`
 
 `cfour.yaml` is the only structural file, and the only path the CLI resolves by
-walking up from the working directory. Its directory is the workspace root, and
-there is one workspace per repository. Without that file, nothing can be written.
+walking up from the working directory. Its directory is the workspace root.
+Without that file, nothing can be written here.
 
-`cfour init` creates it, along with the smallest model that already draws
-something. It takes an id and a display name, and those are the person's to
-choose — but propose defaults from the repository name rather than asking cold:
+**Before creating one, look at the neighbours.** A repository holds several
+workspaces side by side, one per system, so "there is no `cfour.yaml` above this
+directory" does not mean the repository is empty — and `status` lists the ones
+it found beside this directory. If one of them is this system, the answer is to
+work there, not to create a second workspace for the same system.
+
+`cfour init` creates the workspace, along with the smallest model that already
+draws something. It takes an id and a display name, and those are the person's
+to choose — but propose defaults from the directory or the system name rather
+than asking cold:
 
 ```bash
 cfour init --id <id> --nome "<name>"
@@ -78,13 +87,41 @@ The id is worth one sentence of care before running: it is declared rather than
 derived from the folder name precisely so that renaming the directory does not
 break the published address. Confirm the proposal in one line and run it.
 
+Two things it decides for you, and both are worth one line of explanation:
+
+- **the workspace's scope.** One workspace draws one system: it has exactly one
+  context diagram, and the tool refuses a second. If they described more than
+  one system, that is more than one workspace, created side by side — not more
+  root boxes in this one.
+- **the repository it publishes to.** `cfour.yaml` carries that separately from
+  the workspace id, because it is what holds the permission, the publishing key
+  and the first segment of the public address. When a sibling workspace already
+  exists, `cfour init` copies its value, which is what makes a tree of sibling
+  workspaces publish as one repository with one key.
+
 Then look at what it made: `cfour check --inventory --json` shows the starter
 model, which is a real model and not a placeholder — its elements and its view
-can be renamed or removed once real content exists.
+can be renamed or removed once real content exists. Renaming is free: ids are
+generated and reference nothing, so nothing breaks.
 
 If `cfour init` refuses because a workspace already governs this directory, that
-is the answer, not an obstacle: there is one, and it is the one. Read it rather
-than creating a second.
+is the answer, not an obstacle. Read it rather than creating a second one on top
+of it.
+
+## Reading other workspaces — only when they raise it
+
+A workspace draws its own content. Reading someone else's alongside it is
+declared with `cfour uses`, pointing either at a sibling folder of this tree or
+at a workspace published on the platform. Bring it up when they mention another
+team's system, a shared glossary, or a diagram that should span more than one
+system; do not configure it pre-emptively.
+
+For a published participant, `cfour pull` downloads it once and everything after
+that works offline. It writes two things, and they go to opposite sides of the
+line: the downloaded material into `.cfour/`, which belongs **outside** git, and
+a lock file recording which version of each participant was in force, which
+belongs **inside** it. Nothing adds the ignore rule for you, so add it — that is
+an ordinary repository file and not the CLI's to write.
 
 ## The MCP connection
 
@@ -114,14 +151,17 @@ you cannot create for them. Bring it up only if they ask about publishing, about
 sharing the model, or about the portal:
 
 ```bash
-cfour login --key c4_<...>    # stores the key and binds it to this repository
+cfour login --key c4_<...>
 cfour push --dry-run          # shows what would be published
 ```
 
-`cfour keys` shows which stored key applies here. A workspace is published only
-when its own `status` is `active`, which is what `cfour init` sets; `reference`
-and `archived` workspaces stay local. If the platform refuses a push because the
-CLI is too old, upgrading it is the fix — and re-sync the cache afterwards.
+One key reaches a list of repositories, and which repository a push lands in
+comes from the workspace's own `cfour.yaml` — so a tree of sibling workspaces
+needs one key, and each workspace is pushed from its own directory. `cfour keys`
+shows which stored key applies here. A workspace is published only when its
+status is `active`, which is what `cfour init` sets; `reference` and `archived`
+workspaces stay local. If the platform refuses a push because the CLI is too
+old, upgrading it is the fix — and re-sync the cache afterwards.
 
 ## Finish by proving it works
 

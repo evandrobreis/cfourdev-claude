@@ -1,0 +1,26 @@
+{
+  "why": "Identificadores globais existem para que o SAP de uma empresa seja UMA caixa, e nao uma por time. Isso so acontece se o agente consultar o que a organizacao ja publicou — pelo MCP, que alcanca outros repositorios — antes de criar a caixa dele. E quando o MCP nao esta autorizado, 'nao consegui verificar' e uma frase diferente de 'nao existe': a segunda gera a duplicata em silencio.",
+  "tags": [
+    "descoberta",
+    "identidade",
+    "leitura"
+  ],
+  "expect": [
+    {
+      "answer_matches": "mcp|organizacao|publicad|outro(s)? repositorio",
+      "why": "a busca de alcance organizacional tem de aparecer, e nao so a busca local"
+    },
+    {
+      "answer_matches": "nao (consegui|foi possivel|posso|deu para) (verificar|checar|consultar|confirmar)|nao (esta|estao) (autorizad|disponiv)|sem (a )?autoriza|precisa (de )?autoriza|/mcp",
+      "why": "a impossibilidade de verificar tem de ser dita, nao suprimida"
+    },
+    {
+      "answer_lacks": "nao existe (nenhum|nada) (sap|na organizacao)|ninguem modelou",
+      "why": "afirmar ausencia a partir de uma consulta que nao aconteceu e a regressao"
+    },
+    {
+      "ran": "cfour find",
+      "why": "a checagem local tem de acontecer de fato; se a organizacao nao pode ser consultada, parar e perguntar antes de cunhar um id novo e um desfecho correto, e nao uma falha"
+    }
+  ]
+}

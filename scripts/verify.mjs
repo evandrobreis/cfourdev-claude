@@ -28,9 +28,12 @@ import {
   buildIndex,
   renderCommand,
   findWorkspace,
+  siblingWorkspaces,
   cliCacheState,
   blockFile,
 } from './knowledge.mjs'
+
+import { loadCases, grade, readTranscript, GRADERS } from './eval.mjs'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const rel = (p) => path.relative(ROOT, p).split(path.sep).join('/')
@@ -195,14 +198,14 @@ const TREE_SAMPLE = {
           nome: 'add',
           descricao: 'creates a box',
           argumentos: [
-            { nome: 'id', obrigatorio: true, descricao: 'qualified id' },
+            { nome: 'nome', obrigatorio: true, descricao: 'the readable name; the id is generated' },
             { nome: 'extra', obrigatorio: false, descricao: 'something else' },
           ],
           opcoes: [
             { flags: '--name <n>', descricao: 'readable name', obrigatoria: true, repetivel: false },
             { flags: '--tag <t>', descricao: 'a tag', obrigatoria: true, repetivel: true },
           ],
-          exemplos: ['cfour element add loja'],
+          exemplos: ['cfour element add "Loja Online"'],
         },
       ],
     },
@@ -213,7 +216,7 @@ test('buildIndex: one line per runnable command, and never a group', () => {
   const index = buildIndex(TREE_SAMPLE)
   const lines = index.trim().split('\n')
   assert.equal(lines.length, 1, 'only the leaf is runnable')
-  assert.match(lines[0], /^cfour element add <id> \[extra\] {2,}creates a box$/)
+  assert.match(lines[0], /^cfour element add <nome> \[extra\] {2,}creates a box$/)
 })
 
 test('buildIndex: signature and description never collide, however long the signature', () => {
@@ -236,7 +239,7 @@ test('renderCommand: repeatable options are marked, and `obrigatoria` is not lea
   // Rendering it as a requirement would push the model to pass flags nobody
   // asked for, so no option may be described as required.
   assert.doesNotMatch(text, /--name <n>[^\n]*required/i)
-  assert.match(text, /examples:\n {2}cfour element add loja/)
+  assert.match(text, /examples:\n {2}cfour element add "Loja Online"/)
 })
 
 // ---------------------------------------------------------------------------
@@ -249,9 +252,49 @@ test('findWorkspace: walks up to cfour.yaml, and reports its absence rather than
   fs.mkdirSync(deep, { recursive: true })
   assert.equal(findWorkspace(deep), null)
   const workspace = path.join(base, 'repo', 'cfour.yaml')
-  fs.writeFileSync(workspace, 'version: 2\nid: repo\n')
+  fs.writeFileSync(workspace, 'version: 3\nid: repo\n')
   assert.equal(findWorkspace(deep), workspace)
   fs.rmSync(base, { recursive: true, force: true })
+})
+
+test('findWorkspace: the NEAREST cfour.yaml wins, which is what allows sibling workspaces', () => {
+  // A repository holds several workspaces side by side. A file inside one of
+  // them belongs to that one, not to whatever is furthest up the tree — the
+  // same answer the CLI gives when run from that directory.
+  const base = tmpdir()
+  const loja = path.join(base, 'loja')
+  const dentro = path.join(loja, 'models', 'vendas')
+  fs.mkdirSync(dentro, { recursive: true })
+  fs.writeFileSync(path.join(base, 'cfour.yaml'), 'version: 3\nid: raiz\n')
+  fs.writeFileSync(path.join(loja, 'cfour.yaml'), 'version: 3\nid: loja\n')
+  assert.equal(findWorkspace(dentro), path.join(loja, 'cfour.yaml'))
+  fs.rmSync(base, { recursive: true, force: true })
+})
+
+test('siblingWorkspaces: the other workspaces of the repository, since nothing registers them', () => {
+  const base = tmpdir()
+  fs.mkdirSync(path.join(base, '.git'), { recursive: true })
+  for (const name of ['loja', 'pagamentos', 'src']) fs.mkdirSync(path.join(base, name), { recursive: true })
+  fs.mkdirSync(path.join(base, 'node_modules', 'pacote'), { recursive: true })
+  for (const name of ['loja', 'pagamentos']) {
+    fs.writeFileSync(path.join(base, name, 'cfour.yaml'), `version: 3\nid: ${name}\n`)
+  }
+  fs.writeFileSync(path.join(base, 'node_modules', 'pacote', 'cfour.yaml'), 'version: 3\nid: nope\n')
+
+  const own = path.join(base, 'loja', 'cfour.yaml')
+  const found = siblingWorkspaces(path.join(base, 'loja'), own)
+  assert.deepEqual(found, [path.join(base, 'pagamentos', 'cfour.yaml')], 'itself excluded, dependencies excluded')
+
+  assert.deepEqual(
+    siblingWorkspaces(base, null).sort(),
+    [own, path.join(base, 'pagamentos', 'cfour.yaml')].sort(),
+    'with no workspace governing, all of them are reported'
+  )
+
+  const orphan = tmpdir()
+  assert.deepEqual(siblingWorkspaces(orphan, null), [], 'outside a repository there is nothing to enumerate')
+  fs.rmSync(base, { recursive: true, force: true })
+  fs.rmSync(orphan, { recursive: true, force: true })
 })
 
 test('findWorkspace: nothing but cfour.yaml makes a directory a workspace', () => {
@@ -279,14 +322,19 @@ function guard(filePath, toolName = 'Edit') {
   return out.trim() ? JSON.parse(out) : null
 }
 
-/** A workspace with the shape `cfour init` actually produces. */
-function fakeWorkspace() {
-  const base = tmpdir()
+/**
+ * A workspace with the shape `cfour init` actually produces, plus the two files
+ * `cfour pull` writes: the pinned closure and the downloaded copies of it.
+ */
+function fakeWorkspace(base = tmpdir()) {
   fs.mkdirSync(path.join(base, 'models', 'vendas'), { recursive: true })
   fs.mkdirSync(path.join(base, 'views'), { recursive: true })
   fs.mkdirSync(path.join(base, 'layouts'), { recursive: true })
+  fs.mkdirSync(path.join(base, '.cfour', 'usos'), { recursive: true })
   fs.mkdirSync(path.join(base, 'src'), { recursive: true })
-  fs.writeFileSync(path.join(base, 'cfour.yaml'), 'version: 2\nid: loja\n')
+  fs.writeFileSync(path.join(base, 'cfour.yaml'), 'version: 3\nid: loja\nrepo: loja\nstatus: active\n')
+  fs.writeFileSync(path.join(base, 'cfour.lock'), 'usos: []\n')
+  fs.writeFileSync(path.join(base, '.cfour', 'usos', 'acme-comuns.json'), '{}\n')
   fs.writeFileSync(path.join(base, 'models', 'vendas', 'elements.yaml'), 'elements: []\n')
   fs.writeFileSync(path.join(base, 'views', 'contexto.yaml'), 'kind: diagram\n')
   fs.writeFileSync(path.join(base, 'layouts', 'contexto.json'), '{}\n')
@@ -302,6 +350,8 @@ test('guard: escalates every file the CLI owns, and names the command that owns 
     [path.join(base, 'views', 'contexto.yaml'), /cfour diagram/],
     [path.join(base, 'views', 'checkout.yaml'), /cfour flow/],
     [path.join(base, 'layouts', 'contexto.json'), /viewer/],
+    [path.join(base, 'cfour.lock'), /cfour pull/],
+    [path.join(base, '.cfour', 'usos', 'acme-comuns.json'), /cfour pull/],
   ]
   for (const [file, expected] of cases) {
     const verdict = guard(file)
@@ -360,6 +410,19 @@ test('guard: the structure that no longer exists is no longer protected', () => 
   const verdict = guard(path.join(base, 'models', 'vendas', 'project.yaml'))
   assert.match(verdict.hookSpecificOutput.permissionDecisionReason, /the model `vendas`/)
   fs.rmSync(base, { recursive: true, force: true })
+})
+
+test('guard: with sibling workspaces, a file belongs to the nearest one', () => {
+  // Naming the wrong workspace in the escalation would send someone to run the
+  // command from the wrong directory, where it would create a second copy of
+  // the box rather than change the one they meant.
+  const repo = tmpdir()
+  fakeWorkspace(path.join(repo, 'loja'))
+  fakeWorkspace(path.join(repo, 'pagamentos'))
+  const verdict = guard(path.join(repo, 'pagamentos', 'models', 'vendas', 'elements.yaml'))
+  assert.match(verdict.hookSpecificOutput.permissionDecisionReason, /pagamentos\//)
+  assert.doesNotMatch(verdict.hookSpecificOutput.permissionDecisionReason, /loja\//)
+  fs.rmSync(repo, { recursive: true, force: true })
 })
 
 test('guard: a malformed payload never stands between someone and their files', () => {
@@ -517,15 +580,16 @@ test('the write rule is stated where it binds, and nowhere contradicted', () => 
 })
 
 // ---------------------------------------------------------------------------
-// Nothing from before the simplification survives
+// Nothing from a previous version of the structure survives
 // ---------------------------------------------------------------------------
 
-// cfourdev collapsed to three concepts — workspace, model, view — and dropped
-// the structure that came before. What is checked here is the OPERATIONAL
-// residue: commands that no longer exist, files that are no longer written,
-// states the plugin no longer reports. Bare words are deliberately not matched:
-// "model" and "project" are ordinary English, and a test that banned them would
-// be a test nobody could satisfy honestly.
+// cfourdev's structure moved twice, and both moves left residue that reads as
+// perfectly sensible prose. What is checked here is the OPERATIONAL residue:
+// commands that no longer exist, files that are no longer written, cardinality
+// that is no longer true, and a reference grammar that was deleted along with
+// derived identifiers. Bare words are deliberately not matched: "model" and
+// "project" are ordinary English, and a test that banned them would be a test
+// nobody could satisfy honestly.
 const OBSOLETE = [
   { pattern: /\bcfour\s+modelagem\b/, why: 'the `cfour modelagem` family no longer exists' },
   { pattern: /\bcfour\s+projects?\b/, why: 'the `cfour project` family no longer exists' },
@@ -538,29 +602,67 @@ const OBSOLETE = [
   { pattern: /\bproject\.yaml\b/, why: 'a model has no manifest: the folder name is the id' },
   {
     pattern: /model registry|the registry\b|a registry of|registered models?\b/i,
-    why: 'there is no registry: one workspace per repository, resolved by walking up',
+    why: 'there is no registry: the workspace is the directory holding cfour.yaml',
   },
   {
     pattern: /active mode(l|lling)\b|which mode(l|lling) is active/i,
     why: 'nothing is selected or activated; the workspace found by walking up is the one',
   },
+
+  // --- what changed when a repository stopped meaning a workspace ---------
+  {
+    pattern: /\bone (workspace )?per repository\b|a workspace per repository|one workspace to a repository/i,
+    why: 'a repository holds several workspaces side by side, one per system',
+  },
+  {
+    pattern: /the workspace at (the|its) root|cfour\.yaml at its root\b/i,
+    why: 'a workspace root is wherever its cfour.yaml is, and it is rarely the repository root',
+  },
+
+  // --- what changed when identifiers stopped being derived ----------------
   {
     pattern: /falls? back to `?shared`?|resolves? .*then in `?shared`?/i,
-    why: 'a reference has no fallback: a bare id resolves only inside its own model',
+    why: 'a reference has no fallback, and no resolution order: it is a lookup',
+  },
+  {
+    pattern: /counting slashes|three-segment form|qualif(y|ying) the id|qualified id\b/i,
+    why: 'an id is opaque and global; there is no grammar to qualify and no slashes to count',
+  },
+  {
+    pattern: /a (model|namespace) that owns identifiers|models? are namespaces?|namespace that owns/i,
+    why: 'a model groups elements; an identifier does not pass through it',
+  },
+  {
+    pattern: /\b(a|the) mirror\b|mirror element|as a mirror\b|mirrors the (box|element)/i,
+    why: 'the mirror element was removed: two boxes become one by sharing an id',
+  },
+  {
+    pattern: /an id is derived|ids? (are|is) derived from|derived from the (box|element)['’]?s? name/i,
+    why: "an element's id is generated at creation and derives from nothing",
   },
 ]
 
-test('no concept from the previous structure survives anywhere in the plugin', () => {
+/**
+ * Where the legacy scan does not reach, and why.
+ *
+ * `evals/` is the one place in this repository that is SUPPOSED to contain the
+ * old vocabulary: a regression case exists precisely to put the removed word in
+ * front of the agent and check that it translates the intent instead of
+ * rebuilding the structure. `case.json` carries the reason in its `why`.
+ */
+const NOT_SCANNED = [/^scripts\/verify\.mjs$/, /^evals\//]
+
+test('no concept from a previous structure survives anywhere in the plugin', () => {
   const offenders = []
   for (const file of allFiles()) {
-    if (rel(file) === 'scripts/verify.mjs') continue // it is where the patterns live
+    if (NOT_SCANNED.some((p) => p.test(rel(file)))) continue
     const text = fs.readFileSync(file, 'utf8')
     for (const { pattern, why } of OBSOLETE) {
       const hit = text.match(pattern)
       if (hit) offenders.push(`${rel(file)}: "${hit[0].trim()}" — ${why}`)
     }
   }
-  assert.deepEqual(offenders, [], 'residue of the structure cfourdev no longer has')
+  assert.deepEqual(offenders, [], 'residue of a structure cfourdev no longer has')
 })
 
 test('the pre-approved commands are read-only, and all still exist', () => {
@@ -575,15 +677,146 @@ test('the pre-approved commands are read-only, and all still exist', () => {
   }
 })
 
-test('the three current concepts are taught, and taught as storage', () => {
+test('the three current concepts are taught, with the cardinality that constrains them', () => {
   // The routing skill is where someone lands first, so it is where the
-  // distinction has to be legible: these are cfourdev's concepts, not C4's.
+  // distinction has to be legible: these are cfourdev's concepts, and only one
+  // of the three carries architectural weight.
   const modeling = fs.readFileSync(path.join(ROOT, 'skills', 'modeling', 'SKILL.md'), 'utf8')
   for (const concept of ['workspace', 'model', 'view']) {
     assert.match(modeling, new RegExp(`\\*\\*${concept}\\*\\*`), `${concept} is not introduced`)
   }
   assert.match(modeling, /cfour\.yaml/, 'the one structural file has to be named')
+  assert.match(
+    modeling,
+    /several,? side by side|side by side|a repository holds several/i,
+    'a repository holding several workspaces is the fact everything else depends on'
+  )
+  assert.match(
+    modeling,
+    /one context|context diagram/i,
+    'and the one-context rule is what makes a workspace a boundary rather than a folder'
+  )
+  assert.match(
+    modeling,
+    /generated|opaque/i,
+    'identifiers being generated is what makes renaming and refiling free'
+  )
 
+  // Storage moves must stay distinguishable from architectural ones, and the
+  // line moved: filing a box in another model is free, and putting it in
+  // another workspace is a claim that it is a different system.
   const c4 = fs.readFileSync(path.join(ROOT, 'skills', 'architecture', 'references', 'c4.md'), 'utf8')
-  assert.match(c4, /filing decisions?, not architectural/i, 'the boundary must be stated explicitly')
+  assert.match(c4, /filing decision/i, 'the boundary must be stated explicitly')
+  assert.match(
+    c4,
+    /one\s+workspace is one\s+system/i,
+    'and so must the part of it that is architectural'
+  )
+})
+
+// ---------------------------------------------------------------------------
+// The behavioural suite, checked mechanically
+// ---------------------------------------------------------------------------
+//
+// `evals/` is where the plugin's actual claims are tested, and running it costs
+// money and minutes, so it is not part of this file. What IS checked here is
+// that the suite is well-formed — a case with a typo in a grader name, or a
+// regular expression that does not compile, fails silently in a way nobody
+// notices until the day it was supposed to catch something.
+
+test('every eval case is well-formed, and says why it exists', () => {
+  const problems = []
+  for (const spec of loadCases()) {
+    if (!spec.why || spec.why.length < 40) {
+      problems.push(`${spec.name}: no "why", or too thin to justify the case`)
+    }
+    if (!spec.prompt) problems.push(`${spec.name}: empty prompt`)
+    if (!(spec.tags || []).length) problems.push(`${spec.name}: no tags`)
+    if (!(spec.expect || []).length) problems.push(`${spec.name}: nothing is graded`)
+    for (const check of spec.expect || []) {
+      const kinds = Object.keys(check).filter((k) => k !== 'why')
+      if (kinds.length !== 1) {
+        problems.push(`${spec.name}: a grader carries ${kinds.length} kinds: ${kinds.join(', ')}`)
+        continue
+      }
+      const [kind] = kinds
+      if (!(kind in GRADERS)) {
+        problems.push(`${spec.name}: unknown grader "${kind}"`)
+        continue
+      }
+      if (!check.why) problems.push(`${spec.name}: grader "${kind}" does not say what it defends`)
+      if (kind !== 'shell') {
+        try {
+          new RegExp(check[kind])
+        } catch (e) {
+          problems.push(`${spec.name}: ${kind} is not a regular expression — ${e.message}`)
+        }
+      }
+    }
+  }
+  assert.deepEqual(problems, [])
+})
+
+test('the suite still covers every area a cfourdev change could break', () => {
+  // Not a completeness claim — nothing could make one. It is a floor: if an
+  // area loses its last case, that is a deletion someone has to justify rather
+  // than a suite that quietly got smaller.
+  const covered = new Set(loadCases().flatMap((c) => c.tags || []))
+  const required = ['estrutura', 'identidade', 'federacao', 'descoberta', 'guard', 'evidencia']
+  assert.deepEqual(
+    required.filter((t) => !covered.has(t)),
+    [],
+    'these areas have no behavioural regression case at all'
+  )
+})
+
+test('readTranscript: pulls the answer, the commands and the edits out of the stream', () => {
+  const stream = [
+    JSON.stringify({ type: 'system', subtype: 'init' }),
+    'not json at all',
+    JSON.stringify({
+      type: 'assistant',
+      message: {
+        content: [
+          { type: 'text', text: 'thinking' },
+          { type: 'tool_use', name: 'Bash', input: { command: 'cfour element add "API"' } },
+          { type: 'tool_use', name: 'Edit', input: { file_path: '/w/models/vendas/elements.yaml' } },
+        ],
+      },
+    }),
+    JSON.stringify({ type: 'result', result: 'done', total_cost_usd: 0.5 }),
+  ].join('\n')
+  const run = readTranscript(stream)
+  assert.deepEqual(run.commands, ['cfour element add "API"'])
+  assert.deepEqual(run.edits, ['/w/models/vendas/elements.yaml'])
+  assert.equal(run.answer, 'done')
+  assert.equal(run.cost, 0.5)
+})
+
+test('grade: each grader kind decides on its own evidence', () => {
+  const run = {
+    answer: 'duas workspaces, lado a lado',
+    commands: ['cfour uses add ../loja'],
+    edits: ['/w/cfour.yaml'],
+    sandbox: ROOT,
+  }
+  const verdicts = grade(
+    {
+      name: 'sample',
+      expect: [
+        { answer_matches: 'duas workspaces' },
+        { answer_lacks: 'uma workspace por repositorio' },
+        { ran: 'cfour uses add' },
+        { did_not_run: 'cfour init' },
+        { no_edit_of: 'models/' },
+        { answer_matches: 'nao esta escrito aqui' },
+        { no_edit_of: 'cfour\\.yaml' },
+      ],
+    },
+    run
+  )
+  assert.deepEqual(
+    verdicts.map((v) => v.pass),
+    [true, true, true, true, true, false, false]
+  )
 })

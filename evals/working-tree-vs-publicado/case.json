@@ -1,0 +1,21 @@
+{
+  "why": "A leitura publicada e a leitura local sao duas fontes distintas, e o portal so mostra o que passou por `cfour push`. Confundir as duas faz o agente afirmar que o portal reflete o disco, que e a afirmacao errada mais facil de acreditar. A resposta e limitada a comecar por sim ou nao porque a afirmacao e binaria: um caso cuja resposta tem forma conhecida e um caso que se grada sem cacar fraseado.",
+  "tags": [
+    "leitura",
+    "publicacao"
+  ],
+  "expect": [
+    {
+      "answer_matches": "^\\W*(\\*\\*)?nao\\b",
+      "why": "a resposta e nao, e ela vem antes da explicacao"
+    },
+    {
+      "answer_matches": "push|publicad",
+      "why": "e a razao e a publicacao, nomeada"
+    },
+    {
+      "did_not_run": "cfour push",
+      "why": "publicar sem pedirem e uma acao externa tomada por conta propria"
+    }
+  ]
+}

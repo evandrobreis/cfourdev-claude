@@ -1,0 +1,8 @@
+{
+  "why": "O model deixou de ser espaco de nomes: o id de uma caixa nao passa por ele, entao mover entre models nao toca em referencia nenhuma. Com a premissa antiga o agente promete um trabalho de renomeacao que nao existe, e desaconselha uma operacao gratuita.",
+  "tags": ["modelagem", "identidade"],
+  "expect": [
+    { "answer_matches": "nada quebra|nao quebra nada|nao quebra|nenhuma referencia|continua valendo|o id (nao|nao) muda", "why": "a resposta correta e que a operacao e gratuita" },
+    { "answer_lacks": "qualificar|renomear (todas )?as referencias|atualizar (todas )?as referencias|prefixo do model", "why": "referencia qualificada por model e a gramatica que saiu" }
+  ]
+}

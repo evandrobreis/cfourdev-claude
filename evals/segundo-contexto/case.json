@@ -1,0 +1,21 @@
+{
+  "why": "O carregador passou a recusar a segunda view sem `of:`: um contexto por workspace. Sem isso escrito, o agente tenta criar, leva uma recusa que nao entende, e costuma contornar editando YAML ou inventando um `of:` errado.",
+  "tags": [
+    "estrutura",
+    "views"
+  ],
+  "expect": [
+    {
+      "answer_matches": "(uma )?workspace (tem|so tem|so pode ter|admite) um|um (unico )?(diagrama de )?contexto por workspace|ha um por workspace|um por workspace|so (existe|ha|pode haver|pode existir) um (diagrama de )?contexto|apenas um (diagrama de )?contexto|um contexto so",
+      "why": "a regra tem de chegar a pessoa, seja com as palavras do agente ou com as da recusa"
+    },
+    {
+      "no_edit_of": "loja/views",
+      "why": "contornar a recusa escrevendo YAML e o pior desfecho possivel"
+    },
+    {
+      "shell": "test $(grep -L '^of:' loja/views/*.yaml | wc -l) -eq 1",
+      "why": "continua havendo exatamente uma view sem `of:`"
+    }
+  ]
+}

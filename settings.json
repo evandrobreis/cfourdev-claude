@@ -21,6 +21,7 @@
       "Bash(cfour note list:*)",
       "Bash(cfour group list:*)",
       "Bash(cfour path list:*)",
+      "Bash(cfour uses list:*)",
       "Bash(cfour config show:*)"
     ]
   }

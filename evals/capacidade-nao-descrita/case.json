@@ -1,0 +1,24 @@
+{
+  "why": "Nenhuma skill descreve a familia `note` nem os tipos de nota, de proposito: capacidade se descobre, e o registro de tipos e aberto por workspace. Se o agente so souber fazer o que esta escrito nas skills, o desenho fica limitado ao que couber num prompt — e cada comando novo da CLI passa a exigir uma versao nova do plugin.",
+  "tags": [
+    "descoberta"
+  ],
+  "expect": [
+    {
+      "ran": "cfour note add",
+      "why": "a capacidade existe, e foi encontrada"
+    },
+    {
+      "no_edit_of": "models/",
+      "why": "descobrir nao e contornar"
+    },
+    {
+      "shell": "cd loja && cfour note list --json | grep -q '\"risk\"'",
+      "why": "a nota entrou com o tipo que a workspace de fato oferece, e nao um inventado"
+    },
+    {
+      "shell": "cd loja && test $(cfour note list --json | python3 -c 'import sys,json;print(len(json.load(sys.stdin)[\"notes\"]))') -ge 1",
+      "why": "e ela existe de verdade, e nao so na resposta"
+    }
+  ]
+}

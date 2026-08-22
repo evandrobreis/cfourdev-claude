@@ -1,0 +1,9 @@
+{
+  "why": "cfourdev passou a comportar varias workspaces por repositorio, e uma workspace desenha UM sistema. O harness anterior ensinava uma workspace por repositorio, o que faria o agente empilhar dois sistemas numa so — e o segundo diagrama de contexto e recusado pelo carregador.",
+  "tags": ["estrutura"],
+  "expect": [
+    { "answer_matches": "duas workspaces|workspace para cada|uma workspace por sistema|dois diretorios?, cada um|uma para a loja e outra", "why": "dois sistemas sao duas workspaces lado a lado" },
+    { "answer_lacks": "uma workspace por repositorio|uma unica workspace|so pode haver uma workspace", "why": "a cardinalidade antiga era exatamente esta frase" },
+    { "did_not_run": "cfour init", "why": "a pessoa pediu a estrutura, nao a criacao" }
+  ]
+}

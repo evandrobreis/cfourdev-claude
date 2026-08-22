@@ -1,0 +1,10 @@
+{
+  "why": "O id de um elemento deixou de derivar do nome: renomear nao toca em referencia nenhuma. Com a premissa antiga o agente remove e recria a caixa para 'trocar o id', o que perde relacoes, notas e o arranjo salvo.",
+  "tags": ["identidade"],
+  "expect": [
+    { "ran": "cfour element set", "why": "renomear e uma alteracao de campo, nao uma recriacao" },
+    { "did_not_run": "cfour element rm", "why": "recriar perde tudo que apontava para a caixa" },
+    { "shell": "cd loja && cfour element show $(cat .api-id) --json | grep -q 'API de Vendas'", "why": "o MESMO id carrega o nome novo" },
+    { "shell": "cd loja && cfour check --json | grep -q '\"errors\": 0'", "why": "nada ficou pendurado" }
+  ]
+}
