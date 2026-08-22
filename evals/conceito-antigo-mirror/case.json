@@ -1,0 +1,10 @@
+{
+  "why": "O mirror — uma caixa local declarando a caixa que ela espelha — foi removido do formato. Diante do vocabulario antigo o agente tem de traduzir a intencao para o mecanismo atual (`uses:` mais id compartilhado), e nao recriar a estrutura legada nem inventar um comando que nao existe.",
+  "tags": ["legado", "federacao"],
+  "expect": [
+    { "ran": "cfour uses add", "why": "referenciar a caixa da vizinha comeca por ler a vizinha" },
+    { "answer_matches": "uses|mesmo id|adopt|nao existe mais|deixou de existir", "why": "a traducao tem de ficar visivel para a pessoa" },
+    { "did_not_run": "cfour \\w*mirror|--mirror", "why": "inventar o comando antigo e a regressao" },
+    { "shell": "cd pagamentos && cfour check --json | grep -q '\"errors\": 0'", "why": "e o resultado carrega" }
+  ]
+}

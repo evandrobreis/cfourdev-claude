@@ -86,33 +86,41 @@ the modelling decision, and there is no `--level` flag to disagree with it.
 
 ## What cfourdev stores is not what C4 means
 
-cfourdev has three concepts — workspace, model, view — and none of them is an
-architectural one. Keeping them out of the architecture is part of this skill's
-job, because the storage shape is exactly what leaks into a proposal when nobody
-is watching:
+cfourdev has three concepts — workspace, model, view — and two of the three are
+storage. Keeping storage out of the architecture is part of this skill's job,
+because the storage shape is exactly what leaks into a proposal when nobody is
+watching:
 
-- a **workspace** is one repository's publishable unit. It is not the system.
-  A workspace routinely holds several systems, and a system is sometimes spread
-  across two workspaces that are read together;
-- a **model** is a namespace that owns identifiers. It is not a level, not a
-  subsystem, and not a boundary. Splitting into two models changes which folder
-  a box lives in and nothing about what the box *is*;
+- a **model** is where elements are filed: a folder under `models/`. It is not a
+  level, not a subsystem, not a boundary, and — since an element's identifier
+  does not pass through it — not even a namespace. Splitting into two models
+  changes which folder a box lives in and nothing else. Nothing breaks, and
+  nothing means anything different;
 - a **view** is a drawing. It is not an element, and nothing in the model points
   at one.
 
-So never answer an architectural question with a storage move. *"Put it in
-another model"* is not a representation for a concept that does not fit C4 — it
-is a filing decision, and it is the right answer only when the reason is
-identifier ownership or team separation. The organisation of the modelling and
-the semantics of the architecture are two questions, and they are decided
-separately.
+**The workspace is the exception, and it is load-bearing.** A workspace has
+exactly one context diagram, and the tool refuses a second — so one workspace is
+one system. That makes "is this one system or two?" a real C4 question with a
+storage consequence: two systems are two workspaces, created side by side and
+read together through `uses:`. It is not an escape hatch for a concept that does
+not fit a level; it is the answer to one question and one only, *is this a
+separate system that someone owns as a whole?*
+
+So never answer an architectural question with a filing move. *"Put it in
+another model"* is not a representation for a concept that does not fit C4. And
+*"put it in another workspace"* is right only when the thing genuinely is
+another system — never to make room for a second diagram, a second audience or a
+second cut of the same boxes.
 
 ## Proposing a structure
 
 For anything beyond a couple of boxes, propose before you build. Keep the
 proposal in the language of their system, and make it answerable:
 
-- the systems, and which are ours versus third-party
+- the systems, and which are ours versus third-party — and, when more than one
+  of them is ours, that each is a workspace of its own, side by side, read
+  together
 - the people and external actors
 - for each system worth opening, its containers, with the reason each is a
   container — deployed separately, scales separately, is written in a different
@@ -125,6 +133,12 @@ proposal in the language of their system, and make it answerable:
 Say what you would *not* model, and why. Component diagrams for every container
 is a common and expensive mistake: they earn their place where the internal
 structure is genuinely non-obvious and stable enough to survive the next sprint.
+
+Which diagrams exist is barely a choice, and that is worth knowing before you
+promise one: a workspace has one context diagram, and any box may have one
+diagram that opens it. So the question is never *how many diagrams of this box*
+— it is *is this box worth opening at all*. A second perspective on boxes that
+already have a diagram is criteria, grouping or colouring inside it, or a flow.
 
 **Work in increments for anything large.** Context first, and validated, before
 containers. Containers validated before components. Each round uses the existing

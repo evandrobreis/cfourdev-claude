@@ -22,13 +22,18 @@ import path from 'node:path'
  * Which command owns each kind of file. Sending people to the right one is most
  * of what makes the guard useful rather than merely obstructive.
  *
- * The structure this reads is the whole of cfourdev's on-disk shape, and it has
- * no fourth rule:
+ * The structure this reads is the whole of cfourdev's on-disk shape:
  *
  *   cfour.yaml            the workspace: identity and appearance
  *   models/<model>/*.yaml elements, relations and notes
  *   views/<view>.yaml     one diagram or one flow per file
  *   layouts/<view>.json   the arrangement, written by the viewer
+ *   cfour.lock            which published workspaces this reading is pinned to
+ *   .cfour/               the downloaded copies of those workspaces
+ *
+ * The last two are not the model, but they decide what a reading contains, and
+ * a hand edit to either produces a workspace that loads differently from the
+ * one everyone else loads. `cfour pull` owns both.
  *
  * Anything else under the workspace root is the software being documented, and
  * is none of this hook's business.
@@ -61,16 +66,33 @@ function classify(file, root) {
     return {
       what: 'where the boxes of a diagram sit',
       owner: 'the viewer writes `layouts/` when you drag boxes in `cfour serve`',
-      transient: true,
+      transient: 'the next drag overwrites it',
+    }
+  }
+  if (rel.length === 1 && rel[0] === 'cfour.lock') {
+    return {
+      what: 'which published workspaces this reading is pinned to',
+      owner: '`cfour uses` declares what is read, and `cfour pull` writes this file',
+    }
+  }
+  if (rel[0] === '.cfour') {
+    return {
+      what: 'the downloaded copy of a workspace published by someone else',
+      owner: '`cfour pull` writes it, and it is not this repository\'s to edit',
+      transient: 'the next pull overwrites it, and the change was never theirs to receive',
     }
   }
   return null
 }
 
 /**
- * The workspace root: the directory holding `cfour.yaml`, found by walking up,
- * exactly as every `cfour` command does. One workspace per repository, so this
- * is the entire question of context — there is nothing to select.
+ * The workspace root: the NEAREST directory holding `cfour.yaml`, found by
+ * walking up, exactly as every `cfour` command does.
+ *
+ * Nearest is the whole of it. A repository holds several workspaces side by
+ * side, and a file belongs to the one whose root is closest above it — the same
+ * answer the CLI gives when run from that directory. Nothing is selected and
+ * nothing is registered, so there is no other question to ask.
  */
 function workspaceRootOf(file) {
   let dir = path.dirname(path.resolve(file))
@@ -128,7 +150,7 @@ async function main() {
   if (verdict.transient) {
     ask(
       `This file holds ${verdict.what}, and ${verdict.owner}. Editing it by hand is ` +
-        'usually a mistake: the next drag overwrites it.'
+        `usually a mistake: ${verdict.transient}.`
     )
   }
 

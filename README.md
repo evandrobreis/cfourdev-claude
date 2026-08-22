@@ -28,11 +28,13 @@ an environment as an element — it says so, explains what you are actually tryi
 to represent, and proposes the correct form. A model that stores cleanly and
 means the wrong thing is the failure it is built to prevent.
 
-The same line runs the other way. cfourdev's own concepts are storage, and the
-plugin keeps them out of your architecture: a **workspace** is what a repository
-publishes, a **model** is a namespace that owns identifiers, a **view** is a
-drawing. None of them is a C4 level, and none of them is ever proposed as a home
-for a concept that does not fit C4.
+The same line runs the other way. Most of cfourdev's concepts are storage, and
+the plugin keeps them out of your architecture: a **model** is a folder where
+elements are filed, a **view** is a drawing. Neither is a C4 level, and neither
+is ever proposed as a home for a concept that does not fit C4. A **workspace**
+is the one that does carry weight — it has exactly one context diagram, so one
+workspace is one system, and a repository holds as many as it has systems, read
+together.
 
 **It tells you what it knows and what it guessed.** Facts, inferences,
 hypotheses and recommendations stay visibly apart. *"I did not find enough
@@ -76,7 +78,12 @@ installed, and the format documentation from the official source, and caches
 both — then serves one command or one page at a time. When the CLI version
 changes, the cache notices and refreshes itself. Even the documentation's
 address is discovered rather than hardcoded, so the docs can move without a
-release here.
+release here, and when the network is unavailable the installed tool still
+answers the format's own rules offline.
+
+That is also what keeps the plugin usable after cfourdev grows: a new command,
+a new flag or a new open registry value shows up in the cache on the next sync,
+not in the next release of this plugin.
 
 ## Installing
 
@@ -107,13 +114,13 @@ To update:
 ## What ends up in your repository
 
 Only the model, in cfourdev's own format — the plugin stores no state of its
-own:
+own. One directory per system, as many as the repository has:
 
 ```
-cfour.yaml              the workspace: identity and appearance
-models/<model>/*.yaml   elements, relations and notes
-views/<view>.yaml       one diagram or one flow per file
-layouts/<view>.json     where the boxes sit, written by the viewer
+<system>/cfour.yaml            the workspace: identity, appearance, what it reads
+<system>/models/<model>/*.yaml elements, relations and notes
+<system>/views/<view>.yaml     one diagram or one flow per file
+<system>/layouts/<view>.json   where the boxes sit, written by the viewer
 ```
 
 ## What is in the box
@@ -127,6 +134,7 @@ layouts/<view>.json     where the boxes sit, written by the viewer
 | `agents/investigator` | sweeps a large repository for evidence, and deliberately does not classify it |
 | `scripts/knowledge.mjs` | the cache: discovers, slices and serves the CLI surface and the documentation |
 | `scripts/guard-model.mjs` | the hook that keeps the workspace's files behind the CLI |
+| `scripts/eval.mjs`, `evals/` | the behavioural regression suite: real prompts, the real CLI, graded on what the agent said, ran and wrote |
 | `.mcp.json` | the cfourdev MCP server, pre-configured |
 | `settings.json` | pre-approves the CLI's **read-only** commands, so discovery and validation do not interrupt you. Every command that writes still goes through the normal permission prompt. |
 
@@ -138,19 +146,31 @@ layouts/<view>.json     where the boxes sit, written by the viewer
 
 ## Development
 
+Two suites, because they answer different questions.
+
 ```
 node --test scripts/verify.mjs
 ```
 
-The tests cover the mechanical parts: slicing the documentation, cache
-invalidation, the guard's verdicts, and the plugin's own shape. They also check
-that the prose has not quietly re-embedded knowledge the plugin is supposed to
-discover — a hardcoded documentation address, or a CLI flag written down where
-it will go stale — and that no concept from before cfourdev's structural
-simplification has survived anywhere in the plugin.
+The contracts: slicing the documentation, cache invalidation, the guard's
+verdicts, and the plugin's own shape. They also check that the prose has not
+quietly re-embedded knowledge the plugin is supposed to discover — a hardcoded
+documentation address, or a CLI flag written down where it will go stale — and
+that no concept from a previous version of cfourdev's structure has survived
+anywhere in the plugin. Fast, free, and what CI runs.
 
-What they cannot cover is behaviour. Whether the plugin actually refuses a wrong
-C4 level, or actually asks instead of guessing, is only measurable by using it.
+```
+node scripts/eval.mjs --list
+node scripts/eval.mjs
+```
+
+The behaviour. Each case builds a throwaway repository, runs the **real** `cfour`
+CLI to set it up, puts a real request to Claude Code with this plugin loaded, and
+grades what came back: what it said, which commands it ran, and what the
+workspace looks like afterwards. Every case exists because a change in cfourdev
+could make the agent decide something wrong — `evals/README.md` explains the
+shape of one. It costs a few dollars a pass, so CI does not run it; run it when
+the skills change, and when cfourdev does.
 
 ## Licence
 

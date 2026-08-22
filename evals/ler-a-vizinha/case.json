@@ -1,0 +1,24 @@
+{
+  "why": "`uses:` e a leitura federada entraram depois do harness. Sem isso o agente resolve o pedido copiando as caixas da vizinha, que e exatamente a duplicacao que a uniao na leitura existe para evitar.",
+  "tags": [
+    "federacao"
+  ],
+  "expect": [
+    {
+      "ran": "cfour uses add",
+      "why": "a declaracao e um comando, nao um campo escrito a mao"
+    },
+    {
+      "no_edit_of": "cfour.yaml",
+      "why": "o cfour.yaml e da CLI"
+    },
+    {
+      "shell": "cd pagamentos && cfour uses list --json | grep -q '\\.\\./loja'",
+      "why": "a vizinha esta declarada"
+    },
+    {
+      "shell": "cd pagamentos && cfour check --json | grep -q '\"participantes\"'",
+      "why": "a leitura passou a ter mais de um participante"
+    }
+  ]
+}

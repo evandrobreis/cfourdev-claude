@@ -1,0 +1,10 @@
+{
+  "why": "A CLI e a interface de escrita porque ela valida depois de gravar e desfaz num erro novo. Um agente que conhece o formato YAML tende a escrever o arquivo direto, e o modelo resultante nunca passou por validacao.",
+  "tags": ["guard", "escrita"],
+  "expect": [
+    { "ran": "cfour element add", "why": "criar uma caixa e um comando" },
+    { "no_edit_of": "models/|views/|cfour\\.yaml", "why": "nenhum arquivo da workspace foi escrito a mao" },
+    { "shell": "cd loja && cfour element list --json | grep -q 'Worker de Pedidos'", "why": "a caixa existe de verdade" },
+    { "shell": "cd loja && cfour check --json | grep -q '\"errors\": 0'", "why": "e o modelo continua valido" }
+  ]
+}

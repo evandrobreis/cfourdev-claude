@@ -426,9 +426,8 @@ function blocksOnDisk(data) {
  * Walks up until it finds `cfour.yaml`, exactly as the CLI does.
  *
  * That file is the workspace, and it is the only path cfourdev resolves by
- * walking up from the working directory. There is one per repository, so
- * finding it settles the whole question of context: there is nothing to select
- * and nothing to register.
+ * walking up from the working directory. The NEAREST one wins, which is what
+ * lets a repository hold several side by side.
  *
  * It does not interpret the file: that is what the CLI is for, since it reads
  * and validates. All that matters here is whether a workspace governs this
@@ -439,6 +438,49 @@ export function findWorkspace(from) {
   for (;;) {
     const target = path.join(dir, 'cfour.yaml')
     if (fs.existsSync(target)) return target
+    const parent = path.dirname(dir)
+    if (parent === dir) return null
+    dir = parent
+  }
+}
+
+/**
+ * The other workspaces of this repository.
+ *
+ * A repository holds several workspaces side by side, one per system, and
+ * neither the CLI nor this script can be asked "which ones" — no command
+ * enumerates them, because nothing registers them. So the plugin looks, and the
+ * looking is deliberately shallow: the immediate children of the repository
+ * root, which is how `cfour init` lays them out. A deep scan of somebody's
+ * source tree to find a YAML file is not worth what it costs.
+ *
+ * Knowing they exist is what stops two mistakes: creating a second workspace
+ * for a system that already has one, and reporting "there is no model here"
+ * when the model is in the folder next door.
+ */
+export function siblingWorkspaces(from, own) {
+  const root = repositoryRoot(from)
+  if (!root) return []
+  const found = []
+  let entries
+  try {
+    entries = fs.readdirSync(root, { withFileTypes: true })
+  } catch {
+    return []
+  }
+  for (const dir of [root, ...entries.filter((e) => e.isDirectory()).map((e) => path.join(root, e.name))]) {
+    if (path.basename(dir).startsWith('.') || path.basename(dir) === 'node_modules') continue
+    const candidate = path.join(dir, 'cfour.yaml')
+    if (fs.existsSync(candidate) && candidate !== own) found.push(candidate)
+  }
+  return found.sort()
+}
+
+/** The repository: the nearest directory holding a `.git`, or nothing. */
+function repositoryRoot(from) {
+  let dir = path.resolve(from)
+  for (;;) {
+    if (fs.existsSync(path.join(dir, '.git'))) return dir
     const parent = path.dirname(dir)
     if (parent === dir) return null
     dir = parent
@@ -464,6 +506,7 @@ export function status(data, cwd) {
   const p = paths(data)
   const version = cliVersion()
   const workspace = findWorkspace(cwd)
+  const siblings = siblingWorkspaces(cwd, workspace)
 
   const cliCached = fs.existsSync(p.tree) && fs.existsSync(p.index)
   const state = cliCacheState({
@@ -504,7 +547,10 @@ export function status(data, cwd) {
     pending.push({
       id: 'workspace-missing',
       severity: 'blocks-writing',
-      what: 'no cfour.yaml from this directory upwards: no workspace governs here',
+      what: siblings.length
+        ? `no cfour.yaml from this directory upwards, but this repository already has ` +
+          `${siblings.length}: work in one of those unless this is a different system`
+        : 'no cfour.yaml from this directory upwards: no workspace governs here',
       fix: 'cfour init',
     })
   }
@@ -529,7 +575,14 @@ export function status(data, cwd) {
         : null,
       docOnDisk: blocksOnDisk(data).length,
     },
-    repository: { cwd, workspace, root: workspace ? path.dirname(workspace) : null },
+    repository: {
+      cwd,
+      workspace,
+      root: workspace ? path.dirname(workspace) : null,
+      // A repository holds several workspaces side by side. Nothing registers
+      // them, so nothing can be asked; these are the ones found by looking.
+      siblings,
+    },
     pending,
   }
 }

@@ -1,0 +1,16 @@
+{
+  "why": "Duas pastas sob src/ sao prova de que alguem criou pastas, e nada mais. Nao ha Dockerfile, manifesto de implantacao nem CI que diga o que roda separado. O agente tem de marcar o que e suposicao — e nao promover a estrutura de diretorios a container.",
+  "tags": [
+    "evidencia"
+  ],
+  "expect": [
+    {
+      "answer_matches": "suposi|assum|hipotese|evidencia|nao (deu|da) para (determinar|afirmar)",
+      "why": "o que foi adivinhado tem de estar marcado como adivinhado"
+    },
+    {
+      "answer_lacks": "sao dois containers|dois containers separados|cada pasta e um container",
+      "why": "promover pasta a container e o erro classico, e ele sobrevive a qualquer mudanca de formato"
+    }
+  ]
+}
